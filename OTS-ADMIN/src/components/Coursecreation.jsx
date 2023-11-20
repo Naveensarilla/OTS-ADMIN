@@ -621,35 +621,18 @@ const Coursecreation = () => {
                 <td>{course.Discount}</td>
                 <td>{course.totalPrice}</td>
                 <td>
-                  <div className="courseupdate_btn_container">
-
-                  <Link to={`/courseupdate/${course.courseCreationId}`}>
-                    {" "}
-                    <button className="courseupdate_btn">
-                      <i class="fa-solid fa-pencil"></i>
-                    </button>
-                  </Link>
-                  
-                  </div>
-                 <button
-
-                    <Link to={`/courseupdate/${course.courseCreationId}`}>
-                      {" "}
-                      <button className="courseupdate_btn">
-                        <i class="fa-solid fa-pencil"></i>
-                      </button>
-                    </Link>
-                    <button
-
-                      className="coursedelte_btn"
-                      onClick={() => handleDelete(course.courseCreationId)}
-                    >
-                      <i className="fa-regular fa-trash-can"></i>
-                    </button>
-
-
-                  </div>
-                
+                [16:35] Sindhu Gudheti
+  <div className="courseupdate_btn_container">
+  <Link to={`/courseupdate/${course.courseCreationId}`}>
+    {" "}
+    <button className="courseupdate_btn">
+      <i className="fa-solid fa-pencil"></i>
+    </button>
+  </Link>
+  <button className="coursedelte_btn" onClick={() => handleDelete(course.courseCreationId)}>
+    <i className="fa-regular fa-trash-can"></i>
+  </button>
+</div>
 
                 </td>
               </tr>
