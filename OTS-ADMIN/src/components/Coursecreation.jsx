@@ -46,7 +46,6 @@ const Coursecreation = () => {
   //   }
   // };
 
-  
   const [formData, setFormData] = useState({
     courseName: "",
     examId: "",
@@ -381,204 +380,209 @@ const Coursecreation = () => {
       <div className="course_container_heder">
         <h2>courses</h2>
 
-      
-
-      {isFormOpen ? (
-                 <>
-              
-        <form onSubmit={handleSubmit}>
-
-        <button id="courses_close_btn" type="button" onClick={closeForm}>
-        <i className="far fa-circle-xmark"></i>
-               </button>
-          <div className="course_frominput_container">
-            <div>
-              <label htmlFor="courseName">Course Name:</label>
-              <input
-                type="text"
-                id="courseName"
-                name="courseName"
-                value={formData.courseName}
-                onChange={handleChange}
-              />
-            </div>
-
-            <div>
-              <label>Type of test:</label>
-              <div>
-                <select
-                  value={formData.typeOfTestId}
-                  name="typeOfTestId"
-                  onChange={handleChange}
-                >
-                  <option value="">Select type of test</option>
-                  {typeOfTest.map((type) => (
-                    <option key={type.typeOfTestId} value={type.typeOfTestId}>
-                      {type.typeOfTestName}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            </div>
-          </div>
-
-          <fieldset>
-            <legend>Select Exam</legend>
-            <div className="course_frominput_container">
-              <div>
-                <label htmlFor="exams">Select Exam:</label>
-                <select id="exams" value={selectedexams} onChange={handleexams}>
-                  <option value="">Select exams</option>
-                  {exams.map((exams) => (
-                    <option key={exams.examId} value={exams.examId}>
-                      {exams.examName}
-                    </option>
-                  ))}
-                </select>
-              </div>
+        {isFormOpen ? (
+          <>
+            <form onSubmit={handleSubmit}>
+              <button id="courses_close_btn" type="button" onClick={closeForm}>
+                <i className="far fa-circle-xmark"></i>
+              </button>
               <div className="course_frominput_container">
-                <label>Select Subjects:</label>
                 <div>
-                  {subjectsData.map((subject) => (
-                    <div
-                      className="course_frominput_container " id="course_frominput_container_media"
-                      key={subject.subjectId}
+                  <label htmlFor="courseName">Course Name:</label>
+                  <input
+                    type="text"
+                    id="courseName"
+                    name="courseName"
+                    value={formData.courseName}
+                    onChange={handleChange}
+                  />
+                </div>
+
+                <div>
+                  <label>Type of test:</label>
+                  <div>
+                    <select
+                      value={formData.typeOfTestId}
+                      name="typeOfTestId"
+                      onChange={handleChange}
                     >
-                      <input
-                        type="checkbox"
-                        id={`subject-${subject.subjectId}`}
-                        name={`subject-${subject.subjectId}`}
-                        value={subject.subjectId}
-                        checked={selectedSubjects.includes(subject.subjectId)}
-                        onChange={(e) =>
-                          handleSubjectChange(e, subject.subjectId)
-                        }
-                      />
-                      <label htmlFor={`subject-${subject.subjectId}`}>
-                        {subject.subjectName}
-                      </label>
-                    </div>
-                  ))}
+                      <option value="">Select type of test</option>
+                      {typeOfTest.map((type) => (
+                        <option
+                          key={type.typeOfTestId}
+                          value={type.typeOfTestId}
+                        >
+                          {type.typeOfTestName}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
                 </div>
               </div>
-            </div>
-          </fieldset>
-          <br />
-          <fieldset>
-            <div className="course_frominput_container">
-              <label>type of Questions:</label>
-              <div className="course_checkbox_continer_content">
-                {typeofQuestion.map((type) => (
-                  <div
-                    className="course_checkbox_continer course_frominput_container_media"
-                    key={type.quesionTypeId}
-                  >
-                    <input
-                      type="checkbox"
-                      id={`question-${type.quesionTypeId}`}
-                      name={`question-${type.quesionTypeId}`}
-                      value={type.quesionTypeId}
-                      checked={selectedtypeofQuestion.includes(
-                        type.quesionTypeId
-                      )}
-                      onChange={(e) =>
-                        handleQuestionChange(e, type.quesionTypeId)
-                      }
-                    />
-                    <label htmlFor={`question-${type.quesionTypeId}`}>
-                      {type.typeofQuestion}
-                    </label>
+
+              <fieldset>
+                <legend>Select Exam</legend>
+                <div className="course_frominput_container">
+                  <div>
+                    <label htmlFor="exams">Select Exam:</label>
+                    <select
+                      id="exams"
+                      value={selectedexams}
+                      onChange={handleexams}
+                    >
+                      <option value="">Select exams</option>
+                      {exams.map((exams) => (
+                        <option key={exams.examId} value={exams.examId}>
+                          {exams.examName}
+                        </option>
+                      ))}
+                    </select>
                   </div>
-                ))}
-              </div>
-            </div>
-          </fieldset>
-          <br />
-          <fieldset>
-            <legend>Course Duration</legend>
-            <div className="course_frominput_container">
-              <label htmlFor="courseStartDate">Course Start Date:</label>
-              <input
-                type="date"
-                id="courseStartDate"
-                name="courseStartDate"
-                value={startDate}
-                onChange={handleStartDateChange}
-                min={new Date().toISOString().split("T")[0]}
-              />
-              <div className="course_frominput_container">
-                <label htmlFor="courseEndDate">Course End Date:</label>
-                <input
-                  type="date"
-                  id="courseEndDate"
-                  name="courseEndDate"
-                  value={endDate}
-                  onChange={handleEndDateChange}
-                  min={new Date().toISOString().split("T")[0]}
-                />
-              </div>
-            </div>
-          </fieldset>
-          <br />
-          <fieldset>
-            <legend>Cost and Discounts</legend>
+                  <div className="course_frominput_container">
+                    <label>Select Subjects:</label>
+                    <div>
+                      {subjectsData.map((subject) => (
+                        <div
+                          className="course_frominput_container "
+                          id="course_frominput_container_media"
+                          key={subject.subjectId}
+                        >
+                          <input
+                            type="checkbox"
+                            id={`subject-${subject.subjectId}`}
+                            name={`subject-${subject.subjectId}`}
+                            value={subject.subjectId}
+                            checked={selectedSubjects.includes(
+                              subject.subjectId
+                            )}
+                            onChange={(e) =>
+                              handleSubjectChange(e, subject.subjectId)
+                            }
+                          />
+                          <label htmlFor={`subject-${subject.subjectId}`}>
+                            {subject.subjectName}
+                          </label>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </fieldset>
+              <br />
+              <fieldset>
+                <div className="course_frominput_container">
+                  <label>type of Questions:</label>
+                  <div className="course_checkbox_continer_content">
+                    {typeofQuestion.map((type) => (
+                      <div
+                        className="course_checkbox_continer course_frominput_container_media"
+                        key={type.quesionTypeId}
+                      >
+                        <input
+                          type="checkbox"
+                          id={`question-${type.quesionTypeId}`}
+                          name={`question-${type.quesionTypeId}`}
+                          value={type.quesionTypeId}
+                          checked={selectedtypeofQuestion.includes(
+                            type.quesionTypeId
+                          )}
+                          onChange={(e) =>
+                            handleQuestionChange(e, type.quesionTypeId)
+                          }
+                        />
+                        <label htmlFor={`question-${type.quesionTypeId}`}>
+                          {type.typeofQuestion}
+                        </label>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </fieldset>
+              <br />
+              <fieldset>
+                <legend>Course Duration</legend>
+                <div className="course_frominput_container">
+                  <label htmlFor="courseStartDate">Course Start Date:</label>
+                  <input
+                    type="date"
+                    id="courseStartDate"
+                    name="courseStartDate"
+                    value={startDate}
+                    onChange={handleStartDateChange}
+                    min={new Date().toISOString().split("T")[0]}
+                  />
+                  <div className="course_frominput_container">
+                    <label htmlFor="courseEndDate">Course End Date:</label>
+                    <input
+                      type="date"
+                      id="courseEndDate"
+                      name="courseEndDate"
+                      value={endDate}
+                      onChange={handleEndDateChange}
+                      min={new Date().toISOString().split("T")[0]}
+                    />
+                  </div>
+                </div>
+              </fieldset>
+              <br />
+              <fieldset>
+                <legend>Cost and Discounts</legend>
 
-            <div className="course_frominput_container_parent">
-              <div className="course_frominput_containe_discunt ">
-                <label htmlFor="cost">Cost:</label>
-                <input
-                  type="number"
-                  id="cost"
-                  name="cost"
-                  value={formData.cost}
-                  onChange={handleChange}
-                />
-              </div>
+                <div className="course_frominput_container_parent">
+                  <div className="course_frominput_containe_discunt ">
+                    <label htmlFor="cost">Cost:</label>
+                    <input
+                      type="number"
+                      id="cost"
+                      name="cost"
+                      value={formData.cost}
+                      onChange={handleChange}
+                    />
+                  </div>
 
-              <div className="course_frominput_containe_discunt">
-                <label htmlFor="discount">Discount (%):</label>
-                <input
-                  type="number"
-                  id="discount"
-                  name="discount"
-                  value={formData.discount}
-                  onChange={handleChange}
-                />
-              </div>
-              <div className="course_frominput_containe_discunt">
-                <label htmlFor="discountAmount">Discount Amount:</label>
-                <input
-                  type="number"
-                  id="discountAmount"
-                  name="discountAmount"
-                  value={formData.discountAmount}
-                  readOnly
-                />
-              </div>
-              <div className="course_frominput_containe_discunt">
-                <label htmlFor="totalPrice">Total Price:</label>
-                <input
-                  type="number"
-                  id="totalPrice"
-                  name="totalPrice"
-                  value={formData.totalPrice}
-                  readOnly
-                />
-              </div>
-            </div>
-          </fieldset>
-          <button type="submit">Create Course</button>
-        </form>
-        </>
-) : (
-
-  <div className="Add_Course_btn_container">
-  <button type="button" onClick={openForm}>
-   Add course
-  </button>
-  </div>
-
-      )}</div>
+                  <div className="course_frominput_containe_discunt">
+                    <label htmlFor="discount">Discount (%):</label>
+                    <input
+                      type="number"
+                      id="discount"
+                      name="discount"
+                      value={formData.discount}
+                      onChange={handleChange}
+                    />
+                  </div>
+                  <div className="course_frominput_containe_discunt">
+                    <label htmlFor="discountAmount">Discount Amount:</label>
+                    <input
+                      type="number"
+                      id="discountAmount"
+                      name="discountAmount"
+                      value={formData.discountAmount}
+                      readOnly
+                    />
+                  </div>
+                  <div className="course_frominput_containe_discunt">
+                    <label htmlFor="totalPrice">Total Price:</label>
+                    <input
+                      type="number"
+                      id="totalPrice"
+                      name="totalPrice"
+                      value={formData.totalPrice}
+                      readOnly
+                    />
+                  </div>
+                </div>
+              </fieldset>
+              <button type="submit">Create Course</button>
+            </form>
+          </>
+        ) : (
+          <div className="Add_Course_btn_container">
+            <button type="button" onClick={openForm}>
+              Add course
+            </button>
+          </div>
+        )}
+      </div>
       <div className="course_exam_page">
         <table>
           <thead>
@@ -622,35 +626,19 @@ const Coursecreation = () => {
                 <td>{course.totalPrice}</td>
                 <td>
                   <div className="courseupdate_btn_container">
-
-                  <Link to={`/courseupdate/${course.courseCreationId}`}>
-                    {" "}
-                    <button className="courseupdate_btn">
-                      <i class="fa-solid fa-pencil"></i>
-                    </button>
-                  </Link>
-                  
-                  </div>
-                 <button
-
                     <Link to={`/courseupdate/${course.courseCreationId}`}>
                       {" "}
                       <button className="courseupdate_btn">
-                        <i class="fa-solid fa-pencil"></i>
+                        <i className="fa-solid fa-pencil"></i>
                       </button>
                     </Link>
                     <button
-
                       className="coursedelte_btn"
                       onClick={() => handleDelete(course.courseCreationId)}
                     >
                       <i className="fa-regular fa-trash-can"></i>
                     </button>
-
-
                   </div>
-                
-
                 </td>
               </tr>
             ))}
