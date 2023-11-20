@@ -621,7 +621,7 @@ const Coursecreation = () => {
                 <td>{course.Discount}</td>
                 <td>{course.totalPrice}</td>
                 <td>
-                  <div className="courseupdate_btn_container">
+{/*                   <div className="courseupdate_btn_container">
 
                   <Link to={`/courseupdate/${course.courseCreationId}`}>
                     {" "}
@@ -648,7 +648,19 @@ const Coursecreation = () => {
                     </button>
 
 
-                  </div>
+                  </div> */}
+
+                                <div className="courseupdate_btn_container">
+  <Link to={`/courseupdate/${course.courseCreationId}`}>
+    {" "}
+    <button className="courseupdate_btn">
+      <i className="fa-solid fa-pencil"></i>
+    </button>
+  </Link>
+  <button className="coursedelte_btn" onClick={() => handleDelete(course.courseCreationId)}>
+    <i className="fa-regular fa-trash-can"></i>
+  </button>
+</div>
                 
 
                 </td>
