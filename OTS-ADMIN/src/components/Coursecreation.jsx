@@ -19,7 +19,7 @@ const Coursecreation = () => {
     setFormData({
       courseName: "",
       examId: "",
-      questiontypes: "",
+      typeofQuestion: "",
       courseStartDate: "",
       courseEndDate: "",
       cost: "",
@@ -36,7 +36,7 @@ const Coursecreation = () => {
   const [formData, setFormData] = useState({
     courseName: "",
     examId: "",
-    questiontypes: "",
+    typeofQuestion: "",
     courseStartDate: "",
     courseEndDate: "",
     cost: "",
@@ -51,14 +51,20 @@ const Coursecreation = () => {
         const response = await fetch(
           `http://localhost:3081/courese-exams/${selectedexams}`
         );
+  
         if (!response.ok) {
           throw new Error(`HTTP error! Status: ${response.status}`);
         }
+  
         const data = await response.json();
+        console.log("Selected Exam Data:", data); // Log the fetched data
+  
+        // Update your state or perform additional actions with the fetched data
       } catch (error) {
         console.error("Error fetching selected exam:", error);
       }
     };
+  
     fetchSelectedExam();
   }, [selectedexams]);
 
@@ -115,18 +121,21 @@ const Coursecreation = () => {
 
   const handleSubjectChange = (event, subjectId) => {
     const { checked } = event.target;
+  
     const subject = subjectsData.find((subj) => subj.subjectId === subjectId);
-
+  
     if (subject) {
       setSelectedSubjects((prevSelectedSubjects) => {
-        if (checked) {
-          return [...prevSelectedSubjects, subjectId];
-        } else {
-          return prevSelectedSubjects.filter((id) => id !== subjectId);
-        }
+        const updatedSelectedSubjects = checked
+          ? [...prevSelectedSubjects, subjectId]
+          : prevSelectedSubjects.filter((id) => id !== subjectId);
+  
+        console.log('Selected Subjects:', updatedSelectedSubjects);
+        return updatedSelectedSubjects;
       });
     }
   };
+  
   useEffect(() => {
     const fetchTypeOfTest = async () => {
       try {
@@ -141,27 +150,29 @@ const Coursecreation = () => {
     fetchTypeOfTest();
   }, []);
 
-  const handletypeoftest = (event,	typeOfTestId) => {
+  const handletypeoftest = (event, typeOfTestId) => {
     const { checked } = event.target;
-
-    setSelectedtypeOfTest((prevSelectedtest) => {
-      if (checked) {
-        return [...prevSelectedtest, typeOfTestId];
-      } else {
-        return prevSelectedtest.filter((id) => id !== typeOfTestId);
-      }
+  
+    setSelectedtypeOfTest((prevSelectedTest) => {
+      const updatedSelectedTest = checked
+        ? [...prevSelectedTest, typeOfTestId]
+        : prevSelectedTest.filter((id) => id !== typeOfTestId);
+  
+      console.log('Selected Type of Test:', updatedSelectedTest);
+      return updatedSelectedTest;
     });
   };
 
   const handleQuestionChange = (event, questionTypeId) => {
     const { checked } = event.target;
-
+  
     setSelectedtypeofQuestion((prevSelectedQuestions) => {
-      if (checked) {
-        return [...prevSelectedQuestions, questionTypeId];
-      } else {
-        return prevSelectedQuestions.filter((id) => id !== questionTypeId);
-      }
+      const updatedSelectedQuestions = checked
+        ? [...prevSelectedQuestions, questionTypeId]
+        : prevSelectedQuestions.filter((id) => id !== questionTypeId);
+  
+      console.log('Selected Type of Questions:', updatedSelectedQuestions);
+      return updatedSelectedQuestions;
     });
   };
 
@@ -200,19 +211,19 @@ const Coursecreation = () => {
         !isNaN(cost) && !isNaN(discount) ? (cost * discount) / 100 : "";
       const totalPrice =
         !isNaN(cost) && !isNaN(discountAmount) ? cost - discountAmount : "";
-      setFormData({
-        ...formData,
-        typeOfTest: selectedtypeOfTest,
-        examId: selectedexams,
-        subjects: selectedSubjects,
-        typeofQuestion: selectedtypeofQuestion,
-        courseStartDate: startDate,
-        courseEndDate: endDate,
-        cost: cost,
-        discount: discount,
-        discountAmount: discountAmount,
-        totalPrice: totalPrice,
-      });
+        setFormData({
+          ...formData,
+          typeOfTest: selectedtypeOfTest,
+          examId: selectedexams,
+          subjects: selectedSubjects,
+          typeofQuestion: selectedtypeofQuestion,
+          courseStartDate: startDate,
+          courseEndDate: endDate,
+          cost: cost,
+          discount: discount,
+          discountAmount: discountAmount,
+          totalPrice: totalPrice,
+        });
     } else if (name === "courseStartDate" || name === "courseEndDate") {
       setFormData({ ...formData, [name]: value });
     } else {
@@ -242,11 +253,12 @@ const Coursecreation = () => {
     resetFormFields();
     const data = {
       ...formData,
-      typeOfTest:selectedtypeOfTest,
+      typeOfTest: selectedtypeOfTest,
       examId: selectedexams,
       subjects: selectedSubjects,
       typeofQuestion: selectedtypeofQuestion, 
     };
+    
     try {
       const response = await fetch("http://localhost:3081/course-creation", {
         method: "POST",
@@ -269,7 +281,7 @@ const Coursecreation = () => {
             body: JSON.stringify({
               courseCreationId,
               subjectIds: selectedSubjects,
-              quesionTypeIds: selectedtypeofQuestion,
+              typeofQuestion: selectedtypeofQuestion,
               typeOfTestIds:selectedtypeOfTest,
             }),
           }
