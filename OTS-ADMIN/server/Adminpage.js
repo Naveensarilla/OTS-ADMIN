@@ -227,7 +227,16 @@ app.get('/type_of_questions', async (req, res) => {
     res.status(500).json({ error: 'Internal Server Error' });
   }
 });
-
+// app.get('/question_types', async (req, res) => {
+//   try {
+//     const query = 'SELECT * FROM quesion_type'; // Replace with your actual query
+//     const [rows] = await db.query(query);
+//     res.json(rows);
+//   } catch (error) {
+//     console.error(error);
+//     res.status(500).json({ error: 'Internal Server Error' });
+//   }
+// });
 app.get('/courese-exams', async (req, res) =>{
   try{
 const [rows] = await db.query('SELECT  examId,examName FROM exams');
@@ -258,14 +267,14 @@ app.get('/courese-exam-subjects/:examId/subjects', async (req, res) => {
 
 app.post('/course-creation', async (req, res) => {
   const {
-    courseName, examId, typeOfTestId, courseStartDate, courseEndDate, cost, discount, totalPrice,
+    courseName, examId, courseStartDate, courseEndDate, cost, discount, totalPrice,
   } = req.body;
 
   try {
     // Insert the course data into the course_creation_table
     const [result] = await db.query(
-      'INSERT INTO course_creation_table (courseName,  examId, typeOfTestId, courseStartDate, courseEndDate , cost, Discount, totalPrice) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
-      [courseName, examId, typeOfTestId, courseStartDate, courseEndDate, cost, discount, totalPrice]
+      'INSERT INTO course_creation_table (courseName,  examId,  courseStartDate, courseEndDate , cost, Discount, totalPrice) VALUES (?, ?, ?, ?, ?, ?, ?)',
+      [courseName, examId, courseStartDate, courseEndDate, cost, discount, totalPrice]
     );
 
     // Check if the course creation was successful
@@ -285,7 +294,15 @@ app.post('/course-creation', async (req, res) => {
 app.post('/course_type_of_question', async (req, res) => {
   try {
     // Extract data from the request body
-    const { courseCreationId, subjectIds, quesionTypeIds } = req.body;
+    const { courseCreationId,	typeOfTestIds, subjectIds, quesionTypeIds } = req.body;
+
+    for (const typeOfTestId of typeOfTestIds) {
+      await db.query(
+        'INSERT INTO course_typeOftests (courseCreationId, typeOfTestId) VALUES (?, ?)',
+        [courseCreationId, typeOfTestId]
+      );
+    }
+
     // Insert subjects into the course_subjects table
     for (const subjectId of subjectIds) {
       await db.query(
@@ -315,7 +332,56 @@ app.post('/course_type_of_question', async (req, res) => {
 app.get('/course_creation_table', async (req, res) => {
   try {
     const query = `
-    SELECT cc.*, subjects.subjects AS subjects, questions.quesion_types AS question_types, e.examName, t.typeOfTestName FROM course_creation_table cc LEFT JOIN ( SELECT cs.courseCreationId, GROUP_CONCAT(s.subjectName) AS subjects FROM course_subjects cs LEFT JOIN subjects s ON cs.subjectId = s.subjectId GROUP BY cs.courseCreationId ) AS subjects ON cc.courseCreationId = subjects.courseCreationId LEFT JOIN ( SELECT ct.courseCreationId, GROUP_CONCAT(q.typeofQuestion) AS quesion_types FROM course_type_of_question ct LEFT JOIN quesion_type q ON ct.quesionTypeId = q.quesionTypeId GROUP BY ct.courseCreationId ) AS questions ON cc.courseCreationId = questions.courseCreationId JOIN exams AS e ON cc.examId = e.examId JOIN type_of_test AS t ON cc.typeOfTestId = t.typeOfTestId;
+    SELECT
+    cc.*,
+    subjects.subjects AS subjects,
+    questions.quesion_types AS question_types,
+    e.examName,
+    typeOfTests.type_of_test AS type_of_test
+FROM
+    course_creation_table cc
+      
+    LEFT JOIN(
+    SELECT ctt.courseCreationId,
+        GROUP_CONCAT(t.typeOfTestName) AS type_of_test
+    FROM
+        course_typeoftests ctt
+    LEFT JOIN type_of_test t ON
+        ctt.typeOfTestId = t.typeOfTestId
+    GROUP BY
+        ctt.courseCreationId
+) AS typeOfTests
+ON
+    cc.courseCreationId = typeOfTests.courseCreationId
+    
+    
+LEFT JOIN(
+    SELECT cs.courseCreationId,
+        GROUP_CONCAT(s.subjectName) AS subjects
+    FROM
+        course_subjects cs
+    LEFT JOIN subjects s ON
+        cs.subjectId = s.subjectId
+    GROUP BY
+        cs.courseCreationId
+) AS subjects
+ON
+    cc.courseCreationId = subjects.courseCreationId
+LEFT JOIN(
+    SELECT ct.courseCreationId,
+        GROUP_CONCAT(q.typeofQuestion) AS quesion_types
+    FROM
+        course_type_of_question ct
+    LEFT JOIN quesion_type q ON
+        ct.quesionTypeId = q.quesionTypeId
+    GROUP BY
+        ct.courseCreationId
+) AS questions
+ON
+    cc.courseCreationId = questions.courseCreationId
+JOIN exams AS e
+ON
+    cc.examId = e.examId;
      `;
     const [rows] = await db.query(query);
     res.json(rows);
@@ -329,9 +395,9 @@ app.delete('/course_creation_table_Delete/:courseCreationId', async (req, res) =
   const courseCreationId = req.params.courseCreationId;
 
   try {
-    await db.query('DELETE course_creation_table,course_subjects,course_type_of_question FROM course_creation_table LEFT JOIN course_subjects ON course_creation_table.courseCreationId=course_subjects.courseCreationId LEFT JOIN course_type_of_question ON course_creation_table.courseCreationId=course_type_of_question.courseCreationId WHERE course_creation_table.courseCreationId=?', [courseCreationId]);
+    await db.query('DELETE course_creation_table, course_subjects, course_type_of_question, course_typeoftests FROM course_creation_table LEFT JOIN course_typeoftests ON course_creation_table.courseCreationId = course_typeoftests.courseCreationId LEFT JOIN course_subjects ON course_creation_table.courseCreationId = course_subjects.courseCreationId LEFT JOIN course_type_of_question ON course_creation_table.courseCreationId = course_type_of_question.courseCreationId WHERE course_creation_table.courseCreationId = ?', [courseCreationId]);
 
-    res.json({ message: `courese with ID ${courseCreationId} deleted from the database` });
+    res.json({ message: `course with ID ${courseCreationId} deleted from the database` });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Internal Server Error' });
@@ -344,23 +410,57 @@ app.get('/courseupdate/:courseCreationId', async (req, res) => {
   
     try {
       const query = `
-        SELECT cc.*, subjects.subjects AS subjects, questions.quesion_types AS question_types, e.examName, t.typeOfTestName
-        FROM course_creation_table cc
-        LEFT JOIN (
-          SELECT cs.courseCreationId, GROUP_CONCAT(s.subjectName) AS subjects
-          FROM course_subjects cs
-          LEFT JOIN subjects s ON cs.subjectId = s.subjectId
-          GROUP BY cs.courseCreationId
-        ) AS subjects ON cc.courseCreationId = subjects.courseCreationId
-        LEFT JOIN (
-          SELECT ct.courseCreationId, GROUP_CONCAT(q.typeofQuestion) AS quesion_types
-          FROM course_type_of_question ct
-          LEFT JOIN quesion_type q ON ct.quesionTypeId = q.quesionTypeId
-          GROUP BY ct.courseCreationId
-        ) AS questions ON cc.courseCreationId = questions.courseCreationId
-        JOIN exams AS e ON cc.examId = e.examId
-        JOIN type_of_test AS t ON cc.typeOfTestId = t.typeOfTestId
-        WHERE cc.courseCreationId = ?;
+      SELECT
+      cc.*,
+      subjects.subjects AS subjects,
+      questions.quesion_types AS question_types,
+      e.examName,
+      typeOfTests.type_of_test AS type_of_test
+  FROM
+      course_creation_table cc
+      
+   LEFT JOIN(
+      SELECT ctt.courseCreationId,
+          GROUP_CONCAT(t.typeOfTestName) AS type_of_test
+      FROM
+          course_typeoftests ctt
+      LEFT JOIN type_of_test t ON
+          ctt.typeOfTestId = t.typeOfTestId
+      GROUP BY
+          ctt.courseCreationId
+  ) AS typeOfTests
+  ON
+      cc.courseCreationId = typeOfTests.courseCreationId   
+      
+  LEFT JOIN(
+      SELECT cs.courseCreationId,
+          GROUP_CONCAT(s.subjectName) AS subjects
+      FROM
+          course_subjects cs
+      LEFT JOIN subjects s ON
+          cs.subjectId = s.subjectId
+      GROUP BY
+          cs.courseCreationId
+  ) AS subjects
+  ON
+      cc.courseCreationId = subjects.courseCreationId
+  LEFT JOIN(
+      SELECT ct.courseCreationId,
+          GROUP_CONCAT(q.typeofQuestion) AS quesion_types
+      FROM
+          course_type_of_question ct
+      LEFT JOIN quesion_type q ON
+          ct.quesionTypeId = q.quesionTypeId
+      GROUP BY
+          ct.courseCreationId
+  ) AS questions
+  ON
+      cc.courseCreationId = questions.courseCreationId
+  JOIN exams AS e
+  ON
+      cc.examId = e.examId
+  WHERE
+      cc.courseCreationId = ?;
       `;
   
       const [course] = await db.query(query, [courseCreationId]);
@@ -414,10 +514,17 @@ app.get('/courseupdate/:courseCreationId', async (req, res) => {
     }
   });
 
-  app.get('/question_types', async (req, res) => {
+  app.get('/course-type-of-test/:courseCreationId', async (req, res) => {
+    const courseCreationId = req.params.courseCreationId;
+  
     try {
-      const query = 'SELECT * FROM quesion_type'; // Replace with your actual query
-      const [rows] = await db.query(query);
+      const query = `
+        SELECT ctot.typeOfTestId , tt.typeOfTestName
+        FROM course_typeoftests AS ctot
+        JOIN type_of_test AS tt ON ctot.typeOfTestId  = tt.typeOfTestId 
+        WHERE ctot.courseCreationId = ?
+      `;
+      const [rows] = await db.query(query, [courseCreationId]);
       res.json(rows);
     } catch (error) {
       console.error(error);
@@ -431,7 +538,6 @@ app.get('/courseupdate/:courseCreationId', async (req, res) => {
     const {
       courseName,
       selectedExam,
-      selectedTypeOfTest,
       courseStartDate,
       courseEndDate,
       cost,
@@ -444,7 +550,6 @@ app.get('/courseupdate/:courseCreationId', async (req, res) => {
       SET
         courseName = ?,
         examId = ?,
-        typeOfTestId = ?, 
         courseStartDate = ?,
         courseEndDate = ?,
         cost = ?,
@@ -457,7 +562,6 @@ app.get('/courseupdate/:courseCreationId', async (req, res) => {
       await db.query(updateQuery, [
         courseName,
         selectedExam,
-        selectedTypeOfTest,
         courseStartDate,
         courseEndDate,
         cost,
@@ -465,7 +569,15 @@ app.get('/courseupdate/:courseCreationId', async (req, res) => {
         totalPrice,
         courseCreationId,
       ]);
+      const selectedTypeOfTests = req.body.selectedTypeOfTests;
+      const deleteTypeOfTestQuery = 'DELETE FROM course_typeoftests WHERE courseCreationId = ?';
+      await db.query(deleteTypeOfTestQuery, [courseCreationId]);
   
+      const insertTestOfTestQuery = 'INSERT INTO course_typeoftests (courseCreationId, typeOfTestId) VALUES (?, ?)';
+      for (const typeOfTestId of selectedTypeOfTests) {
+        await db.query(insertTestOfTestQuery, [courseCreationId, typeOfTestId]);
+      }
+
       // Handle subjects update (assuming course_subjects table has columns courseCreationId and subjectId)
       const selectedSubjects = req.body.selectedSubjects;
       const deleteSubjectsQuery = 'DELETE FROM course_subjects WHERE courseCreationId = ?';
@@ -653,6 +765,37 @@ app.get('/testcourses', async (req, res) => {
   }
 });
 
+
+app.post('/create-test', async (req, res) => {
+  const {
+    testName,
+    selectedCourse,
+    startDate,
+    startTime,
+    endDate,
+    endTime,
+    duration,
+    totalQuestions,
+    totalMarks,
+    calculator,
+    status,
+  } = req.body;
+
+  try {
+    const [result] = await db.query(
+      'INSERT INTO test_creation_table (TestName, courseCreationId, testStartDate, teatEndDate, testStartTime, testEndTime, Duration, TotalQuestions, totalMarks, calculator, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+      [testName, selectedCourse, startDate, endDate, startTime, endTime, duration, totalQuestions, totalMarks, calculator, status]
+    );
+
+    if (result && result.insertId) {
+      const testCreationTableId = result.insertId;
+      res.json({ success: true, testCreationTableId, message: 'Test created successfully' });
+    }
+  } catch (error) {
+    console.error('Error creating test:', error);
+    res.status(500).json({ success: false, error: 'Internal Server Error' });
+  }
+});
 
 
 

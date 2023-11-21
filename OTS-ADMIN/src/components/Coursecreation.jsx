@@ -3,6 +3,7 @@ import "./admin.css";
 import { Link } from "react-router-dom";
 const Coursecreation = () => {
   const [typeOfTest, setTypeOfTest] = useState([]);
+  const [selectedtypeOfTest, setSelectedtypeOfTest] = useState([]);
   const [exams, setExams] = useState([]);
   const [selectedexams, setSelectedexams] = useState("");
   const [selectedSubjects, setSelectedSubjects] = useState([]);
@@ -13,14 +14,11 @@ const Coursecreation = () => {
   const [subjectsData, setSubjectsData] = useState([]);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [courseData, setCourseData] = useState([]);
-  // const [resetForm, setResetForm] = useState(false);
 
   const resetFormFields = () => {
-    // Reset form fields
     setFormData({
       courseName: "",
       examId: "",
-      typeOfTestId: "",
       questiontypes: "",
       courseStartDate: "",
       courseEndDate: "",
@@ -29,27 +27,15 @@ const Coursecreation = () => {
       discountAmount: "",
       totalPrice: "",
     });
-    // Reset selected subjects and question types
     setSelectedSubjects([]);
     setSelectedtypeofQuestion([]);
-
-    // Reset form visibility
+    setSelectedtypeOfTest([]);
     setIsFormOpen(false);
   };
-
-  // const toggleFormVisibility = () => {
-  //   setIsFormOpen((prevIsFormOpen) => !prevIsFormOpen);
-
-  //   // Reset the form when closing it
-  //   if (isFormOpen) {
-  //     resetFormFields();
-  //   }
-  // };
 
   const [formData, setFormData] = useState({
     courseName: "",
     examId: "",
-    typeOfTestId: "",
     questiontypes: "",
     courseStartDate: "",
     courseEndDate: "",
@@ -65,20 +51,14 @@ const Coursecreation = () => {
         const response = await fetch(
           `http://localhost:3081/courese-exams/${selectedexams}`
         );
-
         if (!response.ok) {
           throw new Error(`HTTP error! Status: ${response.status}`);
         }
-
         const data = await response.json();
-        // console.log("Fetched Selected Exam:", data);
-        // Now 'data' contains the selected exam details, including examName
       } catch (error) {
         console.error("Error fetching selected exam:", error);
       }
     };
-
-    // Call the function when selectedexams changes
     fetchSelectedExam();
   }, [selectedexams]);
 
@@ -89,39 +69,21 @@ const Coursecreation = () => {
           "http://localhost:3081/course_creation_table"
         );
         const result = await response.json();
-
-        // Ensure that subjects and typeofQuestion are arrays
         const coursesWithArrays = result.map((course) => ({
           ...course,
+          typeOfTestName:course.type_of_test ? course.type_of_test.split(", "):[],
           subjects: course.subjects ? course.subjects.split(", ") : [],
           typeofQuestion: course.question_types
             ? course.question_types.split(", ")
             : [],
         }));
-
-        // console.log("Fetched Course Data:", coursesWithArrays);
         setCourseData(coursesWithArrays);
-        // setCourseData(fetchedData);
       } catch (error) {
         console.error("Error fetching course data:", error);
       }
     };
 
     fetchCourseData();
-  }, []);
-
-  useEffect(() => {
-    const fetchTypeOfTest = async () => {
-      try {
-        const response = await fetch("http://localhost:3081/type_of_tests");
-        const result = await response.json();
-        setTypeOfTest(result);
-      } catch (error) {
-        console.error("Error fetching Type of questions:", error);
-      }
-    };
-
-    fetchTypeOfTest();
   }, []);
 
   useEffect(() => {
@@ -155,12 +117,9 @@ const Coursecreation = () => {
 
   const handleSubjectChange = (event, subjectId) => {
     const { checked } = event.target;
-    // Fetch the subject details from subjectsData using subjectId
     const subject = subjectsData.find((subj) => subj.subjectId === subjectId);
 
     if (subject) {
-      // If checked, add the subject to the selectedSubjects array
-      // If unchecked, remove the subject from the selectedSubjects array
       setSelectedSubjects((prevSelectedSubjects) => {
         if (checked) {
           return [...prevSelectedSubjects, subjectId];
@@ -169,6 +128,31 @@ const Coursecreation = () => {
         }
       });
     }
+  };
+  useEffect(() => {
+    const fetchTypeOfTest = async () => {
+      try {
+        const response = await fetch("http://localhost:3081/type_of_tests");
+        const result = await response.json();
+        setTypeOfTest(result);
+      } catch (error) {
+        console.error("Error fetching Type of questions:", error);
+      }
+    };
+
+    fetchTypeOfTest();
+  }, []);
+
+  const handletypeoftest = (event,	typeOfTestId) => {
+    const { checked } = event.target;
+
+    setSelectedtypeOfTest((prevSelectedtest) => {
+      if (checked) {
+        return [...prevSelectedtest, typeOfTestId];
+      } else {
+        return prevSelectedtest.filter((id) => id !== typeOfTestId);
+      }
+    });
   };
 
   const handleQuestionChange = (event, questionTypeId) => {
@@ -210,7 +194,6 @@ const Coursecreation = () => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    let selectedTypeOfTest;
     if (name === "cost" || name === "discount") {
       const cost = name === "cost" ? parseFloat(value) : formData.cost;
       const discount =
@@ -221,7 +204,7 @@ const Coursecreation = () => {
         !isNaN(cost) && !isNaN(discountAmount) ? cost - discountAmount : "";
       setFormData({
         ...formData,
-        typeOfTest: selectedTypeOfTest || "",
+        typeOfTest: selectedtypeOfTest,
         examId: selectedexams,
         subjects: selectedSubjects,
         typeofQuestion: selectedtypeofQuestion,
@@ -243,7 +226,6 @@ const Coursecreation = () => {
     e.preventDefault();
     const requiredFields = [
       "courseName",
-      "typeOfTestId",
       "examId",
       "courseStartDate",
       "courseEndDate",
@@ -260,16 +242,13 @@ const Coursecreation = () => {
     }
     window.location.reload();
     resetFormFields();
-    // Prepare the data for submission
     const data = {
       ...formData,
-      typeOfTest,
+      typeOfTest:selectedtypeOfTest,
       examId: selectedexams,
       subjects: selectedSubjects,
-      typeofQuestion: selectedtypeofQuestion, // Assuming selectedtypeofQuestion is an array
+      typeofQuestion: selectedtypeofQuestion, 
     };
-
-    // Submit the data to the server
     try {
       const response = await fetch("http://localhost:3081/course-creation", {
         method: "POST",
@@ -280,12 +259,8 @@ const Coursecreation = () => {
       });
 
       const result = await response.json();
-
-      // Check if the result contains the expected structure
       if (result && result.courseCreationId) {
         const courseCreationId = result.courseCreationId;
-
-        // Use the courseCreationId in the second fetch to add subjects
         const subjectsResponse = await fetch(
           "http://localhost:3081/course_type_of_question",
           {
@@ -297,6 +272,7 @@ const Coursecreation = () => {
               courseCreationId,
               subjectIds: selectedSubjects,
               quesionTypeIds: selectedtypeofQuestion,
+              typeOfTestIds:selectedtypeOfTest,
             }),
           }
         );
@@ -397,28 +373,34 @@ const Coursecreation = () => {
                     onChange={handleChange}
                   />
                 </div>
-
-                <div>
-                  <label>Type of test:</label>
-                  <div>
-                    <select
-                      value={formData.typeOfTestId}
-                      name="typeOfTestId"
-                      onChange={handleChange}
-                    >
-                      <option value="">Select type of test</option>
-                      {typeOfTest.map((type) => (
-                        <option
-                          key={type.typeOfTestId}
-                          value={type.typeOfTestId}
-                        >
-                          {type.typeOfTestName}
-                        </option>
-                      ))}
-                    </select>
+                <div className="course_fromtype_container">
+                  <label>type of test:</label>
+                  <div className="course_checkbox_continer_content">
+                    {typeOfTest.map((typeofTest) => (
+                      <div
+                        className="course_checkbox_continer course_frominput_container_media"
+                        key={typeofTest.typeOfTestId}
+                      >
+                        <input
+                          type="checkbox"
+                          id={`typeofTest-${typeofTest.typeOfTestId }`}
+                          name={`typeofTest-${typeofTest.typeOfTestId }`}
+                          value={typeofTest.typeOfTestId }
+                          checked={selectedtypeOfTest.includes(
+                            typeofTest.typeOfTestId 
+                          )}
+                          onChange={(e) =>
+                            handletypeoftest(e, typeofTest.typeOfTestId)
+                          }
+                        />
+                        <label htmlFor={`question-${typeofTest.typeOfTestId}`}>
+                          {typeofTest.typeOfTestName}
+                        </label>
+                      </div>
+                    ))}
                   </div>
                 </div>
-              </div>
+              </div> 
 
               <fieldset>
                 <legend>Select Exam</legend>
@@ -606,7 +588,14 @@ const Coursecreation = () => {
               <tr key={course.courseCreationId}>
                 <td>{index + 1}</td>
                 <td>{course.courseName}</td>
-                <td>{course.typeOfTestName}</td>
+                 <td>
+                  {Array.isArray(course.typeOfTestName) &&
+                  course.typeOfTestName.length > 0
+                    ? course.typeOfTestName.join(", ")
+                    : "N/A"}
+                </td>
+              
+
                 <td>{course.examName}</td>
                 <td>
                   {Array.isArray(course.subjects) && course.subjects.length > 0
