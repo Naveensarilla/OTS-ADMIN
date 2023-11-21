@@ -73,9 +73,7 @@ const Coursecreation = () => {
           ...course,
           typeOfTestName:course.type_of_test ? course.type_of_test.split(", "):[],
           subjects: course.subjects ? course.subjects.split(", ") : [],
-          typeofQuestion: course.question_types
-            ? course.question_types.split(", ")
-            : [],
+          typeofQuestion: course.question_types ? course.question_types.split(", ") : [],
         }));
         setCourseData(coursesWithArrays);
       } catch (error) {

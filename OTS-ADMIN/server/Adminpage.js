@@ -14,6 +14,14 @@ const db = mysql.createPool({
   user: 'root',
   password: '',
   database: 'admin_project',
+}, (err, connection) => {
+  if (err) {
+    console.error('Error connecting to database:', err.message);
+  } else {
+    console.log('Database connected!');
+    // You can close the connection immediately if you don't need it elsewhere
+    connection.release();
+  }
 });
 
 
@@ -29,7 +37,7 @@ const storage = multer.diskStorage({
 });
 
 const upload = multer({ storage });
-//_______________________________________________________________exam creation start_____________________________________________________________________________
+//______________________exam creation start__________________________
 
 //-----------------------------geting subjects in exam creation page ------------------------
 app.get('/subjects', async (req, res) => {
@@ -205,10 +213,10 @@ app.get('/exams/:examId/subjects', async (req, res) => {
     }
   });
   //--------------------------------------------END--------------------------------------------------
-//________________________________________________________________Exam creation end_____________________________________________________________________________
-//_______________________________________________________________courese creation start_____________________________________________________________________________
+//_____________________Exam creation end__________________________
+//______________________courese creation start__________________________
 
-// Add this route to fetch type of test names
+// --------------- fetch type of test names -----------------------------
 app.get('/type_of_tests', async (req, res) => {
   try {
     const [rows] = await db.query('SELECT typeOfTestId, typeOfTestName FROM type_of_test');
@@ -218,6 +226,7 @@ app.get('/type_of_tests', async (req, res) => {
     res.status(500).json({ error: 'Internal Server Error' });
   }
 });
+// --------------- fetch type of Questions -----------------------------
 app.get('/type_of_questions', async (req, res) => {
   try {
     const [rows] = await db.query('SELECT quesionTypeId, typeofQuestion FROM quesion_type');
@@ -237,6 +246,9 @@ app.get('/type_of_questions', async (req, res) => {
 //     res.status(500).json({ error: 'Internal Server Error' });
 //   }
 // });
+
+
+// --------------- fetch exams -----------------------------
 app.get('/courese-exams', async (req, res) =>{
   try{
 const [rows] = await db.query('SELECT  examId,examName FROM exams');
@@ -246,7 +258,7 @@ res.json(rows);
     res.status(500).json({ error: 'Internal Server Error' });
   }
 });
- 
+ // --------------- fetch subjects -----------------------------
 app.get('/courese-exam-subjects/:examId/subjects', async (req, res) => {
   const examId = req.params.examId;
 
@@ -265,6 +277,7 @@ app.get('/courese-exam-subjects/:examId/subjects', async (req, res) => {
   }
 });
 
+// --------------- inserting data into course_creation_table -----------------------------
 app.post('/course-creation', async (req, res) => {
   const {
     courseName, examId, courseStartDate, courseEndDate, cost, discount, totalPrice,
@@ -290,12 +303,12 @@ app.post('/course-creation', async (req, res) => {
   }
 });
 
-
+// --------------- inserting data into course_typeOftests,course_subjects,course_type_of_question  -----------------------------
 app.post('/course_type_of_question', async (req, res) => {
   try {
     // Extract data from the request body
     const { courseCreationId,	typeOfTestIds, subjectIds, quesionTypeIds } = req.body;
-
+    console.log('Received request to add subjects and question types for courseCreationId:', courseCreationId);
     for (const typeOfTestId of typeOfTestIds) {
       await db.query(
         'INSERT INTO course_typeOftests (courseCreationId, typeOfTestId) VALUES (?, ?)',
@@ -328,7 +341,7 @@ app.post('/course_type_of_question', async (req, res) => {
   }
 });
 
-
+// --------------- geting data into course_creation_table,course_typeOftests,course_subjects,course_type_of_question  -----------------------------
 app.get('/course_creation_table', async (req, res) => {
   try {
     const query = `
@@ -391,6 +404,9 @@ ON
   }
 });
 
+
+
+// --------------- deleting data into course_creation_table,course_typeOftests,course_subjects,course_type_of_question  -----------------------------
 app.delete('/course_creation_table_Delete/:courseCreationId', async (req, res) => {
   const courseCreationId = req.params.courseCreationId;
 
@@ -404,7 +420,7 @@ app.delete('/course_creation_table_Delete/:courseCreationId', async (req, res) =
   }
 });
 
-
+// --------------- updating data into course_creation_table,course_typeOftests,course_subjects,course_type_of_question  -----------------------------
 app.get('/courseupdate/:courseCreationId', async (req, res) => {
     const courseCreationId = req.params.courseCreationId;
   
@@ -476,6 +492,9 @@ app.get('/courseupdate/:courseCreationId', async (req, res) => {
       res.status(500).json({ error: 'Internal Server Error' });
     }
   });
+
+
+  // --------------- feaching selected data from course_typeOftests,course_subjects,course_type_of_question  -----------------------------
  app.get('/course_subjects/:courseCreationId', async (req, res) => {
     const courseCreationId = req.params.courseCreationId;
   
@@ -487,8 +506,6 @@ app.get('/courseupdate/:courseCreationId', async (req, res) => {
         WHERE cs.courseCreationId = ?
       `;
       const [rows] = await db.query(query, [courseCreationId]);
-  
-      // Send the selected subjects as a JSON response
       res.json(rows);
     } catch (error) {
       console.error(error);
@@ -569,12 +586,12 @@ app.get('/courseupdate/:courseCreationId', async (req, res) => {
         totalPrice,
         courseCreationId,
       ]);
-      const selectedTypeOfTests = req.body.selectedTypeOfTests;
+      const selectedtypeOfTest = req.body.selectedtypeOfTest;
       const deleteTypeOfTestQuery = 'DELETE FROM course_typeoftests WHERE courseCreationId = ?';
       await db.query(deleteTypeOfTestQuery, [courseCreationId]);
   
       const insertTestOfTestQuery = 'INSERT INTO course_typeoftests (courseCreationId, typeOfTestId) VALUES (?, ?)';
-      for (const typeOfTestId of selectedTypeOfTests) {
+      for (const typeOfTestId of selectedtypeOfTest) {
         await db.query(insertTestOfTestQuery, [courseCreationId, typeOfTestId]);
       }
 
@@ -604,8 +621,8 @@ app.get('/courseupdate/:courseCreationId', async (req, res) => {
       res.status(500).json({ error: 'Internal Server Error' });
     }
   });
-//_______________________________________________________________courese creation end _____________________________________________________________________________
-//_______________________________________________________________INSTRUCTION page _____________________________________________________________________________
+//______________________courese creation end __________________________
+//______________________INSTRUCTION page __________________________
 
 app.get('/exams', async (req, res) => {
   try {
@@ -751,9 +768,9 @@ app.get('/instructionpoint',async(req,res)=>{
   }
 })
 
-//_______________________________________________________________end _____________________________________________________________________________
+//______________________end __________________________
 
-//_______________________________________________________________TEST CREATION PAGE _____________________________________________________________________________
+//______________________TEST CREATION PAGE __________________________
 
 app.get('/testcourses', async (req, res) => {
   try {
@@ -799,7 +816,7 @@ app.post('/create-test', async (req, res) => {
 
 
 
-//_______________________________________________________________end _____________________________________________________________________________
+//______________________end __________________________
 
 
 

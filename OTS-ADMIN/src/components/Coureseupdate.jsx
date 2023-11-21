@@ -112,7 +112,7 @@ const Coureseupdate = () => {
     const fetchQuestionTypes = async () => {
       try {
         const response = await axios.get(
-          "http://localhost:3081/type_of_questions"
+          "http://localhost:3081/question_types"
         );
         setQuestionTypes(response.data);
       } catch (error) {
