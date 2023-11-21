@@ -287,6 +287,7 @@ app.post('/course_type_of_question', async (req, res) => {
     // Extract data from the request body
     const { courseCreationId, subjectIds, quesionTypeIds } = req.body;
     // Insert subjects into the course_subjects table
+    console.log('Received data:', req.body);
     for (const subjectId of subjectIds) {
       await db.query(
         'INSERT INTO course_subjects (courseCreationId, subjectId) VALUES (?, ?)',
