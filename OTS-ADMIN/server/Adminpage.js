@@ -804,6 +804,7 @@ app.post('/create-test', async (req, res) => {
     totalMarks,
     calculator,
     status,
+    sectionsData,
   } = req.body;
 
   try {
@@ -814,7 +815,19 @@ app.post('/create-test', async (req, res) => {
 
     if (result && result.insertId) {
       const testCreationTableId = result.insertId;
-      res.json({ success: true, testCreationTableId, message: 'Test created successfully' });
+
+      // Process sectionsData and insert into sections table
+      const results = await Promise.all(
+        sectionsData.map(async (section) => {
+          const [sectionResult] = await db.query(
+            'INSERT INTO sections (testCreationTableId, sectionName, noOfQuestions, QuestionLimit) VALUES (?, ?, ?, ?)',
+            [testCreationTableId, section.sectionName || null, section.noOfQuestions, section.QuestionLimit || null]
+          );
+          return sectionResult;
+        })
+      );
+
+      res.json({ success: true, testCreationTableId, results, message: 'Test created successfully' });
     }
   } catch (error) {
     console.error('Error creating test:', error);
@@ -841,6 +854,34 @@ app.get('/course-typeoftests/:courseCreationId', async (req, res) => {
     res.status(500).json({ error: 'Internal Server Error' });
   }
 });
+
+
+app.get('/test_creation_table', async (req, res) => {
+  try {
+    const query =` SELECT tt.testCreationTableId,tt.TestName,cc.courseName,tt.testStartDate,tt.testEndDate,tt.testStartTime,tt.testEndTime,tt.status  FROM test_creation_table tt JOIN  course_creation_table cc ON tt.courseCreationId=cc.courseCreationId `
+    const [rows] = await db.query(query);
+    res.json(rows);
+  } catch (error) {
+    console.error('Error creating sections:', error);
+    res.status(500).json({ success: false, error: 'Internal Server Error' });
+  }
+});
+
+app.delete('/test_table_data_delete/:testCreationTableId', async (req, res) => {
+  const testCreationTableId = req.params.testCreationTableId;
+
+  try {
+    await db.query('DELETE test_creation_table, sections FROM test_creation_table LEFT JOIN sections ON test_creation_table.testCreationTableId = sections.testCreationTableId WHERE test_creation_table.testCreationTableId = ?', [testCreationTableId]);
+    res.json({ message: `course with ID ${testCreationTableId} deleted from the database` });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
+
+
+
 
 //______________________end __________________________
 
