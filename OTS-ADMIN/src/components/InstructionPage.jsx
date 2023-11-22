@@ -10,6 +10,7 @@ const InstructionPage = () => {
     const [formOpen, setFormOpen] = useState(false);
     const [instructions,setInstructions] = useState([]);
     const [instructionPoints, setInstructionPoints] = useState([]);
+    
     useEffect(() => {
         const fetchExams = async () => {
             try {

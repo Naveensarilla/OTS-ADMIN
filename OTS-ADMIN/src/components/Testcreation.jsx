@@ -11,7 +11,8 @@ const Testcreation = () => {
   const [duration, setDuration] = useState('');
   const [totalQuestions, setTotalQuestions] = useState('');
   const [totalMarks, setTotalMarks] = useState('');
-
+  const [calculator, setCalculator] = useState('no');
+  const [status, setStatus] = useState('inactive');
 
 
   useEffect(() => {
@@ -56,10 +57,40 @@ const Testcreation = () => {
   const handleTotalMarksChange = (e) => {
     setTotalMarks(e.target.value);
   };
+  const handleCalculatorChange = (e) => {
+    setCalculator(e.target.value);
+  };
+  
+  const handleStatusChange = (e) => {
+    setStatus(e.target.value);
+  };
 
-
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    
+  try {
+    const response = await fetch('http://localhost:3081/create-test', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        testName,
+        selectedCourse,
+        startDate,
+        startTime,
+        endDate,
+        endTime,
+        duration,
+        totalQuestions,
+        totalMarks,
+        calculator,
+        status,
+      }),
+    });
+
+    const data = await response.json();
+    console.log(data);
     console.log('Test Name submitted:', testName);
     console.log('Selected Course:', selectedCourse);
     console.log('Start Date:', startDate);
@@ -69,6 +100,9 @@ const Testcreation = () => {
     console.log('Duration:', duration);
     console.log('Total Questions:', totalQuestions);
     console.log('Total Marks:', totalMarks);
+  } catch (error) {
+    console.error('Error submitting form:', error);
+  }
   };
 
   return (
@@ -139,6 +173,22 @@ const Testcreation = () => {
           </tbody>
         </table></div>
         <br/>
+        <label>
+        Calculator:
+        <select value={calculator} onChange={handleCalculatorChange}>
+          <option value="yes">Yes</option>
+          <option value="no">No</option>
+        </select>
+      </label>
+      <br />
+      <label>
+        Status:
+        <select value={status} onChange={handleStatusChange}>
+          <option value="active">Active</option>
+          <option value="inactive">Inactive</option>
+        </select>
+      </label>
+      <br />
         <button type="submit">Submit</button>
       </form>
 
