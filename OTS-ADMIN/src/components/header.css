@@ -63,7 +63,7 @@
 
 .header {
   /* background-color: #000000; */
-  background: rgba(39, 158, 255, 0.822);
+  background: #e2f7fb;
   height: 4rem;
 
   display: flex;
@@ -93,7 +93,7 @@
   width: 200px;
   height: 100vh;
   /* background-color: #000000; */
-  background: rgba(39, 158, 255, 0.822);
+  background: #e2f7fb;
 
 
 }
@@ -108,7 +108,7 @@
 }
 
 .left-nav-bar ul li {
-  color: #fff;
+  color: #f7f2f2;
   padding: 1rem 0;
   transition: 0.3s all;
 
@@ -118,11 +118,14 @@
 }
 
 .left-nav-bar ul a {
-  color: #fff;
+  color: #080808;
   font-size: 1.2rem;
   font-weight: 500;
   width: 100%;
   margin-left: 1.2rem;
+  &:hover {
+  color: #ffffff;
+  }
 }
 
 /* ----------------------------- create_exam------------------------------- */

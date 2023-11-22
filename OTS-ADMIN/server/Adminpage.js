@@ -18,19 +18,19 @@ const db = mysql.createPool({
   database: 'admin_project',
 });
 
-// const storage = multer.diskStorage({
-//   destination: async (req, file, cb) => {
-//     const uploadDir = 'uploads/';
-//     await fs.mkdir(uploadDir, { recursive: true });
-//     cb(null, uploadDir);
-//   },
-//   filename: (req, file, cb) => {
-//     const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-//     cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname));
-//   },
-// });
+const storage = multer.diskStorage({
+  destination: async (req, file, cb) => {
+    const uploadDir = 'uploads/';
+    await fs.mkdir(uploadDir, { recursive: true });
+    cb(null, uploadDir);
+  },
+  filename: (req, file, cb) => {
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname));
+  },
+});
 
-// const upload = multer({ storage });
+const upload = multer({ storage });
 
 //______________________exam creation start__________________________
 
@@ -628,6 +628,154 @@ app.get('/courseupdate/:courseCreationId', async (req, res) => {
   });
 //______________________courese creation end __________________________
 //______________________INSTRUCTION page __________________________
+
+app.get('/exams', async (req, res) => {
+  try {
+    const query = 'SELECT examId,examName FROM exams'; 
+    const [rows] = await db.query(query);
+    res.json(rows);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+} )
+app.use((req, res, next) => {
+  res.setHeader('Content-Type', 'text/html; charset=utf-8');
+  next();
+});
+
+app.post('/upload', upload.single('file'), async (req, res) => {
+  try {
+    const file = req.file;
+    const fileName = file.originalname;
+    const fileContent = await fs.readFile(file.path, 'utf-8');
+
+    const query =
+      'INSERT INTO instruction (examId, instructionHeading, instructionPoint, documentName) VALUES (?, ?, ?, ?)';
+    const values = [req.body.examId, req.body.instructionHeading, fileContent, fileName];
+
+    const result = await db.query(query, values);
+    const instructionId = result[0].insertId;
+
+    res.json({ success: true, instructionId, message: 'File uploaded successfully.' });
+  } catch (error) {
+    console.error('Error uploading file:', error);
+    res.status(500).json({ success: false, message: 'Failed to upload file.' });
+  }
+});
+
+
+
+app.get('/instructions', async (req, res) => {
+  try {
+    const query =
+      'SELECT i.instructionId, e.examName, i.instructionHeading, i.documentName FROM instruction i JOIN exams e ON i.examId = e.examId';
+    const [rows] = await db.query(query);
+    res.json(rows);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
+
+app.delete('/instructions/:instructionId', async (req, res) => {
+  try {
+    const instructionId = req.params.instructionId;
+    const query = 'DELETE FROM instruction WHERE instructionId = ?';
+    const [result] = await db.query(query, [instructionId]);
+
+    if (result.affectedRows > 0) {
+      res.json({ success: true, message: 'Instruction deleted successfully.' });
+    } else {
+      res.status(404).json({ success: false, message: 'Instruction not found.' });
+    }
+  } catch (error) {
+    console.error('Error deleting instruction:', error);
+    res.status(500).json({ success: false, message: 'Failed to delete instruction.' });
+  }
+});
+
+
+// app.put('/InstructionsUpdate/:instructionId', upload.single('file'), async (req, res) => {
+//   try {
+//     const { instructionId } = req.params;
+//     const { examId, instructionHeading } = req.body;
+//     const file = req.file;
+    
+//     // If a new file is provided, update the document content
+//     let instructionPoint;
+//     const fileContent = file ? await fs.readFile(file.path, 'utf-8') : undefined;
+
+//     if (fileContent) {
+//       instructionPoint = fileContent;
+//     } else {
+//       // Fetch the existing instructionPoint from the database
+//       const fetchQuery = 'SELECT instructionPoint FROM instruction WHERE instructionId = ?';
+//       const [fetchResult] = await db.query(fetchQuery, [instructionId]);
+//       instructionPoint = fetchResult[0].instructionPoint;
+//     }
+
+//     // Construct the SQL query based on whether a new file is provided
+//     const updateQuery = fileContent
+//       ? 'UPDATE instruction SET examId = ?, instructionHeading = ?, documentName = ?, instructionPoint = ? WHERE instructionId = ?'
+//       : 'UPDATE instruction SET examId = ?, instructionHeading = ?, instructionPoint = ? WHERE instructionId = ?';
+
+//     const updateValues = fileContent
+//       ? [examId, instructionHeading, file.originalname, instructionPoint, instructionId]
+//       : [examId, instructionHeading, instructionPoint, instructionId];
+
+//     await db.query(updateQuery, updateValues);
+
+//     // If a new file is provided, delete the old file
+//     if (fileContent) {
+//       await fs.unlink(file.path);
+//     }
+
+//     res.json({ success: true, message: 'Instruction updated successfully.' });
+//   } catch (error) {
+//     console.error('Error updating instruction:', error);
+//     res.status(500).json({ success: false, message: 'Failed to update instruction.' });
+//   }
+// });
+
+
+
+
+app.get('/instructionsfeach/:instructionId', async (req, res) => {
+  try {
+    const { instructionId } = req.params;
+
+    // Query the database to get instruction details
+    const query =
+      'SELECT instructionId, examId, instructionHeading, instructionPoint FROM instruction WHERE instructionId = ?';
+    const [result] = await db.query(query, [instructionId]);
+
+    if (result.length > 0) {
+      const instruction = result[0];
+      res.json(instruction);
+    } else {
+      res.status(404).json({ success: false, message: 'Instruction not found.' });
+    }
+  } catch (error) {
+    console.error('Error fetching instruction details:', error);
+    res.status(500).json({ success: false, message: 'Failed to fetch instruction details.' });
+  }
+});
+
+app.get('/instructionpoint',async(req,res)=>{
+  try{ const query='SELECT instructionPoint FROM instruction';
+  const[row] =await db.query(query);
+  res.json(row);
+  }catch (error) {
+    console.error('Error fetching instruction details:', error);
+    res.status(500).json({ success: false, message: 'Failed to fetch instruction details.' });
+  }
+})
+
+
+
+
 //______________________end __________________________
 
 //______________________TEST CREATION PAGE __________________________
@@ -642,11 +790,11 @@ app.get('/testcourses', async (req, res) => {
   }
 });
 
-
 app.post('/create-test', async (req, res) => {
   const {
     testName,
     selectedCourse,
+    selectedtypeOfTest,
     startDate,
     startTime,
     endDate,
@@ -660,8 +808,8 @@ app.post('/create-test', async (req, res) => {
 
   try {
     const [result] = await db.query(
-      'INSERT INTO test_creation_table (TestName, courseCreationId, testStartDate, teatEndDate, testStartTime, testEndTime, Duration, TotalQuestions, totalMarks, calculator, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
-      [testName, selectedCourse, startDate, endDate, startTime, endTime, duration, totalQuestions, totalMarks, calculator, status]
+      'INSERT INTO test_creation_table (TestName, courseCreationId, courseTypeOfTestId, testStartDate, testEndDate, testStartTime, testEndTime, Duration, TotalQuestions, totalMarks, calculator, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+      [testName, selectedCourse, selectedtypeOfTest, startDate, endDate, startTime, endTime, duration, totalQuestions, totalMarks, calculator, status]
     );
 
     if (result && result.insertId) {
@@ -674,7 +822,25 @@ app.post('/create-test', async (req, res) => {
   }
 });
 
+// Add this new API endpoint
+app.get('/course-typeoftests/:courseCreationId', async (req, res) => {
+  const { courseCreationId } = req.params;
 
+  try {
+    const [rows] = await db.query(
+      'SELECT type_of_test.TypeOfTestId, type_of_test.TypeOfTestName,course_typeoftests.courseTypeOfTestId ' +
+      'FROM course_typeoftests ' +
+      'INNER JOIN type_of_test ON course_typeoftests.TypeOfTestId = type_of_test.TypeOfTestId ' +
+      'WHERE course_typeoftests.courseCreationId = ?',
+      [courseCreationId]
+    );
+
+    res.json(rows);
+  } catch (error) {
+    console.error('Error fetching course_typeoftests:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
 
 //______________________end __________________________
 
