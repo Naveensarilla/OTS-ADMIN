@@ -249,7 +249,7 @@ const Coursecreation = () => {
       alert("Please fill in all required fields.");
       return;
     }
-    window.location.reload();
+    // window.location.reload();
     resetFormFields();
     const data = {
       ...formData,
