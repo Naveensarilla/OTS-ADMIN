@@ -233,18 +233,6 @@ app.get('/type_of_questions', async (req, res) => {
     res.status(500).json({ error: 'Internal Server Error' });
   }
 });
-// app.get('/question_types', async (req, res) => {
-//   try {
-//     const query = 'SELECT * FROM quesion_type'; // Replace with your actual query
-//     const [rows] = await db.query(query);
-//     res.json(rows);
-//   } catch (error) {
-//     console.error(error);
-//     res.status(500).json({ error: 'Internal Server Error' });
-//   }
-// });
-
-
 // --------------- fetch exams -----------------------------
 app.get('/courese-exams', async (req, res) =>{
   try{
@@ -346,7 +334,7 @@ app.post('/course_type_of_question', async (req, res) => {
   }
 });
 
-// --------------- geting data into course_creation_table,course_typeOftests,course_subjects,course_type_of_question  -----------------------------
+// --------------- geting data  course_creation_table,course_typeOftests,course_subjects,course_type_of_question  -----------------------------
 app.get('/course_creation_table', async (req, res) => {
   try {
     const query = `
@@ -879,7 +867,73 @@ app.delete('/test_table_data_delete/:testCreationTableId', async (req, res) => {
   }
 });
 
+// app.get('/testupdate/:testCreationTableId', async (req, res) => {
+//   const { testCreationTableId } = req.params;
 
+//   try {
+//     const [rows] = await db.query(`
+//       SELECT 
+//         test_creation_table.*, 
+//         course_creation_table.courseName, 
+//         type_of_test.TypeOfTestName
+//       FROM 
+//         test_creation_table
+//       INNER JOIN 
+//         course_creation_table ON test_creation_table.courseCreationId = course_creation_table.courseCreationId
+//       INNER JOIN 
+//         course_typeoftests ON test_creation_table.courseTypeOfTestId = course_typeoftests.courseTypeOfTestId
+//       INNER JOIN 
+//         type_of_test ON course_typeoftests.TypeOfTestId = type_of_test.TypeOfTestId
+//       WHERE 
+//         test_creation_table.testCreationTableId = ?
+//     `, [testCreationTableId]);
+
+//     if (rows.length > 0) {
+//       res.json(rows[0]);
+//     } else {
+//       res.status(404).json({ error: 'Test not found' });
+//     }
+//   } catch (error) {
+//     console.error('Error fetching test data:', error);
+//     res.status(500).json({ error: 'Internal Server Error' });
+//   }
+// });
+app.get('/testupdate/:testCreationTableId', async (req, res) => {
+  const { testCreationTableId } = req.params;
+
+  try {
+    const [rows] = await db.query(`
+      SELECT 
+        test_creation_table.*, 
+        course_creation_table.courseName, 
+        type_of_test.TypeOfTestName,
+        sections.sectionName,
+        sections.noOfQuestions,
+        sections.QuestionLimit
+      FROM 
+        test_creation_table
+      INNER JOIN 
+        course_creation_table ON test_creation_table.courseCreationId = course_creation_table.courseCreationId
+      INNER JOIN 
+        course_typeoftests ON test_creation_table.courseTypeOfTestId = course_typeoftests.courseTypeOfTestId
+      INNER JOIN 
+        type_of_test ON course_typeoftests.TypeOfTestId = type_of_test.TypeOfTestId
+      INNER JOIN
+        sections ON test_creation_table.testCreationTableId = sections.testCreationTableId
+      WHERE 
+        test_creation_table.testCreationTableId = ?
+    `, [testCreationTableId]);
+
+    if (rows.length > 0) {
+      res.json(rows[0]);
+    } else {
+      res.status(404).json({ error: 'Test not found' });
+    }
+  } catch (error) {
+    console.error('Error fetching test data:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
 
 
 
