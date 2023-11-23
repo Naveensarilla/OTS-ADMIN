@@ -16,33 +16,31 @@ const TestUpdate = () => {
     testEndTime: '',
     Duration: '',
     TotalQuestions: '',
-    sectionName:'',
-    noOfQuestions:'',
-    QuestionLimit:'',
+    sectionName: '',
+    noOfQuestions: '',
+    QuestionLimit: '',
     totalMarks: '',
     calculator: 'No',
     status: 'Inactive',
   });
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
+    const { name, value, type } = e.target;
+  
+    // If the input type is 'number', parse the value as a number
+    const updatedValue = type === 'number' ? parseFloat(value) : value;
+  
     setTestData((prevData) => ({
       ...prevData,
-      [name]: value,
+      [name]: updatedValue,
     }));
-  };
-  
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    // Add your logic for form submission here
-    console.log('Form submitted with data:', testData);
   };
 
   function formatTime(dateTimeString) {
     if (dateTimeString === 'Invalid Time') {
       return '00:00'; // or any other default time you prefer
     }
-  
+
     const formattedTime = moment(dateTimeString, 'HH:mm:ss.SSSSSS').format('HH:mm:ss');
     return formattedTime !== 'Invalid date' ? formattedTime : 'Invalid Time';
   }
@@ -94,10 +92,79 @@ const TestUpdate = () => {
           QuestionLimit: data.QuestionLimit
         }];
         setSections(sectionsData);
-        
+
       })
       .catch(error => console.error('Error fetching test data:', error));
   }, [testCreationTableId]);
+  console.log("Sections:", sections);
+
+  // useEffect(() => {
+  //   // Fetch test data to pre-fill the form
+  //   fetch(`http://localhost:3081/testupdate/${testCreationTableId}`)
+  //     .then(response => response.json())
+  //     .then(data => {
+  //       // Populate the testData state with fetched data
+  //       setTestData({
+  //         ...data,
+  //         selectedCourse: data.courseCreationId,
+  //         selectedTypeOfTest: data.courseTypeOfTestId,
+  //       });
+  //       const sectionsData = [{
+  //         sectionName: data.sectionName,
+  //         noOfQuestions: data.noOfQuestions,
+  //         QuestionLimit: data.QuestionLimit
+  //       }];
+  //       setSections(sectionsData);
+  //     })
+  //     .catch(error => console.error('Error fetching test data:', error));
+  // }, [testCreationTableId]);
+  
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    try {
+      // Update test data
+      const testDataToUpdate = {
+        ...testData,
+      };
+
+      const testResponse = await fetch(`http://localhost:3081/update-test/${testCreationTableId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(testDataToUpdate),
+      });
+      const testResult = await testResponse.json();
+      console.log('Test Update Result:', testResult);
+
+      // Update section data
+      const sectionsDataToUpdate = sections.map((section, index) => ({
+        sectionName: testData[`section${index + 1}`],
+        noOfQuestions: testData[`numQuestions${index + 1}`],
+        QuestionLimit: testData[`questionLimit${index + 1}`],
+      }));
+
+      const sectionsResponse = await fetch(`http://localhost:3081/update-sections/${testCreationTableId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ sectionsData: sectionsDataToUpdate }),
+      });
+      const sectionsResult = await sectionsResponse.json();
+      console.log('Sections Update Result:', sectionsResult);
+
+      console.log('Update successful');
+      // Add any additional logic for successful update
+    } catch (error) {
+      console.error('Error updating test and sections:', error);
+      // Log the error message from the server
+      error.json().then((errorMessage) => console.error(errorMessage));
+    }
+  };
+  
   return (
     <div>
       <h2>Test Update Form</h2>
@@ -106,7 +173,7 @@ const TestUpdate = () => {
           Test Name:
           <input
             type="text"
-            name="testName"
+            name="TestName"
             value={testData.TestName}
             onChange={handleChange}
           />
@@ -222,25 +289,25 @@ const TestUpdate = () => {
         </label>
         <br />
         <table>
-        <thead>
-          <tr>
-            <th>#</th>
-            <th>Section</th>
-            <th>Number of Questions</th>
-            <th>Question Limit</th>
-          </tr>
-        </thead>
-        <tbody>
-  {sections.map((section, index) => (
-    <tr key={index}>
-      <td>{index + 1}</td>
-      <td><input type="text" name={`section${index + 1}`} defaultValue={section.sectionName} /></td>
-      <td><input type="number" name={`numQuestions${index + 1}`} defaultValue={section.noOfQuestions} /></td>
-      <td><input type="number" name={`questionLimit${index + 1}`} defaultValue={section.QuestionLimit} /></td>
-    </tr>
-  ))}
-</tbody>
-      </table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Section</th>
+              <th>Number of Questions</th>
+              <th>Question Limit</th>
+            </tr>
+          </thead>
+          <tbody>
+            {sections.map((section, index) => (
+              <tr key={index}>
+                <td>{index + 1}</td>
+                <td><input type="text" name={`section${index + 1}`} defaultValue={section.sectionName} /></td>
+                <td><input type="number" name={`numQuestions${index + 1}`} defaultValue={section.noOfQuestions} /></td>
+                <td><input type="number" name={`questionLimit${index + 1}`} defaultValue={section.QuestionLimit} /></td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
         <label>
           Calculator:
           <select

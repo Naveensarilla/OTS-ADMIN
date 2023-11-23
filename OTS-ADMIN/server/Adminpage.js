@@ -867,37 +867,7 @@ app.delete('/test_table_data_delete/:testCreationTableId', async (req, res) => {
   }
 });
 
-// app.get('/testupdate/:testCreationTableId', async (req, res) => {
-//   const { testCreationTableId } = req.params;
 
-//   try {
-//     const [rows] = await db.query(`
-//       SELECT 
-//         test_creation_table.*, 
-//         course_creation_table.courseName, 
-//         type_of_test.TypeOfTestName
-//       FROM 
-//         test_creation_table
-//       INNER JOIN 
-//         course_creation_table ON test_creation_table.courseCreationId = course_creation_table.courseCreationId
-//       INNER JOIN 
-//         course_typeoftests ON test_creation_table.courseTypeOfTestId = course_typeoftests.courseTypeOfTestId
-//       INNER JOIN 
-//         type_of_test ON course_typeoftests.TypeOfTestId = type_of_test.TypeOfTestId
-//       WHERE 
-//         test_creation_table.testCreationTableId = ?
-//     `, [testCreationTableId]);
-
-//     if (rows.length > 0) {
-//       res.json(rows[0]);
-//     } else {
-//       res.status(404).json({ error: 'Test not found' });
-//     }
-//   } catch (error) {
-//     console.error('Error fetching test data:', error);
-//     res.status(500).json({ error: 'Internal Server Error' });
-//   }
-// });
 app.get('/testupdate/:testCreationTableId', async (req, res) => {
   const { testCreationTableId } = req.params;
 
@@ -935,6 +905,90 @@ app.get('/testupdate/:testCreationTableId', async (req, res) => {
   }
 });
 
+// Update test data
+app.put('/update-test/:testCreationTableId', async (req, res) => {
+  const testCreationTableId = req.params.testCreationTableId;
+
+  const {
+    testName,
+    selectedCourse,
+    selectedtypeOfTest,
+    startDate,
+    startTime,
+    endDate,
+    endTime,
+    duration,
+    totalQuestions,
+    totalMarks,
+    calculator,
+    status,
+  } = req.body;
+
+  const updateTestQuery = `
+    UPDATE test_creation_table
+    SET
+      TestName = ?,
+      courseCreationId = ?,
+      courseTypeOfTestId = ?,
+      testStartDate = ?,
+      testEndDate = ?,
+      testStartTime = ?,
+      testEndTime = ?,
+      Duration = ?,
+      TotalQuestions = ?,
+      totalMarks = ?,
+      calculator = ?,
+      status = ?
+    WHERE testCreationTableId = ?;
+  `;
+  try {
+    await db.query(updateTestQuery, [
+      testName,
+      selectedCourse,
+      selectedtypeOfTest,
+      startDate,
+      endDate,
+      startTime,
+      endTime,
+      duration,
+      totalQuestions,
+      totalMarks,
+      calculator,
+      status,
+      testCreationTableId,
+    ]);
+
+    console.log('Test data updated successfully');
+    res.json({ message: 'Test data updated successfully' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
+// Update section data
+app.put('/update-sections/:testCreationTableId', async (req, res) => {
+  const testCreationTableId = req.params.testCreationTableId;
+  const sectionsData = req.body.sectionsData;
+
+  // Handle sections update (assuming sections table has columns testCreationTableId, sectionId, etc.)
+  // const deleteSectionsQuery = 'DELETE FROM sections WHERE testCreationTableId = ?';
+  // await db.query(deleteSectionsQuery, [testCreationTableId]);
+
+  const updateSectionsQuery = 'INSERT INTO sections (testCreationTableId, sectionName, noOfQuestions, QuestionLimit) VALUES (?, ?, ?, ?)';
+  try {
+    for (const sectionData of sectionsData) {
+      const { sectionName, noOfQuestions, QuestionLimit } = sectionData;
+      await db.query(updateSectionsQuery, [testCreationTableId, sectionName, noOfQuestions, QuestionLimit]);
+    }
+
+    console.log('Sections data updated successfully');
+    res.json({ message: 'Sections data updated successfully' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
 
 
 //______________________end __________________________

@@ -22,13 +22,8 @@ const Leftnav = () => {
       <li><Link to="/exams" >Exam Creation</Link></li>
       <li><Link to="/Coursecreation">Course Creation</Link></li>
       <li><Link to="/InstructionPage" >Instruction</Link></li>
-
-    
-
-        
-
       <li><Link to="/Testcreation">Test Creation</Link></li>     
-
+      <li><Link to="/DocumentUpload">Document Upload</Link></li>  
       </ul>
     </div>
     </div>
