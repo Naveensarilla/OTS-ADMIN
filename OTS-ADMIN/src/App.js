@@ -7,19 +7,19 @@ import CourseCreation from "./components/Coursecreation.jsx";
 import ExamUpdate from "./components/Examupdate.jsx";
 import CourseUpdate from "./components/Coureseupdate.jsx";
 import InstructionPage from "./components/InstructionPage.jsx";
-<<<<<<< Updated upstream
+
 // import InstructionUpdate from './components/InstructionUpdate.jsx';
 import Testcreation from "./components/Testcreation.jsx";
 import { Edit_instructions } from "./components/instructions/Edit_instructions.jsx";
 import { UpdateInstruction } from "./components/instructions/UpDAteInstraction.jsx";
-=======
+
 import TestCreation from "./components/Testcreation.jsx";
 import EditInstructions from "./components/instructions/Edit_instructions.jsx";
-import UpdateInstruction from "./components/instructions/UpDAteInstraction.jsx";
+
 import TestUpdate from './components/TestUpdate.jsx';
 import DocumentUpload from './components/DocumentUpload.jsx';
 
->>>>>>> Stashed changes
+
 function App() {
   return (
     <Router>
@@ -44,8 +44,7 @@ function App() {
             element={<UpdateInstruction />}
           />
         </Routes>
-<<<<<<< Updated upstream
-=======
+
       </div>
 
       <div className='common_grid_app'>
@@ -60,7 +59,7 @@ function App() {
           <Route path='/testUpdate/:testCreationTableId' element={<TestUpdate />} />
           <Route path='/DocumentUpload' element={<DocumentUpload />} />
         </Routes>
->>>>>>> Stashed changes
+
       </div>
     </Router>
   );
