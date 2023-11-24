@@ -9,7 +9,7 @@ import Coureseupdate from './components/Coureseupdate.jsx';
 import InstructionPage from './components/InstructionPage.jsx';
 // import InstructionUpdate from './components/InstructionUpdate.jsx';
 import Testcreation from './components/Testcreation.jsx';
-// import TestUpdate from './components/TestUpdate.jsx'
+import TestUpdate from './components/TestUpdate.jsx'
 import DocumentUpload from './components/DocumentUpload.jsx'
 function App() {
   return (
@@ -25,7 +25,7 @@ function App() {
         <Route path="/InstructionPage" element={<InstructionPage />} />  
         {/* <Route path="/InstructionUpdate/:instructionId" element={<InstructionUpdate />} />  */}
         <Route path='/Testcreation' element={<Testcreation />}/>
-        {/* <Route path='/testUpdate/:testCreationTableId' element={<TestUpdate/>} /> */}
+        <Route path='/testUpdate/:testCreationTableId' element={<TestUpdate/>} />
         <Route path='/DocumentUpload' element={<DocumentUpload />}/>
       </Routes>
       </div>

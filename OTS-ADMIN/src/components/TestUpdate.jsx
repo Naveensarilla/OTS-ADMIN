@@ -16,26 +16,44 @@ const TestUpdate = () => {
     testEndTime: '',
     Duration: '',
     TotalQuestions: '',
-    sectionName: '',
+    totalMarks: '',
+     sectionName: '',
     noOfQuestions: '',
     QuestionLimit: '',
-    totalMarks: '',
     calculator: 'No',
     status: 'Inactive',
+    selectedsections: [],
   });
 
   const handleChange = (e) => {
     const { name, value, type } = e.target;
-  
-    // If the input type is 'number', parse the value as a number
     const updatedValue = type === 'number' ? parseFloat(value) : value;
   
-    setTestData((prevData) => ({
-      ...prevData,
-      [name]: updatedValue,
-    }));
+    if (name.startsWith('sectionName') || name.startsWith('noOfQuestions') || name.startsWith('QuestionLimit')) {
+    
+      const index = parseInt(name.match(/\d+/)[0], 10) - 1; 
+      const sectionProperty = name.replace(/\d+/g, ''); 
+      
+      setTestData((prevData) => {
+        const updatedSections = [...prevData.selectedsections];
+        updatedSections[index] = {
+          ...updatedSections[index],
+          [sectionProperty]: updatedValue,
+        };
+        return {
+          ...prevData,
+          selectedsections: updatedSections,
+        };
+      });
+    } else {
+      // If it's not a section input, update other properties normally
+      setTestData((prevData) => ({
+        ...prevData,
+        [name]: updatedValue,
+      }));
+    }
   };
-
+  
   function formatTime(dateTimeString) {
     if (dateTimeString === 'Invalid Time') {
       return '00:00'; // or any other default time you prefer
@@ -85,6 +103,11 @@ const TestUpdate = () => {
           ...data,
           selectedCourse: data.courseCreationId,
           selectedTypeOfTest: data.courseTypeOfTestId,
+          selectedsections: [{
+            sectionName: data.sectionName,
+            noOfQuestions: data.noOfQuestions,
+            QuestionLimit: data.QuestionLimit
+          }],
         });
         const sectionsData = [{
           sectionName: data.sectionName,
@@ -98,72 +121,54 @@ const TestUpdate = () => {
   }, [testCreationTableId]);
   console.log("Sections:", sections);
 
-  // useEffect(() => {
-  //   // Fetch test data to pre-fill the form
-  //   fetch(`http://localhost:3081/testupdate/${testCreationTableId}`)
-  //     .then(response => response.json())
-  //     .then(data => {
-  //       // Populate the testData state with fetched data
-  //       setTestData({
-  //         ...data,
-  //         selectedCourse: data.courseCreationId,
-  //         selectedTypeOfTest: data.courseTypeOfTestId,
-  //       });
-  //       const sectionsData = [{
-  //         sectionName: data.sectionName,
-  //         noOfQuestions: data.noOfQuestions,
-  //         QuestionLimit: data.QuestionLimit
-  //       }];
-  //       setSections(sectionsData);
-  //     })
-  //     .catch(error => console.error('Error fetching test data:', error));
-  // }, [testCreationTableId]);
-  
-
   const handleSubmit = async (e) => {
     e.preventDefault();
-
+  
+    // Ensure that selectedsections is an array
+    if (!Array.isArray(testData.selectedsections)) {
+      console.error('Error: selectedsections is not an array');
+      return;
+    }
+  
     try {
-      // Update test data
-      const testDataToUpdate = {
-        ...testData,
-      };
-
-      const testResponse = await fetch(`http://localhost:3081/update-test/${testCreationTableId}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(testDataToUpdate),
-      });
-      const testResult = await testResponse.json();
-      console.log('Test Update Result:', testResult);
-
-      // Update section data
-      const sectionsDataToUpdate = sections.map((section, index) => ({
-        sectionName: testData[`section${index + 1}`],
-        noOfQuestions: testData[`numQuestions${index + 1}`],
-        QuestionLimit: testData[`questionLimit${index + 1}`],
+      // Map the selectedsections array to the required format
+      const sectionData = testData.selectedsections.map(section => ({
+        sectionName: section.sectionName,
+        noOfQuestions: section.noOfQuestions,
+        QuestionLimit: section.QuestionLimit,
       }));
-
-      const sectionsResponse = await fetch(`http://localhost:3081/update-sections/${testCreationTableId}`, {
+  
+      const response = await fetch(`http://localhost:3081/test-update/${testCreationTableId}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ sectionsData: sectionsDataToUpdate }),
+        body: JSON.stringify({
+          TestName: testData.TestName,
+          selectedCourse: testData.selectedCourse,
+          selectedTypeOfTest: testData.selectedTypeOfTest,
+          testStartDate: testData.testStartDate,
+          testEndDate: testData.testEndDate,
+          testStartTime: testData.testStartTime,
+          testEndTime: testData.testEndTime,
+          Duration: testData.Duration,
+          TotalQuestions: testData.TotalQuestions,
+          totalMarks: testData.totalMarks,
+          calculator: testData.calculator,
+          status: testData.status,
+          selectedsections: sectionData, // Pass the formatted sectionData
+        }),
       });
-      const sectionsResult = await sectionsResponse.json();
-      console.log('Sections Update Result:', sectionsResult);
-
-      console.log('Update successful');
-      // Add any additional logic for successful update
+  
+      const data = await response.json();
+      console.log(data);
     } catch (error) {
-      console.error('Error updating test and sections:', error);
-      // Log the error message from the server
-      error.json().then((errorMessage) => console.error(errorMessage));
+      console.error('Error sending request:', error);
     }
   };
+  
+
+
   
   return (
     <div>
@@ -238,7 +243,7 @@ const TestUpdate = () => {
           Start Time:
           <input
             type="time"
-            name="startTime"
+            name="testStartTime"
             value={formatTime(testData.testStartTime)}
             onChange={handleChange}
           />
@@ -249,7 +254,7 @@ const TestUpdate = () => {
           End Time:
           <input
             type="time"
-            name="endTime"
+            name="testEndDate"
             value={formatTime(testData.testEndDate)}
             onChange={handleChange}
           />
@@ -259,7 +264,7 @@ const TestUpdate = () => {
         <label>
           Duration (in minutes):
           <input
-            type="text"
+            type="number"
             name="duration"
             value={testData.Duration}
             onChange={handleChange}
@@ -270,7 +275,7 @@ const TestUpdate = () => {
         <label>
           Total Questions:
           <input
-            type="text"
+            type="number"
             name="totalQuestions"
             value={testData.TotalQuestions}
             onChange={handleChange}
@@ -281,7 +286,7 @@ const TestUpdate = () => {
         <label>
           Total Marks:
           <input
-            type="text"
+            type="number"
             name="totalMarks"
             value={testData.totalMarks}
             onChange={handleChange}

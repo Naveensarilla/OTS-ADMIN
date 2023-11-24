@@ -905,49 +905,68 @@ app.get('/testupdate/:testCreationTableId', async (req, res) => {
   }
 });
 
-// Update test data
-app.put('/update-test/:testCreationTableId', async (req, res) => {
+
+
+
+app.put('/test-update/:testCreationTableId', async (req, res) => { 
   const testCreationTableId = req.params.testCreationTableId;
+  const { 
+    TestName,
+    selectedCourse,
+    selectedTypeOfTest,
+    testStartDate,
+    testEndDate,
+    testStartTime,
+    testEndTime,
+    Duration,
+    TotalQuestions,
+    totalMarks,
+    calculator,
+    status,
+  } = req.body;
 
-  const {
-    testName,selectedCourse,selectedtypeOfTest,startDate,startTime,endDate,endTime,duration,totalQuestions,totalMarks,calculator,status,} = req.body;
+  const updateQuery = `UPDATE test_creation_table SET TestName=?,courseCreationId=?,courseTypeOfTestId=?,testStartDate=?,testEndDate=?,testStartTime=?,testEndTime=?,Duration=?,TotalQuestions=?,totalMarks=?,calculator=?,status=? WHERE testCreationTableId=?`;
 
-  const updateTestQuery = ` UPDATE test_creation_table SET TestName = ?,courseCreationId = ?,courseTypeOfTestId = ?,testStartDate = ?,testEndDate = ?,testStartTime = ?,testEndTime = ?Duration = ?,TotalQuestions = ?,totalMarks = ?,calculator = ?,status = ? WHERE testCreationTableId = ?;`;
   try {
-    await db.query(updateTestQuery, [testName,selectedCourse,selectedtypeOfTest,startDate,endDate,startTime,endTime,duration,totalQuestions,totalMarks,calculator,status,testCreationTableId,]);
+    await db.query(updateQuery, [
+      TestName,
+      selectedCourse,
+      selectedTypeOfTest,
+      testStartDate,
+      testEndDate,
+      testStartTime,
+      testEndTime,
+      Duration,
+      TotalQuestions,
+      totalMarks,
+      calculator,
+      status,
+      testCreationTableId,
+    ]);
 
-    console.log('Test data updated successfully');
-    res.json({ message: 'Test data updated successfully' });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: 'Internal Server Error' });
-  }
-});
+    const selectedsections = req.body.selectedsections;
 
-// Update section data
-app.put('/update-sections/:testCreationTableId', async (req, res) => {
-  const testCreationTableId = req.params.testCreationTableId;
-  const sectionsData = req.body.sectionsData;
+    // Check if selectedsections is an array before attempting to iterate over it
+    if (Array.isArray(selectedsections)) {
+      const deletesectionsQuery = 'DELETE FROM sections WHERE testCreationTableId=?';
+      await db.query(deletesectionsQuery, [testCreationTableId]);
 
-  // Handle sections update (assuming sections table has columns testCreationTableId, sectionId, etc.)
-  // const deleteSectionsQuery = 'DELETE FROM sections WHERE testCreationTableId = ?';
-  // await db.query(deleteSectionsQuery, [testCreationTableId]);
+      const insertsectionsQuery = 'INSERT INTO sections(testCreationTableId, sectionName, noOfQuestions, QuestionLimit) VALUES (?, ?, ?, ?)';
 
-  const updateSectionsQuery = 'INSERT INTO sections (testCreationTableId, sectionName, noOfQuestions, QuestionLimit) VALUES (?, ?, ?, ?)';
-  try {
-    for (const sectionData of sectionsData) {
-      const { sectionName, noOfQuestions, QuestionLimit } = sectionData;
-      await db.query(updateSectionsQuery, [testCreationTableId, sectionName, noOfQuestions, QuestionLimit]);
+      for (const section of selectedsections) {
+        await db.query(insertsectionsQuery, [testCreationTableId, section.sectionName, section.noOfQuestions, section.QuestionLimit]);
+      }
+
+      res.json({ message: 'Course updated successfully' });
+    } else {
+      console.error('Error: selectedsections is not an array');
+      res.status(400).json({ error: 'Invalid data format for selectedsections' });
     }
-
-    console.log('Sections data updated successfully');
-    res.json({ message: 'Sections data updated successfully' });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Internal Server Error' });
   }
 });
-
 
 //______________________end __________________________
 
