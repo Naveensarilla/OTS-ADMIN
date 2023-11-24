@@ -5,7 +5,6 @@ const multer = require('multer');
 const path = require('path');
 const fs = require('fs').promises;
 const exceljs = require('exceljs');
-const mammoth = require('mammoth');
 const app = express();
 const port = 3081;
 
@@ -94,18 +93,12 @@ app.post('/exams', async (req, res) => {
         [insertedExamId, subjectId]
       );
     }
-
-  });
-
-
-
     res.json({ message: 'Exam created successfully', examId: insertedExamId });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Internal Server Error' });
   }
 });
-
   //--------------------------------------------END--------------------------------------------------
   //--------------------------------------------desplaying only selected subjects in table in ecam creation page --------------------------------------------------
  
