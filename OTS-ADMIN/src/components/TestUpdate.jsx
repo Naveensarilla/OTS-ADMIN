@@ -30,10 +30,9 @@ const TestUpdate = () => {
     const updatedValue = type === 'number' ? parseFloat(value) : value;
   
     if (name.startsWith('sectionName') || name.startsWith('noOfQuestions') || name.startsWith('QuestionLimit')) {
-    
-      const index = parseInt(name.match(/\d+/)[0], 10) - 1; 
-      const sectionProperty = name.replace(/\d+/g, ''); 
-      
+      const index = parseInt(name.match(/\d+/)[0], 10) - 1;
+      const sectionProperty = name.replace(/\d+/g, '');
+  
       setTestData((prevData) => {
         const updatedSections = [...prevData.selectedsections];
         updatedSections[index] = {

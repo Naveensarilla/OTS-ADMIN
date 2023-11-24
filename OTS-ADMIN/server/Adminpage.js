@@ -633,58 +633,29 @@ app.use((req, res, next) => {
   next();
 });
 
-app.post('/upload', upload.single('file'), async (req, res) => {
-  try {
-    const file = req.file;
-    const fileName = file.originalname;
-    const fileContent = await fs.readFile(file.path, 'utf-8');
+// app.post('/upload', upload.single('file'), async (req, res) => {
+//   try {
+//     const file = req.file;
+//     const fileName = file.originalname;
+//     const fileContent = await fs.readFile(file.path, 'utf-8');
 
-    const query =
-      'INSERT INTO instruction (examId, instructionHeading, instructionPoint, documentName) VALUES (?, ?, ?, ?)';
-    const values = [req.body.examId, req.body.instructionHeading, fileContent, fileName];
+//     const query =
+//       'INSERT INTO instruction (examId, instructionHeading, instructionPoint, documentName) VALUES (?, ?, ?, ?)';
+//     const values = [req.body.examId, req.body.instructionHeading, fileContent, fileName];
 
-    const result = await db.query(query, values);
-    const instructionId = result[0].insertId;
+//     const result = await db.query(query, values);
+//     const instructionId = result[0].insertId;
 
-    res.json({ success: true, instructionId, message: 'File uploaded successfully.' });
-  } catch (error) {
-    console.error('Error uploading file:', error);
-    res.status(500).json({ success: false, message: 'Failed to upload file.' });
-  }
-});
-
-
-
-app.get('/instructions', async (req, res) => {
-  try {
-    const query =
-      'SELECT i.instructionId, e.examName, i.instructionHeading, i.documentName FROM instruction i JOIN exams e ON i.examId = e.examId';
-    const [rows] = await db.query(query);
-    res.json(rows);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: 'Internal Server Error' });
-  }
-});
+//     res.json({ success: true, instructionId, message: 'File uploaded successfully.' });
+//   } catch (error) {
+//     console.error('Error uploading file:', error);
+//     res.status(500).json({ success: false, message: 'Failed to upload file.' });
+//   }
+// });
 
 
-app.delete('/instructions/:instructionId', async (req, res) => {
-  try {
-    const instructionId = req.params.instructionId;
-    const query = 'DELETE FROM instruction WHERE instructionId = ?';
-    const [result] = await db.query(query, [instructionId]);
 
-    if (result.affectedRows > 0) {
-      res.json({ success: true, message: 'Instruction deleted successfully.' });
-    } else {
-      res.status(404).json({ success: false, message: 'Instruction not found.' });
-    }
-  } catch (error) {
-    console.error('Error deleting instruction:', error);
-    res.status(500).json({ success: false, message: 'Failed to delete instruction.' });
-  }
-});
-
+// kevin ---------
 app.post('/upload', upload.single('file'), async (req, res) => {
   try {
     const { file } = req;
@@ -805,9 +776,7 @@ app.put('/updatepoints/:instructionId/:id', async (req, res) => {
   }
 });
 
-// Assuming you have already established a connection to the database and defined the 'db' object
 
-// Add a new route to handle the deletion
 // its delets evrey this 
 app.delete('/deleteinstruction/:instructionId', async (req, res) => {
   try {
@@ -832,11 +801,7 @@ app.delete('/deleteinstruction/:instructionId', async (req, res) => {
   }
 });
 
-// Assuming you have already established a connection to the database and defined the 'db' object
 
-// Route to handle deletion of a point
-// Assuming you have already established a connection to the database and defined the 'db' object
-// Assuming you have already established a connection to the database and defined the 'db' object
 
 // Add a new route to handle the deletion of a specific point
 app.delete('/deletepoint/:instructionId/:id', async (req, res) => {
@@ -858,6 +823,7 @@ app.delete('/deletepoint/:instructionId/:id', async (req, res) => {
   }
 });
 
+
 app.get('/instructionpointEdit/:instructionId', async (req, res) => {
   const instructionId = req.params.instructionId;
 
@@ -875,37 +841,6 @@ app.get('/instructionpointEdit/:instructionId', async (req, res) => {
     res.status(500).json({ success: false, message: 'Failed to fetch instruction points.', error: error.message });
   }
 });
-
-app.get('/instructionsfeach/:instructionId', async (req, res) => {
-  try {
-    const { instructionId } = req.params;
-
-    // Query the database to get instruction details
-    const query =
-      'SELECT instructionId, examId, instructionHeading, instructionPoint FROM instruction WHERE instructionId = ?';
-    const [result] = await db.query(query, [instructionId]);
-
-    if (result.length > 0) {
-      const instruction = result[0];
-      res.json(instruction);
-    } else {
-      res.status(404).json({ success: false, message: 'Instruction not found.' });
-    }
-  } catch (error) {
-    console.error('Error fetching instruction details:', error);
-    res.status(500).json({ success: false, message: 'Failed to fetch instruction details.' });
-  }
-});
-
-// app.get('/instructionpoint',async(req,res)=>{
-//   try{ const query='SELECT instructionPoint FROM instruction';
-//   const[row] =await db.query(query);
-//   res.json(row);
-//   }catch (error) {
-//     console.error('Error fetching instruction details:', error);
-//     res.status(500).json({ success: false, message: 'Failed to fetch instruction details.' });
-//   }
-// })
 
 
 
