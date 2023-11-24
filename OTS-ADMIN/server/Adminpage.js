@@ -910,53 +910,11 @@ app.put('/update-test/:testCreationTableId', async (req, res) => {
   const testCreationTableId = req.params.testCreationTableId;
 
   const {
-    testName,
-    selectedCourse,
-    selectedtypeOfTest,
-    startDate,
-    startTime,
-    endDate,
-    endTime,
-    duration,
-    totalQuestions,
-    totalMarks,
-    calculator,
-    status,
-  } = req.body;
+    testName,selectedCourse,selectedtypeOfTest,startDate,startTime,endDate,endTime,duration,totalQuestions,totalMarks,calculator,status,} = req.body;
 
-  const updateTestQuery = `
-    UPDATE test_creation_table
-    SET
-      TestName = ?,
-      courseCreationId = ?,
-      courseTypeOfTestId = ?,
-      testStartDate = ?,
-      testEndDate = ?,
-      testStartTime = ?,
-      testEndTime = ?,
-      Duration = ?,
-      TotalQuestions = ?,
-      totalMarks = ?,
-      calculator = ?,
-      status = ?
-    WHERE testCreationTableId = ?;
-  `;
+  const updateTestQuery = ` UPDATE test_creation_table SET TestName = ?,courseCreationId = ?,courseTypeOfTestId = ?,testStartDate = ?,testEndDate = ?,testStartTime = ?,testEndTime = ?Duration = ?,TotalQuestions = ?,totalMarks = ?,calculator = ?,status = ? WHERE testCreationTableId = ?;`;
   try {
-    await db.query(updateTestQuery, [
-      testName,
-      selectedCourse,
-      selectedtypeOfTest,
-      startDate,
-      endDate,
-      startTime,
-      endTime,
-      duration,
-      totalQuestions,
-      totalMarks,
-      calculator,
-      status,
-      testCreationTableId,
-    ]);
+    await db.query(updateTestQuery, [testName,selectedCourse,selectedtypeOfTest,startDate,endDate,startTime,endTime,duration,totalQuestions,totalMarks,calculator,status,testCreationTableId,]);
 
     console.log('Test data updated successfully');
     res.json({ message: 'Test data updated successfully' });
@@ -992,6 +950,103 @@ app.put('/update-sections/:testCreationTableId', async (req, res) => {
 
 
 //______________________end __________________________
+
+//________________________________________Document upload_________________________________
+
+app.get('/tests', async (req, res) => {
+  try {
+      const [rows] = await db.query('SELECT testCreationTableId, TestName FROM test_creation_table');
+      res.json(rows);
+  } catch (error) {
+      console.error('Error fetching test data:', error);
+      res.status(500).send('Internal Server Error');
+  }
+});
+
+app.get('/sections/:testCreationTableId', async (req, res) => {
+  const { testCreationTableId } = req.params;
+  try {
+      const [rows] = await db.query('SELECT testCreationTableId, sectionId, sectionName FROM sections WHERE testCreationTableId = ?', [testCreationTableId]);
+      res.json(rows);
+  } catch (error) {
+      console.error('Error fetching sections data:', error);
+      res.status(500).send('Internal Server Error');
+  }
+});
+
+app.post('/upload', upload.single('document'), async (req, res) => {
+  const docxFilePath = `uploads/${req.file.filename}`;
+  const outputDir = `uploads/${req.file.originalname}_images`;
+
+  if (!fs.existsSync(outputDir)) {
+      fs.mkdirSync(outputDir);
+  }
+
+  try {
+      const result = await mammoth.convertToHtml({ path: docxFilePath });
+      const htmlContent = result.value;
+      const $ = cheerio.load(htmlContent);
+      const textResult = await mammoth.extractRawText({ path: docxFilePath });
+      const textContent = textResult.value;
+      const textSections = textContent.split('\n\n');
+
+      // Get all images in the order they appear in the HTML
+      const images = [];
+      $('img').each(function (i, element) {
+          const base64Data = $(this).attr('src').replace(/^data:image\/\w+;base64,/, '');
+          const imageBuffer = Buffer.from(base64Data, 'base64');
+          images.push(imageBuffer);
+      });
+
+      let j = 0;
+      let Question_id;
+      for (let i = 0; i < images.length; i++) {
+          if (j == 0) {
+              const questionRecord = {
+                  "question_img": images[i],
+                  "testCreationTableId": req.body.testCreationTableId,
+                  "sectionId": req.body.sectionId
+              };
+              console.log(j);
+              Question_id = await insertRecord('questions', questionRecord);
+              j++;
+          } else if (j > 0 && j < 5) {
+              const optionRecord = {
+                  "option_img": images[i],
+                  "question_id": Question_id
+              };
+              console.log(j);
+              await insertRecord('options', optionRecord);
+              j++;
+          } else if (j == 5) {
+              const solutionRecord = {
+                  "solution_img": images[i],
+                  "question_id": Question_id
+              };
+              console.log(j);
+              await insertRecord('solution', solutionRecord);
+              j = 0;
+          }
+      }
+      res.send('Text content and images extracted and saved to the database with the selected topic ID successfully.');
+  } catch (error) {
+      console.error(error);
+      res.status(500).send('Error extracting content and saving it to the database.');
+  }
+});
+
+async function insertRecord(table, record) {
+  try {
+      const [result] = await db.query(`INSERT INTO ${table} SET ?`, record);
+      console.log(`${table} id: ${result.insertId}`);
+      return result.insertId;
+  } catch (err) {
+      console.error(`Error inserting data into ${table}: ${err}`);
+      throw err;
+  }
+}
+
+
 
 
 
