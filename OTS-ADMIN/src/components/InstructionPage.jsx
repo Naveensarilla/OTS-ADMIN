@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import InstructionsDisplay from "./InstructionDisplay";
 import base64 from 'base64-js';
 // import { Link } from "react-router-dom";
 const InstructionPage = () => {
@@ -165,8 +166,9 @@ const InstructionPage = () => {
         </tbody>
       </table>
 
-      <div></div>
+      <div><InstructionsDisplay /></div>
         </div>
+        
     );
 };
 
