@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import base64 from "base64-js";
@@ -21,6 +22,36 @@ const InstructionPage = () => {
         console.error("Error fetching exams:", error);
       }
     };
+
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
+import InstructionsDisplay from "./InstructionDisplay";
+import base64 from 'base64-js';
+// import { Link } from "react-router-dom";
+const InstructionPage = () => {
+    const [instructionHeading, setInstructionHeading] = useState('');
+    const [exams, setExams] = useState([]);
+    const [selectedExam, setSelectedExam] = useState('');
+    const [file, setFile] = useState(null);
+    const [formOpen, setFormOpen] = useState(false);
+    const [instructions,setInstructions] = useState([]);
+    const [instructionPoints, setInstructionPoints] = useState([]);
+    
+    useEffect(() => {
+        const fetchExams = async () => {
+            try {
+                const response = await axios.get('http://localhost:3081/exams');
+                setExams(response.data);
+            } catch (error) {
+                console.error('Error fetching exams:', error);
+            }
+        };
+
+        fetchExams();
+        fetchInstructions();
+        fetchInstructionPoints();
+    }, []);
+
 
     fetchExams();
     fetchInstructions();
@@ -178,6 +209,7 @@ const InstructionPage = () => {
         </tbody>
       </table>
 
+
       <div>
         <InstructionsDisplay />
       </div>
@@ -186,6 +218,12 @@ const InstructionPage = () => {
       <ExcelUpload />
     </div>
   );
+
+      <div><InstructionsDisplay /></div>
+        </div>
+        
+    );
+
 };
 
 function decodeBase64(encodedString) {
