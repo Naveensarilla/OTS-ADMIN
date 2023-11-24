@@ -553,109 +553,14 @@ app.use((req, res, next) => {
 //   }
 // });
 
-// kevin
 
 
-// app.post('/upload', upload.single('file'), async (req, res) => {
-//   try {
-//     const { file } = req;
-//     const fileName = file.originalname;
 
-//     // Read the content of the Word document
-//     const { value: fileContent } = await mammoth.extractRawText({ path: file.path });
 
-//     // Split the text into points based on a specific delimiter (e.g., dot)
-//     const pointsArray = fileContent.split('/').map(point => point.trim());
 
-//     // Filter out empty points
-//     const filteredPointsArray = pointsArray.filter(point => point !== '');
 
-//     // Join the array of points with a separator (e.g., comma)
-//     const pointsText = filteredPointsArray.join(', ');
 
-//     // Insert data into the instruction table
-//     const queryInstruction = 'INSERT INTO instruction (examId, instructionHeading, instructionPoint, documentName) VALUES (?, ?, ?, ?)';
-//     const valuesInstruction = [req.body.examId, req.body.instructionHeading, pointsText, fileName];
-//     const resultInstruction = await db.query(queryInstruction, valuesInstruction);
-//     const instructionId = resultInstruction.insertId;
-
-    
-//     // Insert each point into the instructions_points table with examId from the instruction table
-//     const queryPoints = 'INSERT INTO instructions_points (examId, points, instructionId) VALUES (?, ?, ?)';
-//     for (const point of filteredPointsArray) {
-//       await db.query(queryPoints, [req.body.examId, point, instructionId]);
-//     }
-
-//     // Log data to the console
-//     console.log('File uploaded successfully:', {
-//       success: true,
-//       instructionId,
-//       message: 'File uploaded successfully.',
-//     });
-
-//     // Respond with a simple success message
-//     res.send('File uploaded successfully');
-//   } catch (error) {
-//     // Log error to the console
-//     console.error('Error uploading file:', error);
-
-//     // Respond with a simple error message
-//     res.status(500).send('Failed to upload file.');
-//   }
-// });
-
-// below code is working -----------
-// app.post('/upload', upload.single('file'), async (req, res) => {
-//   try {
-//     const { file } = req;
-//     const fileName = file.originalname;
-
-//     // Read the content of the Word document
-//     const { value: fileContent } = await mammoth.extractRawText({ path: file.path });
-
-//     // Split the text into points based on a specific delimiter (e.g., dot)
-//     const pointsArray = fileContent.split('/').map(point => point.trim());
-
-//     // Filter out empty points
-//     const filteredPointsArray = pointsArray.filter(point => point !== '');
-
-//     // Join the array of points with a separator (e.g., comma)
-//     const pointsText = filteredPointsArray.join(', ');
-
-//     // Insert data into the instruction table
-//     const queryInstruction = 'INSERT INTO instruction (examId, instructionHeading, instructionPoint, documentName) VALUES (?, ?, ?, ?)';
-//     const valuesInstruction = [req.body.examId, req.body.instructionHeading, pointsText, fileName];
-//     const resultInstruction = await db.query(queryInstruction, valuesInstruction);
-//     const instructionId = resultInstruction.insertId;
-
-//     // Log the obtained instructionId
-//     console.log('Obtained instructionId:', instructionId);
-
-//     // Insert each point into the instructions_points table with examId from the instruction table
-//     const queryPoints = 'INSERT INTO instructions_points (examId, points, instructionId) VALUES (?, ?, ?)';
-//     for (const point of filteredPointsArray) {
-//       // Log each point and instructionId before the insertion
-//       console.log('Inserting point:', point, 'with instructionId:', instructionId);
-//       await db.query(queryPoints, [req.body.examId, point, req.body.examId]);
-//     }
-
-//     // Log data to the console
-//     console.log('File uploaded successfully:', {
-//       success: true,
-//       instructionId,
-//       message: 'File uploaded successfully.',
-//     });
-
-//     // Respond with a simple success message
-//     res.send('File uploaded successfully');
-//   } catch (error) {
-//     // Log error to the console
-//     console.error('Error uploading file:', error);
-
-//     // Respond with a simple error message
-//     res.status(500).send('Failed to upload file.');
-//   }
-// });
+// kevin ---------
 app.post('/upload', upload.single('file'), async (req, res) => {
   try {
     const { file } = req;
@@ -776,9 +681,7 @@ app.put('/updatepoints/:instructionId/:id', async (req, res) => {
   }
 });
 
-// Assuming you have already established a connection to the database and defined the 'db' object
 
-// Add a new route to handle the deletion
 // its delets evrey this 
 app.delete('/deleteinstruction/:instructionId', async (req, res) => {
   try {
@@ -803,11 +706,7 @@ app.delete('/deleteinstruction/:instructionId', async (req, res) => {
   }
 });
 
-// Assuming you have already established a connection to the database and defined the 'db' object
 
-// Route to handle deletion of a point
-// Assuming you have already established a connection to the database and defined the 'db' object
-// Assuming you have already established a connection to the database and defined the 'db' object
 
 // Add a new route to handle the deletion of a specific point
 app.delete('/deletepoint/:instructionId/:id', async (req, res) => {
@@ -848,52 +747,7 @@ app.get('/instructionpointEdit/:instructionId', async (req, res) => {
   }
 });
 
-// excela upload
-const XLSX = require('xlsx');
-app.post('/uploadExcel', upload.single('file'), async (req, res) => {
-  try {
-    const workbook = XLSX.read(req.file.buffer, { type: 'buffer' });
-    const worksheet = workbook.getWorksheet(1);
-
-    const tableName = 'your_table'; // Change this to your desired table name
-
-    const columnHeaders = worksheet.getRow(1).values;
-    const rowValues = [];
-
-    worksheet.eachRow((row, rowNumber) => {
-      if (rowNumber > 1 && row.values) {
-        rowValues.push(row.values);
-      }
-    });
-    
-    await insertData(tableName, columnHeaders, rowValues);
-
-    res.send('Data inserted successfully.');
-  } catch (error) {
-    console.error('Error handling file upload:', error.message);
-    res.status(500).send('Failed to upload file.');
-  }
-});
-
-const insertData = async (tableName, columnHeaders, rows) => {
-  const connection = await mysql.createConnection(db);
-
-  for (const rowData of rows) {
-    const insertDataQuery = `INSERT INTO ${tableName} (${columnHeaders.join(', ')}) VALUES (${rowData.map(() => '?').join(', ')})`;
-    try {
-      await connection.execute(insertDataQuery, rowData);
-    } catch (error) {
-      // Log the error, and let it propagate to the caller
-      console.error('Error inserting data:', error.message);
-      throw error;
-    }
-  }
-
-  // Close the connection after all rows have been inserted
-  await connection.end();
-};
-
-
+// END -----------------
 
 
 
@@ -952,47 +806,6 @@ app.delete('/instructions/:instructionId', async (req, res) => {
 });
 
 
-// app.put('/InstructionsUpdate/:instructionId', upload.single('file'), async (req, res) => {
-//   try {
-//     const { instructionId } = req.params;
-//     const { examId, instructionHeading } = req.body;
-//     const file = req.file;
-    
-//     // If a new file is provided, update the document content
-//     let instructionPoint;
-//     const fileContent = file ? await fs.readFile(file.path, 'utf-8') : undefined;
-
-//     if (fileContent) {
-//       instructionPoint = fileContent;
-//     } else {
-//       // Fetch the existing instructionPoint from the database
-//       const fetchQuery = 'SELECT instructionPoint FROM instruction WHERE instructionId = ?';
-//       const [fetchResult] = await db.query(fetchQuery, [instructionId]);
-//       instructionPoint = fetchResult[0].instructionPoint;
-//     }
-
-//     // Construct the SQL query based on whether a new file is provided
-//     const updateQuery = fileContent
-//       ? 'UPDATE instruction SET examId = ?, instructionHeading = ?, documentName = ?, instructionPoint = ? WHERE instructionId = ?'
-//       : 'UPDATE instruction SET examId = ?, instructionHeading = ?, instructionPoint = ? WHERE instructionId = ?';
-
-//     const updateValues = fileContent
-//       ? [examId, instructionHeading, file.originalname, instructionPoint, instructionId]
-//       : [examId, instructionHeading, instructionPoint, instructionId];
-
-//     await db.query(updateQuery, updateValues);
-
-//     // If a new file is provided, delete the old file
-//     if (fileContent) {
-//       await fs.unlink(file.path);
-//     }
-
-//     res.json({ success: true, message: 'Instruction updated successfully.' });
-//   } catch (error) {
-//     console.error('Error updating instruction:', error);
-//     res.status(500).json({ success: false, message: 'Failed to update instruction.' });
-//   }
-// });
 
 
 
