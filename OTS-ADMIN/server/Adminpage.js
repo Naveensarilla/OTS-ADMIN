@@ -4,6 +4,8 @@ const cors = require('cors');
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs').promises;
+const exceljs = require('exceljs');
+const mammoth = require('mammoth');
 const app = express();
 const port = 3081;
 
@@ -552,7 +554,7 @@ app.use((req, res, next) => {
 // });
 
 // kevin
-const mammoth = require('mammoth');
+
 
 // app.post('/upload', upload.single('file'), async (req, res) => {
 //   try {
@@ -828,27 +830,6 @@ app.delete('/deletepoint/:instructionId/:id', async (req, res) => {
 });
 
 
-// app.get('/instructionpoints/:instructionId', async (req, res) => {
-//   try {
-//     // Extract examId from request parameters
-//     const { instructionId } = req.params;
-
-//     // Select all points for the specified examId from the instructions_points table
-//     const query = 'SELECT * FROM instructions_points WHERE instructionId = ?';
-//     const [rows] = await db.query(query, [instructionId]);
-
-//     // Send the fetched data in the response
-//     res.json({ success: true, points: rows });
-//   } catch (error) {
-//     console.error('Error fetching instruction points:', error);
-
-//     // Send a consistent error response
-//     res.status(500).json({ success: false, message: 'Failed to fetch instruction points.', error: error.message });
-//   }
-// });
-
-
-
 app.get('/instructionpointEdit/:instructionId', async (req, res) => {
   const instructionId = req.params.instructionId;
 
@@ -866,6 +847,51 @@ app.get('/instructionpointEdit/:instructionId', async (req, res) => {
     res.status(500).json({ success: false, message: 'Failed to fetch instruction points.', error: error.message });
   }
 });
+
+// excela upload
+const XLSX = require('xlsx');
+app.post('/uploadExcel', upload.single('file'), async (req, res) => {
+  try {
+    const workbook = XLSX.read(req.file.buffer, { type: 'buffer' });
+    const worksheet = workbook.getWorksheet(1);
+
+    const tableName = 'your_table'; // Change this to your desired table name
+
+    const columnHeaders = worksheet.getRow(1).values;
+    const rowValues = [];
+
+    worksheet.eachRow((row, rowNumber) => {
+      if (rowNumber > 1 && row.values) {
+        rowValues.push(row.values);
+      }
+    });
+    
+    await insertData(tableName, columnHeaders, rowValues);
+
+    res.send('Data inserted successfully.');
+  } catch (error) {
+    console.error('Error handling file upload:', error.message);
+    res.status(500).send('Failed to upload file.');
+  }
+});
+
+const insertData = async (tableName, columnHeaders, rows) => {
+  const connection = await mysql.createConnection(db);
+
+  for (const rowData of rows) {
+    const insertDataQuery = `INSERT INTO ${tableName} (${columnHeaders.join(', ')}) VALUES (${rowData.map(() => '?').join(', ')})`;
+    try {
+      await connection.execute(insertDataQuery, rowData);
+    } catch (error) {
+      // Log the error, and let it propagate to the caller
+      console.error('Error inserting data:', error.message);
+      throw error;
+    }
+  }
+
+  // Close the connection after all rows have been inserted
+  await connection.end();
+};
 
 
 

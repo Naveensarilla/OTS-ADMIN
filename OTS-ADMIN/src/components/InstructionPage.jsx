@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import base64 from "base64-js";
 import InstructionsDisplay from "./instructions/InstructionsDisplay ";
+import { ExcelUpload } from "./instructions/Excel/ExcelUpload";
 // import { Link } from "react-router-dom";
 const InstructionPage = () => {
   const [instructionHeading, setInstructionHeading] = useState("");
@@ -180,6 +181,9 @@ const InstructionPage = () => {
       <div>
         <InstructionsDisplay />
       </div>
+      {/* excel */}
+
+      <ExcelUpload />
     </div>
   );
 };
