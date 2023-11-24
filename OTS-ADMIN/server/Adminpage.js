@@ -632,29 +632,6 @@ app.use((req, res, next) => {
   res.setHeader('Content-Type', 'text/html; charset=utf-8');
   next();
 });
-
-// app.post('/upload', upload.single('file'), async (req, res) => {
-//   try {
-//     const file = req.file;
-//     const fileName = file.originalname;
-//     const fileContent = await fs.readFile(file.path, 'utf-8');
-
-//     const query =
-//       'INSERT INTO instruction (examId, instructionHeading, instructionPoint, documentName) VALUES (?, ?, ?, ?)';
-//     const values = [req.body.examId, req.body.instructionHeading, fileContent, fileName];
-
-//     const result = await db.query(query, values);
-//     const instructionId = result[0].insertId;
-
-//     res.json({ success: true, instructionId, message: 'File uploaded successfully.' });
-//   } catch (error) {
-//     console.error('Error uploading file:', error);
-//     res.status(500).json({ success: false, message: 'Failed to upload file.' });
-//   }
-// });
-
-
-
 // kevin ---------
 app.post('/upload', upload.single('file'), async (req, res) => {
   try {
