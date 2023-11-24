@@ -1,0 +1,53 @@
+.Instruction_container {
+  border-top: 1px solid;
+}
+.Instruction_Dis {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding-left: 3rem;
+  gap: 1rem;
+  padding-top: 1rem;
+}
+.Instruction_Dis ul {
+  display: flex;
+  gap: 1rem;
+}
+.Instruction_Dis ul li {
+  list-style: disc;
+  font-weight: bolder;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+.Instruction_btn {
+  background: rgb(101, 179, 253);
+  padding: 2px 10px;
+  border-radius: 5px;
+  text-transform: uppercase;
+}
+
+.Instruction_btn:hover {
+  background: rgb(141, 166, 190);
+}
+
+.Instruction_btn a {
+  color: #fff;
+  font-weight: bolder;
+  cursor: pointer;
+}
+
+.InstDelete {
+  padding: 5px 10px;
+  border-radius: 5px;
+  font-weight: bolder;
+  text-transform: uppercase;
+  border: none;
+  cursor: pointer;
+}
+
+.InstDelete1 {
+  background: rgb(255, 190, 190);
+}
+.InstDelete2 {
+  background: rgb(253, 89, 130);
+}
