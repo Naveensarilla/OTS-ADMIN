@@ -14,7 +14,7 @@ const Coureseupdate = () => {
   const [exams, setExams] = useState([]);
   const [selectedExam, setSelectedExam] = useState("");
   const [typeOfTests, setTypeOfTests] = useState([]);
-  const [selectedTypeOfTests, setSelectedTypeOfTests] = useState("");
+  const [selectedTypeOfTest, setSelectedTypeOfTest] = useState("");
   const [subjects, setSubjects] = useState([]);
   const [selectedSubjects, setSelectedSubjects] = useState([]);
   const [questionTypes, setQuestionTypes] = useState([]);
@@ -26,14 +26,13 @@ const Coureseupdate = () => {
         const response = await axios.get(
           `http://localhost:3081/courseupdate/${courseCreationId}`
         );
-        
         const examsResponse = await axios.get(
           "http://localhost:3081/courese-exams"
         );
-        // const typeOfTestsResponse = await axios.get(
-        //   "http://localhost:3081/type_of_tests"
-        // );
-        // setTypeOfTests(typeOfTestsResponse.data);
+        const typeOfTestsResponse = await axios.get(
+          "http://localhost:3081/type_of_tests"
+        );
+        setTypeOfTests(typeOfTestsResponse.data);
         const courseData = response.data[0];
         setExams(examsResponse.data);
         if (courseData) {
@@ -41,11 +40,11 @@ const Coureseupdate = () => {
           setSelectedExam(
             courseData.examId !== undefined ? courseData.examId.toString() : ""
           );
-          // setSelectedTypeOfTest(
-          //   courseData.typeOfTestId !== undefined
-          //     ? courseData.typeOfTestId.toString()
-          //     : ""
-          // );
+          setSelectedTypeOfTest(
+            courseData.typeOfTestId !== undefined
+              ? courseData.typeOfTestId.toString()
+              : ""
+          );
           setCourseStartDate(formatDate(courseData.courseStartDate) || "");
           setCourseEndDate(formatDate(courseData.courseEndDate) || "");
           setCost(
@@ -135,6 +134,7 @@ const Coureseupdate = () => {
         console.error("Error fetching selected question types:", error);
       }
     };
+
     if (courseCreationId) {
       fetchSelectedQuestionTypes();
     }
@@ -152,54 +152,6 @@ const Coureseupdate = () => {
 
     setSelectedQuestionTypes(updatedSelectedTypes);
   };
-//type of test 
-  useEffect(() => {
-    const fetchtypeOfTests = async () => {
-      try {
-        const response = await axios.get(
-          "http://localhost:3081/type_of_tests"
-        );
-        setTypeOfTests(response.data);
-      } catch (error) {
-        console.error("Error fetching  type of test:", error);
-      }
-    };
-
-    fetchtypeOfTests();
-  }, []);
-
-  useEffect(() => {
-    const fetchSelectedtypeOftests = async () => {
-      try {
-        const response = await axios.get(
-          `http://localhost:3081/course-type-of-test/${courseCreationId}`
-        );
-        const selectedTypeOfTests = response.data.map((typeOfTest) => typeOfTest.typeOfTestId);
-        setSelectedTypeOfTests(selectedTypeOfTests);
-      } catch (error) {
-        console.error("Error fetching selected question types:", error);
-      }
-    };
-    if (courseCreationId) {
-      fetchSelectedtypeOftests();
-    }
-  }, [courseCreationId]);
-
-  const handletypeOfTestsCheckboxChange = (typeOfTestId) => {
-    const updatedSelectedTypeOfTests = [...selectedTypeOfTests];
-    const index = updatedSelectedTypeOfTests.indexOf(typeOfTestId);
-
-    if (index === -1) {
-      updatedSelectedTypeOfTests.push(typeOfTestId);
-    } else {
-      updatedSelectedTypeOfTests.splice(index, 1);
-    }
-
-    setSelectedTypeOfTests(updatedSelectedTypeOfTests);
-  };
-
-
-
 
   const handleSubjectCheckboxChange = (subjectId) => {
     const updatedSubjects = [...selectedSubjects];
@@ -248,7 +200,7 @@ const Coureseupdate = () => {
         `http://localhost:3081/update-course/${courseCreationId}`,
         {
           courseName,
-          selectedTypeOfTests,
+          selectedTypeOfTest,
           selectedExam,
           selectedSubjects,
           selectedQuestionTypes,
@@ -280,25 +232,18 @@ const Coureseupdate = () => {
       </div>
       <div className="courseupdate_frominput_container">
         <label>Select Type of Test:</label>
-        <div className="courseupdate_frominput_container_checkbox" >
-                  
-      {typeOfTests.map((typeOfTest) => (
-          <div key={typeOfTest.typeOfTestId}>
-            <input
-              type="checkbox"
-              id={`typeOfTestes-${typeOfTest.typeOfTestId}`}
-              value={typeOfTest.typeOfTestId}
-              checked={selectedTypeOfTests.includes(typeOfTest.typeOfTestId)}
-              onChange={() =>
-                handletypeOfTestsCheckboxChange(typeOfTest.typeOfTestId)
-              }
-            />
-            <label htmlFor={`question-type-${typeOfTest.typeOfTestId}`}>
-              {typeOfTest.typeOfTestName}
-            </label>
-          </div>
-        ))}
-        </div>
+        <select
+          name="typeOfTestId"
+          value={selectedTypeOfTest}
+          onChange={(e) => setSelectedTypeOfTest(e.target.value)}
+        >
+          <option value="">Select Type of Test</option>
+          {typeOfTests.map((type) => (
+            <option key={type.typeOfTestId} value={type.typeOfTestId}>
+              {type.typeOfTestName}
+            </option>
+          ))}
+        </select>
       </div>
       <div className="courseupdate_frominput_container">
       <label>
