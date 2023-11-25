@@ -64,7 +64,7 @@ const GettinggInstructions = () => {
               <button className="InstDelete InstDelete1"
                 onClick={() => handleDeletePoint(item.instructionId, item.id)}
               >
-             <i class="fa-solid fa-delete-left"></i>
+             <i class="fa-solid fa-trash"></i>
               </button>
         </div>
       ))}
