@@ -964,11 +964,9 @@ app.get('/testupdate/:testCreationTableId', async (req, res) => {
 });
 
 
-
-
-app.put('/test-update/:testCreationTableId', async (req, res) => { 
+app.put('/test-update/:testCreationTableId', async (req, res) => {
   const testCreationTableId = req.params.testCreationTableId;
-  const { 
+  const {
     TestName,
     selectedCourse,
     selectedTypeOfTest,
@@ -981,9 +979,18 @@ app.put('/test-update/:testCreationTableId', async (req, res) => {
     totalMarks,
     calculator,
     status,
+    sectionId,
+    sectionName,
+    noOfQuestions,
+    QuestionLimit,
   } = req.body;
 
-  const updateQuery = `UPDATE test_creation_table SET TestName=?,courseCreationId=?,courseTypeOfTestId=?,testStartDate=?,testEndDate=?,testStartTime=?,testEndTime=?,Duration=?,TotalQuestions=?,totalMarks=?,calculator=?,status=? WHERE testCreationTableId=?`;
+  const updateQuery = `UPDATE test_creation_table 
+                       SET TestName=?, courseCreationId=?, courseTypeOfTestId=?, 
+                           testStartDate=?, testEndDate=?, testStartTime=?, 
+                           testEndTime=?, Duration=?, TotalQuestions=?, 
+                           totalMarks=?, calculator=?, status=?
+                       WHERE testCreationTableId=?`;
 
   try {
     await db.query(updateQuery, [
@@ -1002,29 +1009,28 @@ app.put('/test-update/:testCreationTableId', async (req, res) => {
       testCreationTableId,
     ]);
 
-    const selectedsections = req.body.selectedsections;
+    // Update section
+    const updateSectionQuery = `UPDATE sections 
+                                SET sectionName=?, noOfQuestions=?, QuestionLimit=? 
+                                WHERE testCreationTableId=? AND sectionId=?`;
 
-    // Check if selectedsections is an array before attempting to iterate over it
-    if (Array.isArray(selectedsections)) {
-      const deletesectionsQuery = 'DELETE FROM sections WHERE testCreationTableId=?';
-      await db.query(deletesectionsQuery, [testCreationTableId]);
+    await db.query(updateSectionQuery, [
+      sectionName,
+      noOfQuestions,
+      QuestionLimit,
+      testCreationTableId,
+      sectionId,
+    ]);
 
-      const insertsectionsQuery = 'INSERT INTO sections(testCreationTableId, sectionName, noOfQuestions, QuestionLimit) VALUES (?, ?, ?, ?)';
-
-      for (const section of selectedsections) {
-        await db.query(insertsectionsQuery, [testCreationTableId, section.sectionName, section.noOfQuestions, section.QuestionLimit]);
-      }
-
-      res.json({ message: 'Course updated successfully' });
-    } else {
-      console.error('Error: selectedsections is not an array');
-      res.status(400).json({ error: 'Invalid data format for selectedsections' });
-    }
+    res.json({ message: 'Test and section updated successfully' });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Internal Server Error' });
   }
 });
+
+
+
 
 //______________________end __________________________
 
