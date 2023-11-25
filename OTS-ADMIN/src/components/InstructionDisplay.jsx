@@ -7,6 +7,24 @@ const InstructionsDisplay = () => {
   const [points, setPoints] = useState([]);
   const { instructionId } = useParams();
 
+  const [instruction, instructionPoints] = useState([]);
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await axios.get(
+          `http://localhost:3081/instructionData`
+        );
+        instructionPoints(response.data.points);
+        console.log("Response:", response.data);
+        console.log("instructionId:", instructionId);
+      } catch (error) {
+        console.error("Error fetching data:", error.message);
+      }
+    };
+
+    fetchData();
+  }, [instructionId]);
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -52,11 +70,40 @@ const InstructionsDisplay = () => {
 
   return (
     <div className="Instruction_container">
+
+      <table>
+        <thead>
+        <tr>
+          <th>instructionId</th>
+          <th>Exam </th>
+  
+          <th>Document Name</th>
+          <th>examId</th>
+          <th>Instruction</th>
+        </tr>
+        </thead>
+      <tbody>
+      {instruction.map((ite, inde) => (
+      <tr  key={inde}>
+        <td>{ite.instructionId}</td>
+        <td>{ite.instructionHeading}</td>
+        <td>{ite.documentName}</td>
+        <td>{ite.examId}</td>
+        <td> <Link
+                to={`/Instruction/editIns/${ite.instructionId}`}
+              >
+             open
+              </Link></td>
+        </tr>
+         ))}
+      </tbody>
+
+      </table>
+
       <div className="Instruction_Dis">
-        {points.map((item, index) => (
+        {/* {points.map((item, index) => (
           <ul key={index}>
             <li>{item.points}</li>
-            {/* Correct the order of parameters in the Link */}
             <div className="Instruction_btn">
               <Link
                 to={`/InstructionPage/editIns/${item.instructionId}/${item.id}`}
@@ -78,7 +125,7 @@ const InstructionsDisplay = () => {
               </button>
             </div>
           </ul>
-        ))}
+        ))} */}
       </div>
     </div>
   );
