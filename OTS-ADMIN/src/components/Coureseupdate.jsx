@@ -1,457 +1,375 @@
-import React, { useState, useEffect } from "react";
-import axios from "axios";
-import { useParams, useNavigate } from "react-router-dom";
+import React, { useState, useEffect } from 'react';
+import { useParams } from 'react-router-dom';
+import moment from 'moment';
 
-const Coureseupdate = () => {
-  const { courseCreationId } = useParams();
-  const navigate = useNavigate();
-  const [courseName, setCourseName] = useState("");
-  const [courseStartDate, setCourseStartDate] = useState("");
-  const [courseEndDate, setCourseEndDate] = useState("");
-  const [cost, setCost] = useState("");
-  const [discount, setDiscount] = useState("");
-  const [totalPrice, setTotalPrice] = useState("");
-  const [exams, setExams] = useState([]);
-  const [selectedExam, setSelectedExam] = useState("");
+const TestUpdate = () => {
+  const { testCreationTableId } = useParams();
+  const [courses, setCourses] = useState([]);
   const [typeOfTests, setTypeOfTests] = useState([]);
-  const [selectedTypeOfTests, setSelectedTypeOfTests] = useState("");
-  const [subjects, setSubjects] = useState([]);
-  const [selectedSubjects, setSelectedSubjects] = useState([]);
-  const [questionTypes, setQuestionTypes] = useState([]);
-  const [selectedQuestionTypes, setSelectedQuestionTypes] = useState([]);
+  const [sections, setSections] = useState([]);
+  const [testData, setTestData] = useState({
+    TestName: '',
+    selectedCourse: '',
+    selectedTypeOfTest: '',
+    testStartDate: '',
+    testEndDate: '',
+    testStartTime: '',
+    testEndTime: '',
+    Duration: '',
+    TotalQuestions: '',
+    totalMarks: '',
+    sectionName: '',
+    noOfQuestions: '',
+    QuestionLimit: '',
+    calculator: 'No',
+    status: 'Inactive',
+    selectedsections: [],
+  });
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await axios.get(
-          `http://localhost:3081/courseupdate/${courseCreationId}`
-        );
-        
-        const examsResponse = await axios.get(
-          "http://localhost:3081/courese-exams"
-        );
-        // const typeOfTestsResponse = await axios.get(
-        //   "http://localhost:3081/type_of_tests"
-        // );
-        // setTypeOfTests(typeOfTestsResponse.data);
-        const courseData = response.data[0];
-        setExams(examsResponse.data);
-        if (courseData) {
-          setCourseName(courseData.courseName || "");
-          setSelectedExam(
-            courseData.examId !== undefined ? courseData.examId.toString() : ""
-          );
-          // setSelectedTypeOfTest(
-          //   courseData.typeOfTestId !== undefined
-          //     ? courseData.typeOfTestId.toString()
-          //     : ""
-          // );
-          setCourseStartDate(formatDate(courseData.courseStartDate) || "");
-          setCourseEndDate(formatDate(courseData.courseEndDate) || "");
-          setCost(
-            courseData.cost !== undefined ? courseData.cost.toString() : ""
-          );
-          setDiscount(
-            courseData.Discount !== undefined
-              ? courseData.Discount.toString()
-              : ""
-          );
-          setTotalPrice(
-            courseData.totalPrice !== undefined
-              ? courseData.totalPrice.toString()
-              : ""
-          );
-        } else {
-          console.error("Course data not found.");
-        }
-      } catch (error) {
-        console.error("Error fetching course data:", error);
-      }
-    };
+  const handleChange = (e) => {
+    const { name, value, type } = e.target;
+    const updatedValue = type === 'number' ? parseFloat(value) : value;
 
-    fetchData();
-  }, [courseCreationId]);
+    if (
+      name.startsWith('sectionName') ||
+      name.startsWith('noOfQuestions') ||
+      name.startsWith('QuestionLimit')
+    ) {
+      const index = parseInt(name.match(/\d+/)[0], 10) - 1;
+      const sectionProperty = name.replace(/\d+/g, '');
 
-  useEffect(() => {
-    const fetchSubjects = async () => {
-      try {
-        if (selectedExam) {
-          const response = await axios.get(
-            `http://localhost:3081/courese-exam-subjects/${selectedExam}/subjects`
-          );
-          setSubjects(response.data);
-        } else {
-          setSubjects([]);
-        }
-      } catch (error) {
-        console.error("Error fetching subjects:", error);
-      }
-    };
-    fetchSubjects();
-  }, [selectedExam]);
-
-  useEffect(() => {
-    const fetchSelectedSubjects = async () => {
-      try {
-        const response = await axios.get(
-          `http://localhost:3081/course_subjects/${courseCreationId}`
-        );
-        const selectedSubjectIds = response.data.map(
-          (subject) => subject.subjectId
-        );
-        setSelectedSubjects(selectedSubjectIds);
-      } catch (error) {
-        console.error("Error fetching selected subjects:", error);
-      }
-    };
-
-    fetchSelectedSubjects();
-  }, [courseCreationId]);
-
-  useEffect(() => {
-    const fetchQuestionTypes = async () => {
-      try {
-        const response = await axios.get(
-          "http://localhost:3081/question_types"
-        );
-        setQuestionTypes(response.data);
-      } catch (error) {
-        console.error("Error fetching question types:", error);
-      }
-    };
-
-    fetchQuestionTypes();
-  }, []);
-
-  useEffect(() => {
-    const fetchSelectedQuestionTypes = async () => {
-      try {
-        const response = await axios.get(
-          `http://localhost:3081/course-type-of-questions/${courseCreationId}`
-        );
-        const selectedTypes = response.data.map((type) => type.quesionTypeId);
-        setSelectedQuestionTypes(selectedTypes);
-      } catch (error) {
-        console.error("Error fetching selected question types:", error);
-      }
-    };
-    if (courseCreationId) {
-      fetchSelectedQuestionTypes();
-    }
-  }, [courseCreationId]);
-
-  const handleQuestionTypeCheckboxChange = (quesionTypeId) => {
-    const updatedSelectedTypes = [...selectedQuestionTypes];
-    const index = updatedSelectedTypes.indexOf(quesionTypeId);
-
-    if (index === -1) {
-      updatedSelectedTypes.push(quesionTypeId);
+      setTestData((prevData) => {
+        const updatedSections = [...prevData.selectedsections];
+        updatedSections[index] = {
+          ...updatedSections[index],
+          [sectionProperty]: updatedValue,
+        };
+        return {
+          ...prevData,
+          selectedsections: updatedSections,
+        };
+      });
     } else {
-      updatedSelectedTypes.splice(index, 1);
+      // If it's not a section input, update other properties normally
+      setTestData((prevData) => ({
+        ...prevData,
+        [name]: updatedValue,
+      }));
     }
-
-    setSelectedQuestionTypes(updatedSelectedTypes);
-  };
-//type of test 
-  useEffect(() => {
-    const fetchtypeOfTests = async () => {
-      try {
-        const response = await axios.get(
-          "http://localhost:3081/type_of_tests"
-        );
-        setTypeOfTests(response.data);
-      } catch (error) {
-        console.error("Error fetching  type of test:", error);
-      }
-    };
-
-    fetchtypeOfTests();
-  }, []);
-
-  useEffect(() => {
-    const fetchSelectedtypeOftests = async () => {
-      try {
-        const response = await axios.get(
-          `http://localhost:3081/course-type-of-test/${courseCreationId}`
-        );
-        const selectedTypeOfTests = response.data.map((typeOfTest) => typeOfTest.typeOfTestId);
-        setSelectedTypeOfTests(selectedTypeOfTests);
-      } catch (error) {
-        console.error("Error fetching selected question types:", error);
-      }
-    };
-    if (courseCreationId) {
-      fetchSelectedtypeOftests();
-    }
-  }, [courseCreationId]);
-
-  const handletypeOfTestsCheckboxChange = (typeOfTestId) => {
-    const updatedSelectedTypeOfTests = [...selectedTypeOfTests];
-    const index = updatedSelectedTypeOfTests.indexOf(typeOfTestId);
-
-    if (index === -1) {
-      updatedSelectedTypeOfTests.push(typeOfTestId);
-    } else {
-      updatedSelectedTypeOfTests.splice(index, 1);
-    }
-
-    setSelectedTypeOfTests(updatedSelectedTypeOfTests);
   };
 
+  const handleSectionChange = (e, index, property) => {
+    const { value } = e.target;
 
+    setTestData((prevData) => {
+      const updatedSections = [...prevData.selectedsections];
+      updatedSections[index] = {
+        ...updatedSections[index],
+        [property]: value,
+      };
 
+      return {
+        ...prevData,
+        selectedsections: updatedSections,
+      };
+    });
+  };
 
-  const handleSubjectCheckboxChange = (subjectId) => {
-    const updatedSubjects = [...selectedSubjects];
-    const index = updatedSubjects.indexOf(subjectId);
-
-    if (index === -1) {
-      updatedSubjects.push(subjectId);
-    } else {
-      updatedSubjects.splice(index, 1);
+  function formatTime(dateTimeString) {
+    if (dateTimeString === 'Invalid Time') {
+      return '00:00'; // or any other default time you prefer
     }
 
-    setSelectedSubjects(updatedSubjects);
-  };
+    const formattedTime = moment(dateTimeString, 'HH:mm:ss.SSSSSS').format('HH:mm:ss');
+    return formattedTime !== 'Invalid date' ? formattedTime : 'Invalid Time';
+  }
 
   const formatDate = (dateString) => {
     if (!dateString) {
-      return "";
+      return '';
     }
     const date = new Date(dateString);
     const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, "0");
-    const day = String(date.getDate()).padStart(2, "0");
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
 
     return `${year}-${month}-${day}`;
   };
 
-  const handleCalculateTotal = () => {
-    // Assuming cost and discount are numbers
-    const costValue = parseFloat(cost);
-    const discountPercentage = parseFloat(discount);
+  useEffect(() => {
+    // Fetch courses from the API
+    fetch('http://localhost:3081/testcourses')
+      .then((response) => response.json())
+      .then((data) => setCourses(data))
+      .catch((error) => console.error('Error fetching courses:', error));
+  }, []);
 
-    if (!isNaN(costValue) && !isNaN(discountPercentage)) {
-      const discountAmount = (costValue * discountPercentage) / 100;
-      const calculatedTotal = costValue - discountAmount;
-      setTotalPrice(calculatedTotal.toFixed(2));
-    } else {
-      setTotalPrice("");
+  useEffect(() => {
+    // Fetch type of tests from the API based on the selected course
+    if (testData.selectedCourse) {
+      fetch(`http://localhost:3081/course-typeoftests/${testData.selectedCourse}`)
+        .then((response) => response.json())
+        .then((data) => setTypeOfTests(data))
+        .catch((error) => console.error('Error fetching type of tests:', error));
     }
-  };
+  }, [testData.selectedCourse]);
+
+  useEffect(() => {
+    // Update sections state when selectedsections changes
+    setSections(testData.selectedsections);
+  }, [testData.selectedsections]);
+
+  useEffect(() => {
+    // Fetch test data to pre-fill the form
+    fetch(`http://localhost:3081/testupdate/${testCreationTableId}`)
+      .then((response) => response.json())
+      .then((data) => {
+        // Populate the testData state with fetched data
+        setTestData({
+          ...data,
+          selectedCourse: data.courseCreationId,
+          selectedTypeOfTest: data.courseTypeOfTestId,
+          selectedsections: [
+            {
+              sectionName: data.sectionName,
+              noOfQuestions: data.noOfQuestions,
+              QuestionLimit: data.QuestionLimit,
+            },
+          ],
+        });
+        const sectionsData = [
+          {
+            sectionName: data.sectionName,
+            noOfQuestions: data.noOfQuestions,
+            QuestionLimit: data.QuestionLimit,
+          },
+        ];
+        setSections(sectionsData);
+      })
+      .catch((error) => console.error('Error fetching test data:', error));
+  }, [testCreationTableId]);
+  console.log('Sections:', sections);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    // Ensure that selectedsections is an array
+    if (!Array.isArray(testData.selectedsections)) {
+      console.error('Error: selectedsections is not an array');
+      return;
+    }
+
     try {
-      await axios.put(
-        `http://localhost:3081/update-course/${courseCreationId}`,
-        {
-          courseName,
-          selectedTypeOfTests,
-          selectedExam,
-          selectedSubjects,
-          selectedQuestionTypes,
-          courseStartDate,
-          courseEndDate,
-          cost,
-          discount,
-          totalPrice,
-        }
-      );
-      alert("Course updated successfully");
-      navigate("/Coursecreation");
+      // Map the selectedsections array to the required format
+      const sectionData = testData.selectedsections.map((section) => ({
+        sectionName: section.sectionName,
+        noOfQuestions: section.noOfQuestions,
+        QuestionLimit: section.QuestionLimit,
+      }));
+
+      const response = await fetch(`http://localhost:3081/test-update/${testCreationTableId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          TestName: testData.TestName,
+          selectedCourse: testData.selectedCourse,
+          selectedTypeOfTest: testData.selectedTypeOfTest,
+          testStartDate: testData.testStartDate,
+          testEndDate: testData.testEndDate,
+          testStartTime: testData.testStartTime,
+          testEndTime: testData.testEndTime,
+          Duration: testData.Duration,
+          TotalQuestions: testData.TotalQuestions,
+          totalMarks: testData.totalMarks,
+          calculator: testData.calculator,
+          status: testData.status,
+          selectedsections: sectionData, // Pass the formatted sectionData
+        }),
+      });
+
+      const data = await response.json();
+      console.log(data);
     } catch (error) {
-      console.error("Error updating course:", error);
-      alert("Failed to update course. Please try again.");
+      console.error('Error sending request:', error);
     }
   };
 
   return (
-    <div className="couseupdatepage">
+    <div>
+      <h2>Test Update Form</h2>
       <form onSubmit={handleSubmit}>
-      <div className="courseupdate_frominput_container">
-        <label> Course Name:</label>
-        <input
-          type="text"
-          value={courseName}
-          onChange={(e) => setCourseName(e.target.value)}
-        />
-      </div>
-      <div className="courseupdate_frominput_container">
-        <label>Select Type of Test:</label>
-        <div className="courseupdate_frominput_container_checkbox" >
-                  
-      {typeOfTests.map((typeOfTest) => (
-          <div key={typeOfTest.typeOfTestId}>
-            <input
-              type="checkbox"
-              id={`typeOfTestes-${typeOfTest.typeOfTestId}`}
-              value={typeOfTest.typeOfTestId}
-              checked={selectedTypeOfTests.includes(typeOfTest.typeOfTestId)}
-              onChange={() =>
-                handletypeOfTestsCheckboxChange(typeOfTest.typeOfTestId)
-              }
-            />
-            <label htmlFor={`question-type-${typeOfTest.typeOfTestId}`}>
-              {typeOfTest.typeOfTestName}
-            </label>
-          </div>
-        ))}
-        </div>
-      </div>
-      <div className="courseupdate_frominput_container">
-      <label>
-        Select Exam:
-       
-      </label>
-      <select
-          name="examId"
-          value={selectedExam}
-          onChange={(e) => setSelectedExam(e.target.value)}
-        >
-          <option value="">Select Exam</option>
-          {exams.map((exam) => (
-            <option key={exam.examId} value={exam.examId}>
-              {exam.examName}
-            </option>
-          ))}
-        </select>
-      </div>
-     
-      <div className="courseupdate_frominput_container">
-      <label>
-        Select Subjects:
-      
-      </label>
+        <label>
+          Test Name:
+          <input type="text" name="TestName" value={testData.TestName} onChange={handleChange} />
+        </label>
+        <br />
+        <label>
+          Select Course:
+          <select name="selectedCourse" value={testData.selectedCourse} onChange={handleChange}>
+            <option value="">Select a Course</option>
+            {courses.map((course) => (
+              <option key={course.courseCreationId} value={course.courseCreationId}>
+                {course.courseName}
+              </option>
+            ))}
+          </select>
+        </label>
+        <br />
 
+        <label>
+          Type of
 
-      <div className="courseupdate_frominput_container_checkbox" >
+ Tests:
+          <select
+            name="selectedTypeOfTest"
+            value={testData.selectedTypeOfTest}
+            onChange={handleChange}
+          >
+            <option value="">Select a Type of Test</option>
+            {typeOfTests.map((typeOfTest) => (
+              <option key={typeOfTest.TypeOfTestId} value={typeOfTest.TypeOfTestId}>
+                {typeOfTest.TypeOfTestName}
+              </option>
+            ))}
+          </select>
+        </label>
+        <br />
+        <label>
+          Test Start Date:
+          <input
+            type="date"
+            name="testStartDate"
+            value={formatDate(testData.testStartDate)}
+            onChange={handleChange}
+          />
+        </label>
+        <br />
 
-    
-      {subjects.map((subject) => (
-          <div  key={subject.subjectId}>
-            <input
-              type="checkbox"
-              id={`subject-${subject.subjectId}`}
-              value={subject.subjectId}
-              checked={selectedSubjects.includes(subject.subjectId)}
-              onChange={() => handleSubjectCheckboxChange(subject.subjectId)}
-            />
-            <label htmlFor={`subject-${subject.subjectId}`}>
-              {subject.subjectName}
-            </label>
-          </div>
-        ))}
-          </div>
-     </div>
+        <label>
+          Test End Date:
+          <input
+            type="date"
+            name="testEndDate"
+            value={formatDate(testData.testEndDate)}
+            onChange={handleChange}
+          />
+        </label>
+        <br />
 
-      
-     <div className="courseupdate_frominput_container">
-     <label>
-        Select Type of Questions:
-      
-      </label>
+        <label>
+          Start Time:
+          <input
+            type="time"
+            name="testStartTime"
+            value={formatTime(testData.testStartTime)}
+            onChange={handleChange}
+          />
+        </label>
+        <br />
 
-      <div className="courseupdate_frominput_container_checkbox" >
-                  
-      {questionTypes.map((type) => (
-          <div key={type.quesionTypeId}>
-            <input
-              type="checkbox"
-              id={`question-type-${type.quesionTypeId}`}
-              value={type.quesionTypeId}
-              checked={selectedQuestionTypes.includes(type.quesionTypeId)}
-              onChange={() =>
-                handleQuestionTypeCheckboxChange(type.quesionTypeId)
-              }
-            />
-            <label htmlFor={`question-type-${type.quesionTypeId}`}>
-              {type.typeofQuestion}
-            </label>
-          </div>
-        ))}
-        </div>
-      </div>
-   
-      <div className="courseupdate_frominput_container">
-      <label>
-        Course Start Date:
-       
-      </label>
-      <input
-          type="date"
-          value={formatDate(courseStartDate)}
-          onChange={(e) => setCourseStartDate(e.target.value)}
+        <label>
+          End Time:
+          <input
+            type="time"
+            name="testEndTime"
+            value={formatTime(testData.testEndTime)}
+            onChange={handleChange}
+          />
+        </label>
+        <br />
 
-          min={new Date().toISOString().split("T")[0]} // Set max attribute to today
+        <label>
+          Duration (in minutes):
+          <input
+            type="number"
+            name="Duration"
+            value={testData.Duration}
+            onChange={handleChange}
+          />
+        </label>
+        <br />
 
-        />
-</div>
-    
-<div className="courseupdate_frominput_container">
-  
-<label>
-        Course End Date:
-      
-      </label>
-      <input
-          type="date"
-          value={formatDate(courseEndDate)}
-          onChange={(e) => setCourseEndDate(e.target.value)}
+        <label>
+          Total Questions:
+          <input
+            type="number"
+            name="TotalQuestions"
+            value={testData.TotalQuestions}
+            onChange={handleChange}
+          />
+        </label>
+        <br />
 
-          min={new Date().toISOString().split("T")[0]} // Set max attribute to today
+        <label>
+          Total Marks:
+          <input type="number" name="totalMarks" value={testData.totalMarks} onChange={handleChange} />
+        </label>
+        <br />
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Section</th>
+              <th>Number of Questions</th>
+              <th>Question Limit</th>
+            </tr>
+          </thead>
+          <tbody>
+            {sections.map((section, index) => (
+              <tr key={index}>
+                <td>{index + 1}</td>
+                <td>
+                  <input
+                    type="text"
+                    name={`section${index + 1}`}
+                    value={section.sectionName}
+                    onChange={(e) => handleSectionChange(e, index, 'sectionName')}
+                  />
+                </td>
+                <td>
+                  <input
+                    type="number"
+                    name={`numQuestions${index + 1}`}
+                    value={section.noOfQuestions}
+                    onChange={(e) => handleSectionChange(e, index, 'noOfQuestions')}
+                  />
+                </td>
+                <td>
+                  <input
+                    type="number"
+                    name={`questionLimit${index + 1}`}
+                    value={section.QuestionLimit}
+                    onChange={(e) => handleSectionChange(e, index, 'QuestionLimit')}
+                  />
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        <label>
+          Calculator:
+          <select name="calculator" value={testData.calculator} onChange={handleChange}>
+            <option value="Yes">Yes</option>
+            <option value="No">No</option>
+          </select>
+        </label>
+        <br />
 
+        <label>
+          Status:
+          <select name="status" value={testData.status} onChange={handleChange}>
+            <option value="Active">Active</option>
+            <option value="Inactive">Inactive</option>
+          </select>
+        </label>
+        <br />
 
-        />
-  
-  </div>
-  <div className="courseupdate_frominput_container">
-  <label>
-        Cost:
-      
-      </label>
-      <input
-          type="number"
-          value={cost}
-          onChange={(e) => {
-            setCost(e.target.value);
-            handleCalculateTotal();
-          }}
-        />
-  </div>
-    
-  <div className="courseupdate_frominput_container">
-  <label>
-        Discount (%):
-      
-      </label>
-      <input
-          type="number"
-          value={discount}
-          onChange={(e) => {
-            setDiscount(e.target.value);
-            handleCalculateTotal();
-          }}
-        />
-  </div>
-
-     
-  <div className="courseupdate_frominput_container">
-  <label>
-        Total Price:
-      </label>
-      <input type="text" value={totalPrice} readOnly />
-
-  </div>
-     
-    
-  
-      <button type="submit">UPDATE COURSE</button>
-    </form>
+        <button type="submit">Submit</button>
+      </form>
     </div>
-    
   );
 };
 
-export default Coureseupdate;
+export default TestUpdate;
