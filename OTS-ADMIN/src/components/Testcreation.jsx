@@ -1,31 +1,31 @@
-import React, { useState, useEffect } from 'react';
-import moment from 'moment';
+import React, { useState, useEffect } from "react";
+import moment from "moment";
 import { Link } from "react-router-dom";
 const Testcreation = () => {
-  const [testName, setTestName] = useState('');
+  const [testName, setTestName] = useState("");
   const [courses, setCourses] = useState([]);
-  const [selectedCourse, setSelectedCourse] = useState('');
-  const [startDate, setStartDate] = useState('');
-  const [startTime, setStartTime] = useState('');
-  const [endDate, setEndDate] = useState('');
-  const [endTime, setEndTime] = useState('');
-  const [duration, setDuration] = useState('');
-  const [totalQuestions, setTotalQuestions] = useState('');
-  const [totalMarks, setTotalMarks] = useState('');
-  const [calculator, setCalculator] = useState('no');
-  const [status, setStatus] = useState('inactive');
+  const [selectedCourse, setSelectedCourse] = useState("");
+  const [startDate, setStartDate] = useState("");
+  const [startTime, setStartTime] = useState("");
+  const [endDate, setEndDate] = useState("");
+  const [endTime, setEndTime] = useState("");
+  const [duration, setDuration] = useState("");
+  const [totalQuestions, setTotalQuestions] = useState("");
+  const [totalMarks, setTotalMarks] = useState("");
+  const [calculator, setCalculator] = useState("no");
+  const [status, setStatus] = useState("inactive");
   const [typeOfTests, setTypeOfTests] = useState([]);
-  const [selectedtypeOfTest, setSelectedtypeOfTest] = useState('');
+  const [selectedtypeOfTest, setSelectedtypeOfTest] = useState("");
   const [numberOfSections, setNumberOfSections] = useState(1);
   const [QuestionLimitChecked, setQuestionLimitChecked] = useState(false);
   const [sectionsData, setSectionsData] = useState([]);
   const [isFormVisible, setIsFormVisible] = useState(false);
   const [testData, setTestData] = useState([]);
   useEffect(() => {
-    fetch('http://localhost:3081/testcourses')
+    fetch("http://localhost:3081/testcourses")
       .then((response) => response.json())
       .then((data) => setCourses(data))
-      .catch((error) => console.error('Error fetching courses:', error));
+      .catch((error) => console.error("Error fetching courses:", error));
   }, []);
 
   useEffect(() => {
@@ -33,7 +33,9 @@ const Testcreation = () => {
       fetch(`http://localhost:3081/course-typeoftests/${selectedCourse}`)
         .then((response) => response.json())
         .then((data) => setTypeOfTests(data))
-        .catch((error) => console.error('Error fetching course_typeoftests:', error));
+        .catch((error) =>
+          console.error("Error fetching course_typeoftests:", error)
+        );
     }
   }, [selectedCourse]);
   const handleOpenForm = () => {
@@ -49,7 +51,7 @@ const Testcreation = () => {
   };
   const handleSelectTypeOfTest = (e) => {
     setSelectedtypeOfTest(e.target.value);
-  }
+  };
   const handleInputChange = (e) => {
     setTestName(e.target.value);
   };
@@ -68,7 +70,6 @@ const Testcreation = () => {
   const handleEndTimeChange = (e) => {
     setEndTime(e.target.value);
   };
-
 
   const handleDurationChange = (e) => {
     setDuration(e.target.value);
@@ -117,16 +118,16 @@ const Testcreation = () => {
     e.preventDefault();
     try {
       // Log the sectionsData before making the request
-      console.log('Sections Data Before Request:', sectionsData);
+      console.log("Sections Data Before Request:", sectionsData);
 
       // Assuming you have the testCreationTableId from the test creation
       // const testCreationTableId = getTestCreationTableId();
 
       // Make a request to create test and sections
-      const response = await fetch('http://localhost:3081/create-test', {
-        method: 'POST',
+      const response = await fetch("http://localhost:3081/create-test", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
           testName,
@@ -141,21 +142,23 @@ const Testcreation = () => {
           totalMarks,
           calculator,
           status,
-          sectionsData,  // Use the state variable directly
+          sectionsData, // Use the state variable directly
         }),
       });
 
       const data = await response.json();
       console.log(data);
     } catch (error) {
-      console.error('Error submitting form:', error);
+      console.error("Error submitting form:", error);
     }
   };
 
   useEffect(() => {
     const feachTestData = async () => {
       try {
-        const response = await fetch("http://localhost:3081/test_creation_table");
+        const response = await fetch(
+          "http://localhost:3081/test_creation_table"
+        );
         const data = await response.json(); // Convert the response to JSON
         setTestData(data);
       } catch (error) {
@@ -165,10 +168,11 @@ const Testcreation = () => {
     feachTestData();
   }, []);
 
-  
   function formatTime(dateTimeString) {
-    const formattedTime = moment(dateTimeString, 'HH:mm:ss.SSSSSS').format('HH:mm');
-    return formattedTime !== 'Invalid date' ? formattedTime : 'Invalid Time';
+    const formattedTime = moment(dateTimeString, "HH:mm:ss.SSSSSS").format(
+      "HH:mm"
+    );
+    return formattedTime !== "Invalid date" ? formattedTime : "Invalid Time";
   }
 
   function formatDate(dateString) {
@@ -178,39 +182,39 @@ const Testcreation = () => {
     const year = date.getFullYear();
     return `${day}/${month}/${year}`;
   }
- const handleDelete =async(testCreationTableId) =>{
-  const confirmDelete = window.confirm(
-    "Are you sure you want to delete this course?"
-  );
-  if (confirmDelete) {
-    try {
-      const response = await fetch(
-        `http://localhost:3081/test_table_data_delete/${testCreationTableId}`,
-        {
-          method: "DELETE",
+  const handleDelete = async (testCreationTableId) => {
+    const confirmDelete = window.confirm(
+      "Are you sure you want to delete this course?"
+    );
+    if (confirmDelete) {
+      try {
+        const response = await fetch(
+          `http://localhost:3081/test_table_data_delete/${testCreationTableId}`,
+          {
+            method: "DELETE",
+          }
+        );
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
         }
-      );
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! Status: ${response.status}`);
+        const result = await response.json();
+        console.log(result.message);
+        const updatedtestData = testData.filter(
+          (test) => test.testCreationTableId !== testCreationTableId
+        );
+        console.log("Before:", testData);
+        console.log("After:", updatedtestData);
+        setTestData(updatedtestData);
+      } catch (error) {
+        console.error("Error deleting course:", error);
       }
-
-      const result = await response.json();
-      console.log(result.message);
-      const updatedtestData = testData.filter(
-        (test) => test.testCreationTableId !== testCreationTableId
-      );
-      console.log("Before:", testData);
-      console.log("After:", updatedtestData);
-      setTestData(updatedtestData);
-    } catch (error) {
-      console.error("Error deleting course:", error);
+    } else {
+      // The user canceled the deletion
+      console.log("Deletion canceled.");
     }
-  } else {
-    // The user canceled the deletion
-    console.log("Deletion canceled.");
-  }
- }
+  };
 
   return (
     <div>
@@ -221,7 +225,6 @@ const Testcreation = () => {
       )}
 
       {isFormVisible && (
-
         <form onSubmit={handleSubmit}>
           <button type="button" onClick={handleCloseForm}>
             Close Form
@@ -235,9 +238,14 @@ const Testcreation = () => {
           <label>
             Select Course:
             <select value={selectedCourse} onChange={handleSelectChange}>
-              <option value="" disabled>Select a course</option>
+              <option value="" disabled>
+                Select a course
+              </option>
               {courses.map((course) => (
-                <option key={course.courseCreationId} value={course.courseCreationId}>
+                <option
+                  key={course.courseCreationId}
+                  value={course.courseCreationId}
+                >
                   {course.courseName}
                 </option>
               ))}
@@ -248,10 +256,18 @@ const Testcreation = () => {
           <div>
             <label>
               Type of Tests:
-              <select value={selectedtypeOfTest} onChange={handleSelectTypeOfTest}>
-                <option value="" disabled>Select a type of test</option>
+              <select
+                value={selectedtypeOfTest}
+                onChange={handleSelectTypeOfTest}
+              >
+                <option value="" disabled>
+                  Select a type of test
+                </option>
                 {typeOfTests.map((typeOfTest) => (
-                  <option key={typeOfTest.TypeOfTestId} value={typeOfTest.TypeOfTestId}>
+                  <option
+                    key={typeOfTest.TypeOfTestId}
+                    value={typeOfTest.TypeOfTestId}
+                  >
                     {typeOfTest.TypeOfTestName}
                   </option>
                 ))}
@@ -259,14 +275,21 @@ const Testcreation = () => {
             </label>
           </div>
 
-
           <label>
-            Test  Start Date:
-            <input type="date" value={startDate} onChange={handleStartDateChange} />
+            Test Start Date:
+            <input
+              type="date"
+              value={startDate}
+              onChange={handleStartDateChange}
+            />
           </label>
           <label>
             Start Time:
-            <input type="time" value={startTime} onChange={handleStartTimeChange} />
+            <input
+              type="time"
+              value={startTime}
+              onChange={handleStartTimeChange}
+            />
           </label>
           <br />
           <label>
@@ -280,17 +303,32 @@ const Testcreation = () => {
           <br />
           <label>
             Duration (in minutes):
-            <input type="number" value={duration} onChange={handleDurationChange} min="1" />
+            <input
+              type="number"
+              value={duration}
+              onChange={handleDurationChange}
+              min="1"
+            />
           </label>
           <br />
           <label>
             Total Questions:
-            <input type="number" value={totalQuestions} onChange={handleTotalQuestionsChange} min="1" />
+            <input
+              type="number"
+              value={totalQuestions}
+              onChange={handleTotalQuestionsChange}
+              min="1"
+            />
           </label>
           <br />
           <label>
             Total Marks:
-            <input type="number" value={totalMarks} onChange={handleTotalMarksChange} min="1" />
+            <input
+              type="number"
+              value={totalMarks}
+              onChange={handleTotalMarksChange}
+              min="1"
+            />
           </label>
           <br />
           <div>
@@ -320,23 +358,29 @@ const Testcreation = () => {
                     <td>
                       <input
                         type="text"
-                        value={sectionsData[index]?.sectionName || ''}
-                        onChange={(e) => handleSectionChange(e, index, 'sectionName')}
+                        value={sectionsData[index]?.sectionName || ""}
+                        onChange={(e) =>
+                          handleSectionChange(e, index, "sectionName")
+                        }
                       />
                     </td>
                     <td>
                       <input
                         type="number"
-                        value={sectionsData[index]?.noOfQuestions || ''}
-                        onChange={(e) => handleSectionChange(e, index, 'noOfQuestions')}
+                        value={sectionsData[index]?.noOfQuestions || ""}
+                        onChange={(e) =>
+                          handleSectionChange(e, index, "noOfQuestions")
+                        }
                       />
                     </td>
                     {QuestionLimitChecked && (
                       <td>
                         <input
                           type="number"
-                          value={sectionsData[index]?.QuestionLimit || ''}
-                          onChange={(e) => handleSectionChange(e, index, 'QuestionLimit')}
+                          value={sectionsData[index]?.QuestionLimit || ""}
+                          onChange={(e) =>
+                            handleSectionChange(e, index, "QuestionLimit")
+                          }
                         />
                       </td>
                     )}
@@ -348,6 +392,12 @@ const Testcreation = () => {
             <button type="button" onClick={addSection}>
               +
             </button>
+
+     {/* getting Instructions  */}
+            <div>
+            <i> <b>Instructions</b></i>
+
+            </div>
           </div>
           <br />
           <label>
@@ -367,7 +417,6 @@ const Testcreation = () => {
           </label>
           <br />
           <button type="submit">Submit</button>
-
         </form>
       )}
 
@@ -394,18 +443,18 @@ const Testcreation = () => {
                 <td>{test.courseName}</td>
                 <td>{formatDate(test.testStartDate)}</td>
                 <td>{formatDate(test.testEndDate)}</td>
-               <td>{formatTime(test.testStartTime)}</td>
-<td>{formatTime(test.testEndTime)}</td>
+                <td>{formatTime(test.testStartTime)}</td>
+                <td>{formatTime(test.testEndTime)}</td>
                 <td>{test.status}</td>
                 <td>
                   <div>
-                  <Link to={`/testupdate/${test.testCreationTableId}`}>
+                    <Link to={`/testupdate/${test.testCreationTableId}`}>
                       {" "}
                       <button className="courseupdate_btn">
                         <i className="fa-solid fa-pencil"></i>
                       </button>
                     </Link>
-                  <button
+                    <button
                       className="coursedelte_btn"
                       onClick={() => handleDelete(test.testCreationTableId)}
                     >
@@ -418,12 +467,8 @@ const Testcreation = () => {
           </tbody>
         </table>
       </div>
-
-
-
-
     </div>
-  )
-}
+  );
+};
 
-export default Testcreation
+export default Testcreation;

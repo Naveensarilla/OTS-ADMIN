@@ -69,7 +69,7 @@ const InstructionsDisplay = () => {
   // };
 
   return (
-    <div className="Instruction_container">
+    <div className="Instruction_containerTable">
       <table>
         <thead>
           <tr>
@@ -80,6 +80,7 @@ const InstructionsDisplay = () => {
             <th>Document Name</th>
 
             <th>Instruction</th>
+            <th>delete</th>
           </tr>
         </thead>
         <tbody>

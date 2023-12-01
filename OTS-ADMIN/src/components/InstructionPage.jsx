@@ -4,6 +4,8 @@ import InstructionsDisplay from "./InstructionDisplay";
 import base64 from "base64-js";
 import ExcelUpload from "./ex/ExcelTable";
 import ExcelTable from "./ex/ExcelTable";
+import "./InstructionPage.css";
+
 // import { Link } from "react-router-dom";
 const InstructionPage = () => {
   const [instructionHeading, setInstructionHeading] = useState("");
@@ -24,29 +26,9 @@ const InstructionPage = () => {
       }
     };
     fetchExams();
-    // fetchInstructions();
-    // fetchInstructionPoints();
+
   }, []);
 
-  // const fetchInstructionPoints = async () => {
-  //   try {
-  //     const response = await axios.get(
-  //       "http://localhost:3081/instructionpoint"
-  //     );
-  //     setInstructionPoints(response.data);
-  //   } catch (error) {
-  //     console.error("Error fetching instruction points:", error);
-  //   }
-  // };
-
-  // const fetchInstructions = async () => {
-  //   try {
-  //     const response = await axios.get("http://localhost:3081/instructions");
-  //     setInstructions(response.data);
-  //   } catch (error) {
-  //     console.error("Error fetching instructions:", error);
-  //   }
-  // };
   const handleFileUpload = (files) => {
     const selectedFile = files[0];
     setFile(selectedFile);
@@ -84,101 +66,75 @@ const InstructionPage = () => {
   const closeForm = () => {
     setFormOpen(false);
   };
-  // const handleDelete = async (instructionId) => {
-  //   try {
-  //     // Send a request to delete the instruction
-  //     await axios.delete(`http://localhost:3081/instructions/${instructionId}`);
-  //     alert("Instruction deleted successfully!");
-  //     fetchInstructions(); // Fetch updated instructions after deletion
-  //   } catch (error) {
-  //     console.error("Error deleting instruction:", error);
-  //     alert("Failed to delete instruction. Please try again.");
-  //   }
-  // };
 
   return (
-    <div>
+    <div className="instruction_container">
       {formOpen ? (
         <form>
-          <button type="button" onClick={closeForm} disabled={!formOpen}>
+          <button
+            className="instructionBTN"
+            type="button"
+            onClick={closeForm}
+            disabled={!formOpen}
+          >
             Close Form
           </button>
-          <label>Select Exam:</label>
-          <select
-            name="examId"
-            value={selectedExam}
-            onChange={(e) => setSelectedExam(e.target.value)}
-          >
-            <option value="">Select Exam:</option>
-            {exams.map((exam) => (
-              <option key={exam.examId} value={[exam.examId]}>
-                {exam.examName}
-              </option>
-            ))}
-          </select>
-          <label>Instructions Heading:</label>
-          <input
-            type="text"
-            value={instructionHeading}
-            onChange={(e) => setInstructionHeading(e.target.value)}
-          />
-          <br />
-          <div>
-            <label>Instructions:</label>
-            <input
-              type="file"
-              id="fileInput"
-              onChange={(e) => handleFileUpload(e.target.files)}
-            />
-            <span>
-              {file ? `Selected File: ${file.name}` : "No file selected"}
-            </span>
-            <button type="button" onClick={handleUpload}>
-              Upload
-            </button>
+
+          <div className="instruction_input_contant">
+            <div className="inst">
+              <label>Select Exam:</label>
+              <select
+                name="examId"
+                value={selectedExam}
+                onChange={(e) => setSelectedExam(e.target.value)}
+              >
+                <option value="">Select Exam:</option>
+                {exams.map((exam) => (
+                  <option key={exam.examId} value={[exam.examId]}>
+                    {exam.examName}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="inst">
+              <label>Instructions Heading:</label>
+              <input
+                type="text"
+                value={instructionHeading}
+                onChange={(e) => setInstructionHeading(e.target.value)}
+              />
+            </div>
+
+            <div className="inst">
+              <label>Instructions:</label>
+              <input
+                type="file"
+                id="fileInput"
+                onChange={(e) => handleFileUpload(e.target.files)}
+              />
+              <span>
+                {file ? `Selected File: ${file.name}` : "No file selected"}
+              </span>
+            </div>
+
+            <div className="">
+              <button className="instructionUpload" type="button" onClick={handleUpload}>
+                Upload
+              </button>
+            </div>
           </div>
+          <div className="InstructionBoredr"></div>
         </form>
+        
       ) : (
-        <button type="button" onClick={openForm}>
+        <button className="instruction_openMenu instructionBTN" type="button" onClick={openForm}>
           Open Form
         </button>
       )}
-      {/* <table>
-        <thead>
-          <tr>
-            <th>Serial No</th>
-            <th>Exam Name</th>
-            <th>Instruction Heading</th>
-            <th>Document Name</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {instructions.map((instruction, index) => (
-            <tr key={instruction.instructionId}>
-              <td>{index + 1}</td>
-              <td>{instruction.examName}</td>
-              <td>{instruction.instructionHeading}</td>
-              <td>{instruction.documentName}</td>
-              <td>
-           
-                <button onClick={() => handleDelete(instruction.instructionId)}>
-                  Delete
-                </button>
-              </td>
-              <td>
-                {decodeBase64(instructionPoints[index]?.instructionPoint) ||
-                  "N/A"}
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table> */}
-
-      
-      <div>
+      <div className="instruction_content">
         <InstructionsDisplay />
-        <ExcelTable />
+        {/* <ExcelTable /> */}
       </div>
     </div>
   );

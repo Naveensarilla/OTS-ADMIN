@@ -34,7 +34,7 @@ const storage = multer.diskStorage({
 const upload = multer({ storage });
 
 //______________________exam creation start__________________________
-  
+
 //-----------------------------geting subjects in exam creation page ------------------------
 app.get("/subjects", async (req, res) => {
   // Fetch subjects
@@ -684,6 +684,87 @@ app.use((req, res, next) => {
   next();
 });
 // kevin ---------
+// app.post("/upload", upload.single("file"), async (req, res) => {
+//   try {
+//     const { file } = req;
+//     const fileName = file.originalname;
+
+//     // Read the content of the Word document
+//     const { value: fileContent } = await mammoth.extractRawText({
+//       path: file.path,
+//     });
+
+//     // Split the text into points based on a specific delimiter (e.g., dot)
+//     const pointsArray = fileContent.split("/").map((point) => point.trim());
+
+//     // Filter out empty points
+//     const filteredPointsArray = pointsArray.filter((point) => point !== "");
+
+//     // Join the array of points with a separator (e.g., comma)
+//     const pointsText = filteredPointsArray.join(", ");
+
+//     // Insert data into the instruction table
+//     const queryInstruction =
+//       "INSERT INTO instruction (examId, instructionHeading, examName, documentName) VALUES (?, ?, ?, ?)";
+//     const valuesInstruction = [
+//       req.body.examId,
+//       req.body.instructionHeading,
+//       req.body.examName,
+//       fileName,
+//     ];
+
+//     const resultInstruction = await db.query(
+//       queryInstruction,
+//       valuesInstruction
+//     );
+
+//     if (!resultInstruction || resultInstruction[0].affectedRows !== 1) {
+//       // Handle the case where the query did not succeed
+//       console.error(
+//         "Error uploading file: Failed to insert into instruction table.",
+//         resultInstruction
+//       );
+//       res.status(500).send("Failed to upload file.");
+//       return;
+//     }
+
+//     const instructionId = resultInstruction[0].insertId;
+
+//     // Log the obtained instructionId
+//     console.log("Obtained instructionId:", instructionId);
+
+//     // Insert each point into the instructions_points table with the correct instructionId
+//     const queryPoints =
+//       "INSERT INTO instructions_points (examId, points, instructionId) VALUES (?, ?, ?)";
+//     for (const point of filteredPointsArray) {
+//       // Log each point and instructionId before the insertion
+//       console.log(
+//         "Inserting point:",
+//         point,
+//         "with instructionId:",
+//         instructionId
+//       );
+//       await db.query(queryPoints, [req.body.examId, point, instructionId]);
+//     }
+
+//     // Log data to the console
+//     console.log("File uploaded successfully:", {
+//       success: true,
+//       instructionId,
+//       message: "File uploaded successfully.",
+//     });
+
+//     // Respond with a simple success message
+//     res.send("File uploaded successfully");
+//   } catch (error) {
+//     // Log error to the console
+//     console.error("Error uploading file:", error);
+
+//     // Respond with a simple error message
+//     res.status(500).send("Failed to upload file.");
+//   }
+// });
+
 app.post("/upload", upload.single("file"), async (req, res) => {
   try {
     const { file } = req;
@@ -724,7 +805,11 @@ app.post("/upload", upload.single("file"), async (req, res) => {
         "Error uploading file: Failed to insert into instruction table.",
         resultInstruction
       );
-      res.status(500).send("Failed to upload file.");
+      res.status(500).json({
+        success: false,
+        message: "Failed to upload file. Couldn't insert into instruction table.",
+        error: resultInstruction,
+      });
       return;
     }
 
@@ -735,17 +820,24 @@ app.post("/upload", upload.single("file"), async (req, res) => {
 
     // Insert each point into the instructions_points table with the correct instructionId
     const queryPoints =
-      "INSERT INTO instructions_points (examId, points, instructionId) VALUES (?, ?, ?)";
-    for (const point of filteredPointsArray) {
-      // Log each point and instructionId before the insertion
-      console.log(
-        "Inserting point:",
-        point,
-        "with instructionId:",
-        instructionId
-      );
-      await db.query(queryPoints, [req.body.examId, point, instructionId]);
-    }
+  "INSERT INTO instructions_points (examId, points, instructionId, instructionHeading) VALUES (?, ?, ?, ?)";
+for (const point of filteredPointsArray) {
+  // Log each point and instructionHeading before the insertion
+  console.log(
+    "Inserting point:",
+    point,
+    "with instructionId:",
+    instructionId,
+    "and instructionHeading:",
+    req.body.instructionHeading
+  );
+  await db.query(queryPoints, [
+    req.body.examId,
+    point,
+    instructionId,
+    req.body.instructionHeading,
+  ]);
+}
 
     // Log data to the console
     console.log("File uploaded successfully:", {
@@ -755,98 +847,105 @@ app.post("/upload", upload.single("file"), async (req, res) => {
     });
 
     // Respond with a simple success message
-    res.send("File uploaded successfully");
+    res.json({
+      success: true,
+      instructionId,
+      message: "File uploaded successfully.",
+    });
   } catch (error) {
     // Log error to the console
     console.error("Error uploading file:", error);
 
-    // Respond with a simple error message
-    res.status(500).send("Failed to upload file.");
+    // Respond with a detailed error message
+    res.status(500).json({
+      success: false,
+      message: "Failed to upload file.",
+      error: error.message,
+    });
   }
 });
 
-  // app.post("/upload", upload.single("file"), async (req, res) => {
-  //   try {
-  //     const { file } = req;
-  //     const fileName = file.originalname;
+// app.post("/upload", upload.single("file"), async (req, res) => {
+//   try {
+//     const { file } = req;
+//     const fileName = file.originalname;
 
-  //     // Read the content of the Word document
-  //     const { value: fileContent } = await mammoth.extractRawText({
-  //       path: file.path,
-  //     });
+//     // Read the content of the Word document
+//     const { value: fileContent } = await mammoth.extractRawText({
+//       path: file.path,
+//     });
 
-  //     // Split the text into points based on a specific delimiter (e.g., dot)
-  //     const pointsArray = fileContent.split("/").map((point) => point.trim());
+//     // Split the text into points based on a specific delimiter (e.g., dot)
+//     const pointsArray = fileContent.split("/").map((point) => point.trim());
 
-  //     // Filter out empty points
-  //     const filteredPointsArray = pointsArray.filter((point) => point !== "");
+//     // Filter out empty points
+//     const filteredPointsArray = pointsArray.filter((point) => point !== "");
 
-  //     // Join the array of points with a separator (e.g., comma)
-  //     const pointsText = filteredPointsArray.join(", ");
+//     // Join the array of points with a separator (e.g., comma)
+//     const pointsText = filteredPointsArray.join(", ");
 
-  //     // Insert data into the instruction table
-  //     const queryInstruction =
-  //       "INSERT INTO instruction (examId, instructionHeading, examName, documentName) VALUES (?, ?, ?, ?)";
-  //     const valuesInstruction = [
-  //       req.body.examId,
-  //       req.body.instructionHeading,
-  //       req.body.examName,
-  //       fileName,
-  //     ];
+//     // Insert data into the instruction table
+//     const queryInstruction =
+//       "INSERT INTO instruction (examId, instructionHeading, examName, documentName) VALUES (?, ?, ?, ?)";
+//     const valuesInstruction = [
+//       req.body.examId,
+//       req.body.instructionHeading,
+//       req.body.examName,
+//       fileName,
+//     ];
 
-  //     // Assuming db is properly initialized and connected
-  //     const resultInstruction = await db.query(
-  //       queryInstruction,
-  //       valuesInstruction
-  //     );
+//     // Assuming db is properly initialized and connected
+//     const resultInstruction = await db.query(
+//       queryInstruction,
+//       valuesInstruction
+//     );
 
-  //     if (!resultInstruction || resultInstruction[0].affectedRows !== 1) {
-  //       // Handle the case where the query did not succeed
-  //       console.error(
-  //         "Error uploading file: Failed to insert into instruction table.",
-  //         resultInstruction
-  //       );
-  //       res.status(500).send("Failed to upload file.");
-  //       return;
-  //     }
+//     if (!resultInstruction || resultInstruction[0].affectedRows !== 1) {
+//       // Handle the case where the query did not succeed
+//       console.error(
+//         "Error uploading file: Failed to insert into instruction table.",
+//         resultInstruction
+//       );
+//       res.status(500).send("Failed to upload file.");
+//       return;
+//     }
 
-  //     const instructionId = resultInstruction[0].insertId;
+//     const instructionId = resultInstruction[0].insertId;
 
-  //     // Log the obtained instructionId
-  //     console.log("Obtained instructionId:", instructionId,valuesInstruction );
+//     // Log the obtained instructionId
+//     console.log("Obtained instructionId:", instructionId,valuesInstruction );
 
-  //     // Insert each point into the instructions_points table with the correct instructionId
-  //     const queryPoints =
-  //       "INSERT INTO instructions_points (examId, points, instructionId) VALUES (?, ?, ?)";
-  //     for (const point of filteredPointsArray) {
-  //       // Log each point and instructionId before the insertion
-  //       console.log(
-  //         "Inserting point:",
-  //         point,
-  //         "with instructionId:",
-  //         instructionId
-  //       );
-  //       await db.query(queryPoints, [req.body.examId, point, instructionId]);
-  //     }
+//     // Insert each point into the instructions_points table with the correct instructionId
+//     const queryPoints =
+//       "INSERT INTO instructions_points (examId, points, instructionId) VALUES (?, ?, ?)";
+//     for (const point of filteredPointsArray) {
+//       // Log each point and instructionId before the insertion
+//       console.log(
+//         "Inserting point:",
+//         point,
+//         "with instructionId:",
+//         instructionId
+//       );
+//       await db.query(queryPoints, [req.body.examId, point, instructionId]);
+//     }
 
-  //     // Log data to the console
-  //     console.log("File uploaded successfully:", {
-  //       success: true,
-  //       instructionId,
-  //       message: "File uploaded successfully.",
-  //     });
+//     // Log data to the console
+//     console.log("File uploaded successfully:", {
+//       success: true,
+//       instructionId,
+//       message: "File uploaded successfully.",
+//     });
 
-  //     // Respond with a simple success message
-  //     res.send("File uploaded successfully");
-  //   } catch (error) {
-  //     // Log error to the console
-  //     console.error("Error uploading file:", error);
+//     // Respond with a simple success message
+//     res.send("File uploaded successfully");
+//   } catch (error) {
+//     // Log error to the console
+//     console.error("Error uploading file:", error);
 
-  //     // Respond with a simple error message
-  //     res.status(500).send("Failed to upload file.");
-  //   }
-  // });
-
+//     // Respond with a simple error message
+//     res.status(500).send("Failed to upload file.");
+//   }
+// });
 
 app.get("/instructionData", async (req, res) => {
   try {
@@ -862,13 +961,11 @@ app.get("/instructionData", async (req, res) => {
     console.error("Error fetching instruction points:", error);
 
     // Send a consistent error response
-    res
-      .status(500)
-      .json({
-        success: false,
-        message: "Failed to fetch instruction points.",
-        error: error.message,
-      });
+    res.status(500).json({
+      success: false,
+      message: "Failed to fetch instruction points.",
+      error: error.message,
+    });
   }
 });
 
@@ -887,13 +984,11 @@ app.get("/instructionpointsGet", async (req, res) => {
     console.error("Error fetching instruction points:", error);
 
     // Send a consistent error response
-    res
-      .status(500)
-      .json({
-        success: false,
-        message: "Failed to fetch instruction points.",
-        error: error.message,
-      });
+    res.status(500).json({
+      success: false,
+      message: "Failed to fetch instruction points.",
+      error: error.message,
+    });
   }
 });
 
@@ -912,24 +1007,20 @@ app.get("/instructionpoints/:instructionId/:id", async (req, res) => {
     console.error("Error fetching instruction points:", error);
 
     // Send a consistent error response
-    res
-      .status(500)
-      .json({
-        success: false,
-        message: "Failed to fetch instruction points.",
-        error: error.message,
-      });
+    res.status(500).json({
+      success: false,
+      message: "Failed to fetch instruction points.",
+      error: error.message,
+    });
   }
 });
 
-
 app.get("/instructionpoints/:instructionId/", async (req, res) => {
   try {
-    const { instructionId, } = req.params;
+    const { instructionId } = req.params;
 
     // Select points for the specified instructionId and examId from the instructions_points table
-    const query =
-      "SELECT * FROM instructions_points WHERE instructionId = ?";
+    const query = "SELECT * FROM instructions_points WHERE instructionId = ?";
     const [rows] = await db.query(query, [instructionId]);
 
     // Send the fetched data in the response
@@ -938,13 +1029,11 @@ app.get("/instructionpoints/:instructionId/", async (req, res) => {
     console.error("Error fetching instruction points:", error);
 
     // Send a consistent error response
-    res
-      .status(500)
-      .json({
-        success: false,
-        message: "Failed to fetch instruction points.",
-        error: error.message,
-      });
+    res.status(500).json({
+      success: false,
+      message: "Failed to fetch instruction points.",
+      error: error.message,
+    });
   }
 });
 // Assuming you have an Express app and a MySQL connection pool (`db`)
@@ -965,12 +1054,10 @@ app.put("/updatepoints/:instructionId/:id", async (req, res) => {
     });
   } catch (error) {
     console.error("Error updating instruction points:", error);
-    res
-      .status(500)
-      .json({
-        success: false,
-        message: "Failed to update instruction points.",
-      });
+    res.status(500).json({
+      success: false,
+      message: "Failed to update instruction points.",
+    });
   }
 });
 
@@ -999,22 +1086,18 @@ app.delete("/deleteinstruction/:instructionId", async (req, res) => {
     ) {
       res.json({ success: true, message: "Data deleted successfully." });
     } else {
-      res
-        .status(404)
-        .json({
-          success: false,
-          message: "No data found for the given instructionId.",
-        });
+      res.status(404).json({
+        success: false,
+        message: "No data found for the given instructionId.",
+      });
     }
   } catch (error) {
     console.error("Error deleting data:", error);
-    res
-      .status(500)
-      .json({
-        success: false,
-        message: "Failed to delete data.",
-        error: error.message,
-      });
+    res.status(500).json({
+      success: false,
+      message: "Failed to delete data.",
+      error: error.message,
+    });
   }
 });
 
@@ -1034,22 +1117,18 @@ app.delete("/deletepoint/:instructionId/:id", async (req, res) => {
     if (deleteResult.affectedRows > 0) {
       res.json({ success: true, message: "Point deleted successfully." });
     } else {
-      res
-        .status(404)
-        .json({
-          success: false,
-          message: "No point found for the given instructionId and id.",
-        });
+      res.status(404).json({
+        success: false,
+        message: "No point found for the given instructionId and id.",
+      });
     }
   } catch (error) {
     console.error("Error deleting point:", error);
-    res
-      .status(500)
-      .json({
-        success: false,
-        message: "Failed to delete point.",
-        error: error.message,
-      });
+    res.status(500).json({
+      success: false,
+      message: "Failed to delete point.",
+      error: error.message,
+    });
   }
 });
 
@@ -1067,20 +1146,18 @@ app.get("/instructionpointEdit/:instructionId", async (req, res) => {
     console.error("Error fetching instruction points:", error);
 
     // Send a consistent error response
-    res
-      .status(500)
-      .json({
-        success: false,
-        message: "Failed to fetch instruction points.",
-        error: error.message,
-      });
+    res.status(500).json({
+      success: false,
+      message: "Failed to fetch instruction points.",
+      error: error.message,
+    });
   }
 });
 
 // Ex
-const fileUpload = require('express-fileupload');
+const fileUpload = require("express-fileupload");
 app.use(fileUpload());
-const xlsx = require('xlsx');
+const xlsx = require("xlsx");
 // app.post('/uploadExcel', (req, res) => {
 //   try {
 //     if (!req.files || Object.keys(req.files).length === 0) {
@@ -1114,59 +1191,67 @@ const xlsx = require('xlsx');
 //   }
 // });
 
-
-app.post('/uploadexcel', async (req, res) => {
+app.post("/uploadexcel", async (req, res) => {
   try {
     if (!req.files || Object.keys(req.files).length === 0) {
-      return res.status(400).json({ error: 'No files were uploaded.' });
+      return res.status(400).json({ error: "No files were uploaded." });
     }
 
     const { file, examId, instructionHeading } = req.files;
-    console.log(`examId : ${examId}, instructionHeading : ${instructionHeading}`);
-    
+    console.log(
+      `examId : ${examId}, instructionHeading : ${instructionHeading}`
+    );
 
-    const workbook = xlsx.read(file.data, { type: 'buffer' });
+    const workbook = xlsx.read(file.data, { type: "buffer" });
     const sheetName = workbook.SheetNames[0];
     const sheet = workbook.Sheets[sheetName];
     const data = xlsx.utils.sheet_to_json(sheet);
 
-    console.log('Received file:', file);
-    console.log('Data from file:', data);
+    console.log("Received file:", file);
+    console.log("Data from file:", data);
 
     // Assuming you have a column named 'examId' and 'instructionHeading' in your excel file
     // Modify the columns array accordingly based on your file structure
     const columns = Object.keys(data[0]);
 
     // Add 'examId' and 'instructionHeading' to the insert statement
-    const insertStatement = `INSERT INTO your_table (examId, instructionHeading, ${columns.join(', ')}) VALUES ?`;
+    const insertStatement = `INSERT INTO your_table (examId, instructionHeading, ${columns.join(
+      ", "
+    )}) VALUES ?`;
 
-    console.log('examId:', examId);
-    console.log('instructionHeading:', instructionHeading);
-    console.log('columns:', columns);
+    console.log("examId:", examId);
+    console.log("instructionHeading:", instructionHeading);
+    console.log("columns:", columns);
 
     // Use async/await to wait for the query result
     const result = await new Promise((resolve, reject) => {
-      db.query(insertStatement, [data.map(item => [examId, instructionHeading, ...columns.map(col => item[col])])], (err, result) => {
-        if (err) {
-          console.error('Database query error:', err);
-          reject(err);
-        } else {
-          console.log('Result:', result, examId);
-          resolve(result);
+      db.query(
+        insertStatement,
+        [
+          data.map((item) => [
+            examId,
+            instructionHeading,
+            ...columns.map((col) => item[col]),
+          ]),
+        ],
+        (err, result) => {
+          if (err) {
+            console.error("Database query error:", err);
+            reject(err);
+          } else {
+            console.log("Result:", result, examId);
+            resolve(result);
+          }
         }
-      });
+      );
     });
 
-    res.status(200).json({ message: 'Data inserted successfully.', result });
+    res.status(200).json({ message: "Data inserted successfully.", result });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: 'Internal Server Error' });
+    res.status(500).json({ error: "Internal Server Error" });
   }
 });
-
-
-
-
 
 //______________________end __________________________
 
@@ -1272,13 +1357,27 @@ app.get("/course-typeoftests/:courseCreationId", async (req, res) => {
   }
 });
 
+// app.get("/test_creation_table", async (req, res) => {
+//   try {
+//     const query = ` SELECT tt.testCreationTableId,tt.TestName,cc.courseName,tt.testStartDate,tt.testEndDate,tt.testStartTime,tt.testEndTime,tt.status  FROM test_creation_table tt JOIN  course_creation_table cc ON tt.courseCreationId=cc.courseCreationId `;
+//     const [rows] = await db.query(query);
+//     res.json(rows);
+//   } catch (error) {
+//     console.error("Error creating sections:", error);
+//     res.status(500).json({ success: false, error: "Internal Server Error" });
+//   }
+// });
 app.get("/test_creation_table", async (req, res) => {
   try {
-    const query = ` SELECT tt.testCreationTableId,tt.TestName,cc.courseName,tt.testStartDate,tt.testEndDate,tt.testStartTime,tt.testEndTime,tt.status  FROM test_creation_table tt JOIN  course_creation_table cc ON tt.courseCreationId=cc.courseCreationId `;
+    const query = `SELECT tt.testCreationTableId, tt.TestName, cc.courseName, tt.testStartDate, tt.testEndDate, tt.testStartTime, tt.testEndTime, tt.status
+    FROM test_creation_table tt
+    JOIN course_creation_table cc ON tt.courseCreationId = cc.courseCreationId;
+    `;
+
     const [rows] = await db.query(query);
     res.json(rows);
   } catch (error) {
-    console.error("Error creating sections:", error);
+    console.error("Error fetching test creation data:", error);
     res.status(500).json({ success: false, error: "Internal Server Error" });
   }
 });

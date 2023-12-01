@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import axios from "axios";
 
+
 const API_BASE_URL = "http://localhost:3081";
 
 const GettinggInstructions = () => {
@@ -36,7 +37,6 @@ const GettinggInstructions = () => {
     fetchData();
   }, [instructionId]);
 
-
   const handleDeletePoint = async (instructionId, id) => {
     try {
       const response = await axios.delete(
@@ -52,21 +52,32 @@ const GettinggInstructions = () => {
   };
 
   return (
-    <div>
+    <div className="Instruction_points">
       {points.map((item, index) => (
-        <div key={index} style={{display:'flex'}}>
-          <p>{item.points}</p>
+        <ul key={index} >
+          <li>{item.instructionHeading}</li>
+          <li>{item.points}</li>
+          {/* <Link
+            to={`/InstructionPage/editIns/${item.instructionId}/${item.id}`}
+          >
+          <i className="fa-solid fa-pencil"></i>
+          </Link> */}
+          
           <Link
-                to={`/InstructionPage/editIns/${item.instructionId}/${item.id}`}
-              >
-                edit
-              </Link>
-              <button className="InstDelete InstDelete1"
-                onClick={() => handleDeletePoint(item.instructionId, item.id)}
-              >
-             <i class="fa-solid fa-trash"></i>
-              </button>
-        </div>
+            to={`/InstructionPage/editIns/${item.instructionId}/${item.id}`}
+            title="Edit this point"
+          >
+            <i className="fa-solid fa-pencil"></i>
+          </Link>
+
+          <button
+            className="InstructiondelPoint"
+            title="delete this point"
+            onClick={() => handleDeletePoint(item.instructionId, item.id)}
+          >
+            <i class="fa-solid fa-trash"></i>
+          </button>
+        </ul>
       ))}
     </div>
   );
