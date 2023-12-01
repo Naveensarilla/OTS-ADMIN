@@ -80,12 +80,15 @@ const TestUpdate = () => {
     }
   }, [testData.selectedCourse]);
 
+
   useEffect(() => {
-    // Fetch test data to pre-fill the form
     fetch(`http://localhost:3081/testupdate/${testCreationTableId}`)
-      .then((response) => response.json())
+      .then((response) => {
+        console.log('Response Status:', response.status);
+        return response.json();
+      })
       .then((data) => {
-        // Populate the testData state with fetched data
+        console.log('Fetched Data:', data);
         setTestData({
           ...data,
           selectedCourse: data.courseCreationId,
@@ -93,12 +96,14 @@ const TestUpdate = () => {
           sectionName: data.sectionName,
           noOfQuestions: data.noOfQuestions,
           QuestionLimit: data.QuestionLimit,
-          selectedInstruction:data.instructionId,
+          selectedInstruction: data.instructionId,
         });
       })
       .catch((error) => console.error('Error fetching test data:', error));
   }, [testCreationTableId]);
-  // console.log('Sections:', sections);
+  
+
+
 
   const handleSubmit = async (e) => {
     e.preventDefault();

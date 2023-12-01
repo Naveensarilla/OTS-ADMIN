@@ -610,10 +610,113 @@ app.get('/courseupdate/:courseCreationId', async (req, res) => {
     }
   });
 
-  app.put('/update-course/:courseCreationId', async (req, res) => {
-    const courseCreationId = req.params.courseCreationId;
+  // app.put('/update-course/:courseCreationId', async (req, res) => {
+  //   const courseCreationId = req.params.courseCreationId;
   
-    const {
+  //   const {
+  //     courseName,
+  //     selectedExam,
+  //     courseStartDate,
+  //     courseEndDate,
+  //     cost,
+  //     discount,
+  //     totalPrice,
+  //   } = req.body;
+  
+  //   const updateQuery = `
+  //     UPDATE course_creation_table
+  //     SET
+  //       courseName = ?,
+  //       examId = ?,
+  //       courseStartDate = ?,
+  //       courseEndDate = ?,
+  //       cost = ?,
+  //       Discount = ?,       
+  //       totalPrice = ?
+  //     WHERE courseCreationId = ?;
+  //   `;
+  
+  //   try {
+  //     await db.query(updateQuery, [
+  //       courseName,
+  //       selectedExam,
+  //       courseStartDate,
+  //       courseEndDate,
+  //       cost,
+  //       discount,
+  //       totalPrice,
+  //       courseCreationId,
+  //     ]);
+  //     const selectedtypeOfTests = req.body.selectedtypeOfTests;
+  //     const deleteTypeOfTestQuery = 'DELETE FROM course_typeoftests WHERE courseCreationId = ?';
+  //     await db.query(deleteTypeOfTestQuery, [courseCreationId]);
+  
+  //     const insertTestOfTestQuery = 'INSERT INTO course_typeoftests (courseCreationId, typeOfTestId) VALUES (?, ?)';
+  //     for (const typeOfTestId of selectedtypeOfTests) {
+  //       await db.query(insertTestOfTestQuery, [courseCreationId, typeOfTestId]);
+  //     }
+
+  //     // Handle subjects update (assuming course_subjects table has columns courseCreationId and subjectId)
+  //     const selectedSubjects = req.body.selectedSubjects;
+  //     const deleteSubjectsQuery = 'DELETE FROM course_subjects WHERE courseCreationId = ?';
+  //     await db.query(deleteSubjectsQuery, [courseCreationId]);
+  
+  //     const insertSubjectsQuery = 'INSERT INTO course_subjects (courseCreationId, subjectId) VALUES (?, ?)';
+  //     for (const subjectId of selectedSubjects) {
+  //       await db.query(insertSubjectsQuery, [courseCreationId, subjectId]);
+  //     }
+  
+  //     // Handle question types update (assuming course_type_of_question table has columns courseCreationId and quesionTypeId)
+  //     const selectedQuestionTypes = req.body.selectedQuestionTypes;
+  //     const deleteQuestionTypesQuery = 'DELETE FROM course_type_of_question WHERE courseCreationId = ?';
+  //     await db.query(deleteQuestionTypesQuery, [courseCreationId]);
+  
+  //     const insertQuestionTypesQuery = 'INSERT INTO course_type_of_question (courseCreationId, quesionTypeId) VALUES (?, ?)';
+  //     for (const quesionTypeId of selectedQuestionTypes) {
+  //       await db.query(insertQuestionTypesQuery, [courseCreationId, quesionTypeId]);
+  //     }
+  
+  //     res.json({ message: 'Course updated successfully' });
+  //   } catch (error) {
+  //     console.error(error);
+  //     res.status(500).json({ error: 'Internal Server Error' });
+  //   }
+  // });
+//______________________courese creation end __________________________
+//______________________INSTRUCTION page __________________________
+
+
+app.put('/update-course/:courseCreationId', async (req, res) => {
+  const courseCreationId = req.params.courseCreationId;
+
+  const {
+    courseName,
+    selectedExam,
+    courseStartDate,
+    courseEndDate,
+    cost,
+    discount,
+    totalPrice,
+    selectedTypeOfTests,
+    selectedSubjects,
+    selectedQuestionTypes,
+  } = req.body;
+
+  const updateQuery = `
+    UPDATE course_creation_table
+    SET
+      courseName = ?,
+      examId = ?,
+      courseStartDate = ?,
+      courseEndDate = ?,
+      cost = ?,
+      Discount = ?,       
+      totalPrice = ?
+    WHERE courseCreationId = ?;
+  `;
+
+  try {
+    await db.query(updateQuery, [
       courseName,
       selectedExam,
       courseStartDate,
@@ -621,69 +724,42 @@ app.get('/courseupdate/:courseCreationId', async (req, res) => {
       cost,
       discount,
       totalPrice,
-    } = req.body;
-  
-    const updateQuery = `
-      UPDATE course_creation_table
-      SET
-        courseName = ?,
-        examId = ?,
-        courseStartDate = ?,
-        courseEndDate = ?,
-        cost = ?,
-        Discount = ?,       
-        totalPrice = ?
-      WHERE courseCreationId = ?;
-    `;
-  
-    try {
-      await db.query(updateQuery, [
-        courseName,
-        selectedExam,
-        courseStartDate,
-        courseEndDate,
-        cost,
-        discount,
-        totalPrice,
-        courseCreationId,
-      ]);
-      const selectedtypeOfTest = req.body.selectedtypeOfTest;
-      const deleteTypeOfTestQuery = 'DELETE FROM course_typeoftests WHERE courseCreationId = ?';
-      await db.query(deleteTypeOfTestQuery, [courseCreationId]);
-  
-      const insertTestOfTestQuery = 'INSERT INTO course_typeoftests (courseCreationId, typeOfTestId) VALUES (?, ?)';
-      for (const typeOfTestId of selectedtypeOfTest) {
-        await db.query(insertTestOfTestQuery, [courseCreationId, typeOfTestId]);
-      }
+      courseCreationId,
+    ]);
 
-      // Handle subjects update (assuming course_subjects table has columns courseCreationId and subjectId)
-      const selectedSubjects = req.body.selectedSubjects;
-      const deleteSubjectsQuery = 'DELETE FROM course_subjects WHERE courseCreationId = ?';
-      await db.query(deleteSubjectsQuery, [courseCreationId]);
-  
-      const insertSubjectsQuery = 'INSERT INTO course_subjects (courseCreationId, subjectId) VALUES (?, ?)';
-      for (const subjectId of selectedSubjects) {
-        await db.query(insertSubjectsQuery, [courseCreationId, subjectId]);
-      }
-  
-      // Handle question types update (assuming course_type_of_question table has columns courseCreationId and quesionTypeId)
-      const selectedQuestionTypes = req.body.selectedQuestionTypes;
-      const deleteQuestionTypesQuery = 'DELETE FROM course_type_of_question WHERE courseCreationId = ?';
-      await db.query(deleteQuestionTypesQuery, [courseCreationId]);
-  
-      const insertQuestionTypesQuery = 'INSERT INTO course_type_of_question (courseCreationId, quesionTypeId) VALUES (?, ?)';
-      for (const quesionTypeId of selectedQuestionTypes) {
-        await db.query(insertQuestionTypesQuery, [courseCreationId, quesionTypeId]);
-      }
-  
-      res.json({ message: 'Course updated successfully' });
-    } catch (error) {
-      console.error(error);
-      res.status(500).json({ error: 'Internal Server Error' });
+    // Handle type of tests update
+    const deleteTypeOfTestQuery = 'DELETE FROM course_typeoftests WHERE courseCreationId = ?';
+    await db.query(deleteTypeOfTestQuery, [courseCreationId]);
+
+    const insertTestOfTestQuery = 'INSERT INTO course_typeoftests (courseCreationId, typeOfTestId) VALUES (?, ?)';
+    for (const typeOfTestId of selectedTypeOfTests) {
+      await db.query(insertTestOfTestQuery, [courseCreationId, typeOfTestId]);
     }
-  });
-//______________________courese creation end __________________________
-//______________________INSTRUCTION page __________________________
+
+    // Handle subjects update (assuming course_subjects table has columns courseCreationId and subjectId)
+    const deleteSubjectsQuery = 'DELETE FROM course_subjects WHERE courseCreationId = ?';
+    await db.query(deleteSubjectsQuery, [courseCreationId]);
+
+    const insertSubjectsQuery = 'INSERT INTO course_subjects (courseCreationId, subjectId) VALUES (?, ?)';
+    for (const subjectId of selectedSubjects) {
+      await db.query(insertSubjectsQuery, [courseCreationId, subjectId]);
+    }
+
+    // Handle question types update (assuming course_type_of_question table has columns courseCreationId and quesionTypeId)
+    const deleteQuestionTypesQuery = 'DELETE FROM course_type_of_question WHERE courseCreationId = ?';
+    await db.query(deleteQuestionTypesQuery, [courseCreationId]);
+
+    const insertQuestionTypesQuery = 'INSERT INTO course_type_of_question (courseCreationId, quesionTypeId) VALUES (?, ?)';
+    for (const quesionTypeId of selectedQuestionTypes) {
+      await db.query(insertQuestionTypesQuery, [courseCreationId, quesionTypeId]);
+    }
+
+    res.json({ message: 'Course updated successfully' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
 
 app.get('/exams', async (req, res) => {
   try {
@@ -903,11 +979,12 @@ app.get('/testcourses', async (req, res) => {
   }
 });
 
+
 app.post('/create-test', async (req, res) => {
   const {
     testName,
     selectedCourse,
-    selectedtypeOfTest,
+    selectedtypeOfTest,  // Assuming this is the correct property name
     startDate,
     startTime,
     endDate,
@@ -923,8 +1000,8 @@ app.post('/create-test', async (req, res) => {
 
   try {
     const [result] = await db.query(
-      'INSERT INTO test_creation_table (TestName, courseCreationId, courseTypeOfTestId, testStartDate, testEndDate, testStartTime, testEndTime, Duration, TotalQuestions, totalMarks, calculator, status,instructionId ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
-      [testName, selectedCourse, selectedtypeOfTest, startDate, endDate, startTime, endTime, duration, totalQuestions, totalMarks, calculator, status,selectedInstruction]
+      'INSERT INTO test_creation_table (TestName, courseCreationId, courseTypeOfTestId, testStartDate, testEndDate, testStartTime, testEndTime, Duration, TotalQuestions, totalMarks, calculator, status, instructionId) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+      [testName, selectedCourse, selectedtypeOfTest, startDate, endDate, startTime, endTime, duration, totalQuestions, totalMarks, calculator, status, selectedInstruction]
     );
 
     if (result && result.insertId) {
@@ -937,9 +1014,6 @@ app.post('/create-test', async (req, res) => {
             'INSERT INTO sections (testCreationTableId, sectionName, noOfQuestions, QuestionLimit) VALUES (?, ?, ?, ?)',
             [testCreationTableId, section.sectionName || null, section.noOfQuestions, section.QuestionLimit || null]
           );
-          // console.log('Selected Instruction:', selectedInstruction);
-          // const updateResult = await db.query('UPDATE test_creation_table SET instructionId = ? WHERE testCreationTableId = ?', [selectedInstruction, testCreationTableId]);
-          // console.log('Update Result:', updateResult);
           return sectionResult;
         })
       );
@@ -951,6 +1025,8 @@ app.post('/create-test', async (req, res) => {
     res.status(500).json({ success: false, error: 'Internal Server Error' });
   }
 });
+
+
 app.get('/instructions', async (req, res) => {
   try {
     const [instructions] = await db.query('SELECT instructionId, instructionHeading FROM instruction');
@@ -1045,12 +1121,13 @@ app.get('/testupdate/:testCreationTableId', async (req, res) => {
 });
 
 
+
 app.put('/test-update/:testCreationTableId', async (req, res) => {
   const testCreationTableId = req.params.testCreationTableId;
   const {
     TestName,
     selectedCourse,
-    selectedTypeOfTest,
+    selectedTypeOfTests,
     testStartDate,
     testEndDate,
     testStartTime,
@@ -1078,7 +1155,7 @@ app.put('/test-update/:testCreationTableId', async (req, res) => {
     await db.query(updateQuery, [
       TestName,
       selectedCourse,
-      selectedTypeOfTest,
+      selectedTypeOfTests,
       testStartDate,
       testEndDate,
       testStartTime,

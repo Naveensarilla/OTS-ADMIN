@@ -41,7 +41,7 @@ const Coureseupdate = () => {
           setSelectedExam(
             courseData.examId !== undefined ? courseData.examId.toString() : ""
           );
-          // setSelectedTypeOfTest(
+          // setSelectedTypeOfTests(
           //   courseData.typeOfTestId !== undefined
           //     ? courseData.typeOfTestId.toString()
           //     : ""
@@ -112,7 +112,7 @@ const Coureseupdate = () => {
     const fetchQuestionTypes = async () => {
       try {
         const response = await axios.get(
-          "http://localhost:3081/question_types"
+          "http://localhost:3081/type_of_questions"
         );
         setQuestionTypes(response.data);
       } catch (error) {
