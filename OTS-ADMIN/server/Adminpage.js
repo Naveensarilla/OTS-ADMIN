@@ -33,7 +33,7 @@ const storage = multer.diskStorage({
 const upload = multer({ storage });
 
 //______________________exam creation start__________________________
-
+  
 //-----------------------------geting subjects in exam creation page ------------------------
 app.get("/subjects", async (req, res) => {
   // Fetch subjects
