@@ -21,6 +21,26 @@ const Testcreation = () => {
   const [sectionsData, setSectionsData] = useState([]);
   const [isFormVisible, setIsFormVisible] = useState(false);
   const [testData, setTestData] = useState([]);
+  const [selectedInstruction, setSelectedInstruction] = useState('');
+  const [instructionsData, setInstructionsData] = useState([]);
+
+  useEffect(() => {
+    const fetchInstructions = async () => {
+      try {
+        const response = await fetch('http://localhost:3081/instructions');
+        const data = await response.json();
+        setInstructionsData(data);
+      } catch (error) {
+        console.error('Error fetching instructions:', error);
+      }
+    };
+
+    fetchInstructions();
+  }, []);
+
+
+  
+
   useEffect(() => {
     fetch('http://localhost:3081/testcourses')
       .then((response) => response.json())
@@ -43,7 +63,7 @@ const Testcreation = () => {
   const handleCloseForm = () => {
     setIsFormVisible(false);
   };
-
+  
   const handleSelectChange = (e) => {
     setSelectedCourse(e.target.value);
   };
@@ -80,6 +100,9 @@ const Testcreation = () => {
 
   const handleTotalMarksChange = (e) => {
     setTotalMarks(e.target.value);
+  };
+  const handleInstructionChange = (e) => {
+    setSelectedInstruction(e.target.value);
   };
   const handleCalculatorChange = (e) => {
     setCalculator(e.target.value);
@@ -141,7 +164,8 @@ const Testcreation = () => {
           totalMarks,
           calculator,
           status,
-          sectionsData,  // Use the state variable directly
+          sectionsData,
+          selectedInstruction,
         }),
       });
 
@@ -165,52 +189,52 @@ const Testcreation = () => {
     feachTestData();
   }, []);
 
-  
+
   function formatTime(dateTimeString) {
     const formattedTime = moment(dateTimeString, 'HH:mm:ss.SSSSSS').format('HH:mm');
     return formattedTime !== 'Invalid date' ? formattedTime : 'Invalid Time';
   }
 
-  function formatDate(dateString) {
-    const date = new Date(dateString);
-    const day = date.getDate().toString().padStart(2, "0");
-    const month = (date.getMonth() + 1).toString().padStart(2, "0"); // Month is 0-based
-    const year = date.getFullYear();
-    return `${day}/${month}/${year}`;
-  }
- const handleDelete =async(testCreationTableId) =>{
-  const confirmDelete = window.confirm(
-    "Are you sure you want to delete this course?"
-  );
-  if (confirmDelete) {
-    try {
-      const response = await fetch(
-        `http://localhost:3081/test_table_data_delete/${testCreationTableId}`,
-        {
-          method: "DELETE",
+  // function formatDate(dateString) {
+  //   const date = new Date(dateString);
+  //   const day = date.getDate().toString().padStart(2, "0");
+  //   const month = (date.getMonth() + 1).toString().padStart(2, "0"); // Month is 0-based
+  //   const year = date.getFullYear();
+  //   return `${day}/${month}/${year}`;
+  // }
+  const handleDelete = async (testCreationTableId) => {
+    const confirmDelete = window.confirm(
+      "Are you sure you want to delete this course?"
+    );
+    if (confirmDelete) {
+      try {
+        const response = await fetch(
+          `http://localhost:3081/test_table_data_delete/${testCreationTableId}`,
+          {
+            method: "DELETE",
+          }
+        );
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
         }
-      );
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! Status: ${response.status}`);
+        const result = await response.json();
+        console.log(result.message);
+        const updatedtestData = testData.filter(
+          (test) => test.testCreationTableId !== testCreationTableId
+        );
+        console.log("Before:", testData);
+        console.log("After:", updatedtestData);
+        setTestData(updatedtestData);
+      } catch (error) {
+        console.error("Error deleting course:", error);
       }
-
-      const result = await response.json();
-      console.log(result.message);
-      const updatedtestData = testData.filter(
-        (test) => test.testCreationTableId !== testCreationTableId
-      );
-      console.log("Before:", testData);
-      console.log("After:", updatedtestData);
-      setTestData(updatedtestData);
-    } catch (error) {
-      console.error("Error deleting course:", error);
+    } else {
+      // The user canceled the deletion
+      console.log("Deletion canceled.");
     }
-  } else {
-    // The user canceled the deletion
-    console.log("Deletion canceled.");
   }
- }
 
   return (
     <div>
@@ -351,6 +375,18 @@ const Testcreation = () => {
           </div>
           <br />
           <label>
+            Instructions:
+            <select value={selectedInstruction} onChange={handleInstructionChange}>
+              <option value="" disabled>Select an instruction</option>
+              {instructionsData.map(instruction => (
+                <option key={instruction.instructionId} value={instruction.instructionId}>
+                  {instruction.instructionHeading}
+                </option>
+              ))}
+            </select>
+          </label>
+          <br />
+          <label>
             Calculator:
             <select value={calculator} onChange={handleCalculatorChange}>
               <option value="yes">Yes</option>
@@ -392,20 +428,20 @@ const Testcreation = () => {
                 <td>{index + 1}</td>
                 <td>{test.TestName}</td>
                 <td>{test.courseName}</td>
-                <td>{formatDate(test.testStartDate)}</td>
-                <td>{formatDate(test.testEndDate)}</td>
-               <td>{formatTime(test.testStartTime)}</td>
-<td>{formatTime(test.testEndTime)}</td>
+                <td>{test.testStartDate}</td>
+                <td>{test.testEndDate}</td>
+                <td>{formatTime(test.testStartTime)}</td>
+                <td>{formatTime(test.testEndTime)}</td>
                 <td>{test.status}</td>
                 <td>
                   <div>
-                  <Link to={`/testupdate/${test.testCreationTableId}`}>
+                    <Link to={`/testupdate/${test.testCreationTableId}`}>
                       {" "}
                       <button className="courseupdate_btn">
                         <i className="fa-solid fa-pencil"></i>
                       </button>
                     </Link>
-                  <button
+                    <button
                       className="coursedelte_btn"
                       onClick={() => handleDelete(test.testCreationTableId)}
                     >

@@ -46,6 +46,72 @@ app.get('/subjects', async (req, res) => {
     res.status(500).json({ error: 'Internal Server Error' });
   }
 });
+app.get('/feachingexams/:examId', async (req, res) => {
+  const { examId } = req.params;
+  try {
+    // Fetch exams from the database
+    const [rows] = await db.query('SELECT * FROM exams WHERE examId = ?', [examId]);
+
+    res.json(rows);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
+app.get('/exams/:examId/subjects', async (req, res) => {
+  const { examId } = req.params;
+
+  try {
+    console.log('Fetching subjects for examId:', examId);
+
+    const [rows] = await db.query(
+      'SELECT subjectId FROM exam_creation_table WHERE examId = ?',
+      [examId]
+    );
+
+    const selectedSubjects = rows.map(row => row.subjectId);
+    console.log('Selected subjects:', selectedSubjects);
+
+    res.json(selectedSubjects);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
+
+app.put('/update/:examId', async (req, res) => {
+  const { examId } = req.params;
+  const { examName, startDate, endDate, subjects } = req.body;
+
+  try {
+    // Update data in the exams table
+    await db.query('UPDATE exams SET examName = ?, startDate = ?, endDate = ? WHERE examId = ?', [examName, startDate, endDate, examId]);
+
+    // Update subjects in the exam_creation_table
+    // 1. Delete existing subjects that are not in the updated list
+    await db.query('DELETE FROM exam_creation_table WHERE examId = ? AND subjectId NOT IN (?)', [examId, subjects]);
+
+    // 2. Insert new subjects that are not already in the table
+    const existingSubjects = await db.query('SELECT subjectId FROM exam_creation_table WHERE examId = ?', [examId]);
+    const existingSubjectIds = existingSubjects[0].map(row => row.subjectId);
+
+    const newSubjects = subjects.filter(subjectId => !existingSubjectIds.includes(subjectId));
+
+    const subjectInsertPromises = newSubjects.map(subjectId =>
+      db.query('INSERT INTO exam_creation_table (examId, subjectId) VALUES (?, ?)', [examId, subjectId])
+    );
+
+    await Promise.all(subjectInsertPromises);
+
+    res.json({ success: true, message: 'Exam data updated successfully' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
 //--------------------------------------------END--------------------------------------------------
 //---------------------------------------------inserting exam creation page data-------------------------------------------------
 
@@ -172,20 +238,21 @@ app.put('/updatedata/:examId', async (req, res) => {
     res.status(500).json({ error: 'Internal Server Error' });
   }
 });
+
 //--------------------------------------------END--------------------------------------------------
 //--------------------------------------------geting only selected subjects in edit page--------------------------------------------------
-app.get('/exams/:examId/subjects', async (req, res) => {
-    const examId = req.params.examId;
+// app.get('/exams/:examId/subjects', async (req, res) => {
+//     const examId = req.params.examId;
   
-    try {
-      const [rows] = await db.query('SELECT subjectId FROM exam_creation_table WHERE examId = ?', [examId]);
-      const selectedSubjects = rows.map(row => row.subjectId);
-      res.json(selectedSubjects);
-    } catch (error) {
-      console.error(error);
-      res.status(500).json({ error: 'Internal Server Error' });
-    }
-  });
+//     try {
+//       const [rows] = await db.query('SELECT subjectId FROM exam_creation_table WHERE examId = ?', [examId]);
+//       const selectedSubjects = rows.map(row => row.subjectId);
+//       res.json(selectedSubjects);
+//     } catch (error) {
+//       console.error(error);
+//       res.status(500).json({ error: 'Internal Server Error' });
+//     }
+//   });
 //--------------------------------------------END--------------------------------------------------
 //--------------------------------------------updating subjects--------------------------------------------------
   app.put('/exams/:examId/subjects', async (req, res) => {
@@ -851,12 +918,13 @@ app.post('/create-test', async (req, res) => {
     calculator,
     status,
     sectionsData,
+    selectedInstruction,
   } = req.body;
 
   try {
     const [result] = await db.query(
-      'INSERT INTO test_creation_table (TestName, courseCreationId, courseTypeOfTestId, testStartDate, testEndDate, testStartTime, testEndTime, Duration, TotalQuestions, totalMarks, calculator, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
-      [testName, selectedCourse, selectedtypeOfTest, startDate, endDate, startTime, endTime, duration, totalQuestions, totalMarks, calculator, status]
+      'INSERT INTO test_creation_table (TestName, courseCreationId, courseTypeOfTestId, testStartDate, testEndDate, testStartTime, testEndTime, Duration, TotalQuestions, totalMarks, calculator, status,instructionId ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+      [testName, selectedCourse, selectedtypeOfTest, startDate, endDate, startTime, endTime, duration, totalQuestions, totalMarks, calculator, status,selectedInstruction]
     );
 
     if (result && result.insertId) {
@@ -869,6 +937,9 @@ app.post('/create-test', async (req, res) => {
             'INSERT INTO sections (testCreationTableId, sectionName, noOfQuestions, QuestionLimit) VALUES (?, ?, ?, ?)',
             [testCreationTableId, section.sectionName || null, section.noOfQuestions, section.QuestionLimit || null]
           );
+          // console.log('Selected Instruction:', selectedInstruction);
+          // const updateResult = await db.query('UPDATE test_creation_table SET instructionId = ? WHERE testCreationTableId = ?', [selectedInstruction, testCreationTableId]);
+          // console.log('Update Result:', updateResult);
           return sectionResult;
         })
       );
@@ -880,7 +951,15 @@ app.post('/create-test', async (req, res) => {
     res.status(500).json({ success: false, error: 'Internal Server Error' });
   }
 });
-
+app.get('/instructions', async (req, res) => {
+  try {
+    const [instructions] = await db.query('SELECT instructionId, instructionHeading FROM instruction');
+    res.json(instructions);
+  } catch (error) {
+    console.error('Error fetching instructions:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
 // Add this new API endpoint
 app.get('/course-typeoftests/:courseCreationId', async (req, res) => {
   const { courseCreationId } = req.params;
@@ -948,6 +1027,8 @@ app.get('/testupdate/:testCreationTableId', async (req, res) => {
         type_of_test ON course_typeoftests.TypeOfTestId = type_of_test.TypeOfTestId
       INNER JOIN
         sections ON test_creation_table.testCreationTableId = sections.testCreationTableId
+        INNER JOIN 
+        instruction  ON test_creation_table.instructionId = instruction.instructionId
       WHERE 
         test_creation_table.testCreationTableId = ?
     `, [testCreationTableId]);
@@ -983,13 +1064,14 @@ app.put('/test-update/:testCreationTableId', async (req, res) => {
     sectionName,
     noOfQuestions,
     QuestionLimit,
+    selectedInstruction,
   } = req.body;
 
   const updateQuery = `UPDATE test_creation_table 
                        SET TestName=?, courseCreationId=?, courseTypeOfTestId=?, 
                            testStartDate=?, testEndDate=?, testStartTime=?, 
                            testEndTime=?, Duration=?, TotalQuestions=?, 
-                           totalMarks=?, calculator=?, status=?
+                           totalMarks=?, calculator=?, status=?, instructionId=?
                        WHERE testCreationTableId=?`;
 
   try {
@@ -1006,8 +1088,13 @@ app.put('/test-update/:testCreationTableId', async (req, res) => {
       totalMarks,
       calculator,
       status,
+      selectedInstruction,
       testCreationTableId,
     ]);
+
+    // Log the update result
+    const updateResult = await db.query('SELECT * FROM test_creation_table WHERE testCreationTableId = ?', [testCreationTableId]);
+    console.log('Update Result:', updateResult);
 
     // Update section
     const updateSectionQuery = `UPDATE sections 
@@ -1028,6 +1115,7 @@ app.put('/test-update/:testCreationTableId', async (req, res) => {
     res.status(500).json({ error: 'Internal Server Error' });
   }
 });
+
 
 
 

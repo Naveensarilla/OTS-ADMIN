@@ -6,6 +6,7 @@ const TestUpdate = () => {
   const { testCreationTableId } = useParams();
   const [courses, setCourses] = useState([]);
   const [typeOfTests, setTypeOfTests] = useState([]);
+  const [instructionsData, setInstructionsData] = useState([]);
   const [testData, setTestData] = useState({
     TestName: '',
     selectedCourse: '',
@@ -22,6 +23,7 @@ const TestUpdate = () => {
     sectionName: '',
     noOfQuestions: '',
     QuestionLimit: '',
+    selectedInstruction:'',
   });
 
   const handleChange = (e) => {
@@ -42,17 +44,23 @@ const TestUpdate = () => {
     return formattedTime !== 'Invalid date' ? formattedTime : 'Invalid Time';
   }
 
-  const formatDate = (dateString) => {
-    if (!dateString) {
-      return '';
-    }
-    const date = new Date(dateString);
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const day = String(date.getDate()).padStart(2, '0');
+  // const formatDate = (dateString) => {
+  //   if (!dateString) {
+  //     return '';
+  //   }
+  //   const date = new Date(dateString);
+  //   const year = date.getFullYear();
+  //   const month = String(date.getMonth() + 1).padStart(2, '0');
+  //   const day = String(date.getDate()).padStart(2, '0');
 
-    return `${year}-${month}-${day}`;
-  };
+  //   return `${year}-${month}-${day}`;
+  // };
+  useEffect(() => {
+  fetch('http://localhost:3081/instructions')
+  .then((response) => response.json())
+  .then((data) => setInstructionsData(data))
+  .catch((error) => console.error('Error fetching courses:', error));
+  }, []);
 
   useEffect(() => {
     // Fetch courses from the API
@@ -85,6 +93,7 @@ const TestUpdate = () => {
           sectionName: data.sectionName,
           noOfQuestions: data.noOfQuestions,
           QuestionLimit: data.QuestionLimit,
+          selectedInstruction:data.instructionId,
         });
       })
       .catch((error) => console.error('Error fetching test data:', error));
@@ -116,9 +125,11 @@ const TestUpdate = () => {
           sectionName: testData.sectionName,
           noOfQuestions: testData.noOfQuestions,
           QuestionLimit: testData.QuestionLimit,
+          selectedInstruction:testData.selectedInstruction,
+
         }),
       });
-
+   
       const data = await response.json();
       console.log(data);
     } catch (error) {
@@ -177,13 +188,13 @@ const TestUpdate = () => {
         <br />
         <label>
           Test Start Date:
-          <input type="date" name="testStartDate" value={formatDate(testData.testStartDate)} onChange={handleChange} />
+          <input type="date" name="testStartDate" value={testData.testStartDate} onChange={handleChange} />
         </label>
         <br />
 
         <label>
           Test End Date:
-          <input type="date" name="testEndDate" value={formatDate(testData.testEndDate)} onChange={handleChange} />
+          <input type="date" name="testEndDate" value={testData.testEndDate} onChange={handleChange} />
         </label>
         <br />
 
@@ -230,6 +241,24 @@ const TestUpdate = () => {
           Question Limit:
           <input type="number" name="QuestionLimit" value={testData.QuestionLimit} onChange={handleChange} />
         </label>
+
+        <label>
+  Instructions:
+  <select
+    value={testData.selectedInstruction}
+    name="selectedInstruction"
+    onChange={handleChange}
+  >
+    <option value="">Select an instruction</option>
+    {instructionsData.map((instruction) => (
+      <option key={instruction.instructionId} value={instruction.instructionId}>
+        {instruction.instructionHeading}
+      </option>
+    ))}
+  </select>
+</label>
+
+
         <label>
           Calculator:
           <select name="calculator" value={testData.calculator} onChange={handleChange}>
