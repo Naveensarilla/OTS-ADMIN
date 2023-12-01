@@ -3,9 +3,11 @@ const mysql = require("mysql2/promise");
 const cors = require("cors");
 const multer = require("multer");
 const path = require("path");
+const cheerio = require("cheerio");
 const fs = require("fs").promises;
 const app = express();
 const port = 3081;
+
 
 app.use(express.json());
 app.use(cors());
@@ -32,7 +34,7 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage });
 
-//______________________exam creation start__________________________
+//______________________ exam creation start __________________________
 
 //-----------------------------geting subjects in exam creation page ------------------------
 app.get("/subjects", async (req, res) => {
