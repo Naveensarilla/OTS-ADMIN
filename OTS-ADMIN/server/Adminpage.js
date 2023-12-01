@@ -1339,6 +1339,9 @@ app.get("/testupdate/:testCreationTableId", async (req, res) => {
   }
 });
 
+
+
+app.put('/test-update/:testCreationTableId', async (req, res) => {
 app.put("/test-update/:testCreationTableId", async (req, res) => {
   const testCreationTableId = req.params.testCreationTableId;
   const {
@@ -1354,9 +1357,18 @@ app.put("/test-update/:testCreationTableId", async (req, res) => {
     totalMarks,
     calculator,
     status,
+    sectionId,
+    sectionName,
+    noOfQuestions,
+    QuestionLimit,
   } = req.body;
 
-  const updateQuery = `UPDATE test_creation_table SET TestName=?,courseCreationId=?,courseTypeOfTestId=?,testStartDate=?,testEndDate=?,testStartTime=?,testEndTime=?,Duration=?,TotalQuestions=?,totalMarks=?,calculator=?,status=? WHERE testCreationTableId=?`;
+  const updateQuery = `UPDATE test_creation_table 
+                       SET TestName=?, courseCreationId=?, courseTypeOfTestId=?, 
+                           testStartDate=?, testEndDate=?, testStartTime=?, 
+                           testEndTime=?, Duration=?, TotalQuestions=?, 
+                           totalMarks=?, calculator=?, status=?
+                       WHERE testCreationTableId=?`;
 
   try {
     await db.query(updateQuery, [
@@ -1375,6 +1387,20 @@ app.put("/test-update/:testCreationTableId", async (req, res) => {
       testCreationTableId,
     ]);
 
+    // Update section
+    const updateSectionQuery = `UPDATE sections 
+                                SET sectionName=?, noOfQuestions=?, QuestionLimit=? 
+                                WHERE testCreationTableId=? AND sectionId=?`;
+
+    await db.query(updateSectionQuery, [
+      sectionName,
+      noOfQuestions,
+      QuestionLimit,
+      testCreationTableId,
+      sectionId,
+    ]);
+
+    res.json({ message: 'Test and section updated successfully' });
     const selectedsections = req.body.selectedsections;
 
     // Check if selectedsections is an array before attempting to iterate over it
@@ -1407,6 +1433,9 @@ app.put("/test-update/:testCreationTableId", async (req, res) => {
     res.status(500).json({ error: "Internal Server Error" });
   }
 });
+
+
+
 
 //______________________end __________________________
 
