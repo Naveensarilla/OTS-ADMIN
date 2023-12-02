@@ -7,7 +7,7 @@ import Coursecreation from './components/Coursecreation.jsx';
 import NewExamUpdataion from './components/NewExamUpdataion.jsx'
 import Coureseupdate from './components/Coureseupdate.jsx';
 import InstructionPage from './components/InstructionPage.jsx';
-// import InstructionUpdate from './components/InstructionUpdate.jsx';
+import InstructionUpdate from './components/InstructionUpdate.jsx';
 import {UpdateInstruction} from './components/UpdateInstruction.jsx';
 import Testcreation from './components/Testcreation.jsx';
 import TestUpdate from './components/TestUpdate.jsx'
