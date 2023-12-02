@@ -44,7 +44,7 @@ const DocumentUpload = ({testCreationTableId}) => {
     formData.append('testCreationTableId', selectedTest);
 
     fetch('http://localhost:3082/upload', {
-      method: 'POST',
+      method: 'post',
       body: formData,
     })
       .then((response) => response.text())

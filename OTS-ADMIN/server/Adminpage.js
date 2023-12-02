@@ -3,6 +3,8 @@ const mysql = require("mysql2/promise");
 const cors = require("cors");
 const multer = require("multer");
 const path = require("path");
+const cheerio = require("cheerio");
+
 const fs = require("fs").promises;
 const app = express();
 const port = 3081;
@@ -1211,7 +1213,7 @@ app.post("/create-test", async (req, res) => {
 
   try {
     const [result] = await db.query(
-      "INSERT INTO test_creation_table (TestName, courseCreationId, courseTypeOfTestId, testStartDate, testEndDate, testStartTime, testEndTime, Duration, TotalQuestions, totalMarks, calculator, status, instructionId) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+      "INSERT INTO test_creation_table (TestName, courseCreationId, courseTypeOfTestId, testStartDate, testEndDate, testStartTime, testEndTime, Duration, TotalQuestions, totalMarks, calculator, status, instructionId) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,?)",
       [
         testName,
         selectedCourse,
@@ -1481,6 +1483,7 @@ app.get("/testupdate/:testCreationTableId", async (req, res) => {
 //   }
 // });
 
+
 app.put("/test-update/:testCreationTableId", async (req, res) => {
   const testCreationTableId = req.params.testCreationTableId;
   const {
@@ -1585,6 +1588,7 @@ app.get("/sections/:testCreationTableId", async (req, res) => {
     res.status(500).send("Internal Server Error");
   }
 });
+
 
 app.post("/upload", upload.single("document"), async (req, res) => {
   const docxFilePath = `uploads/${req.file.filename}`;
