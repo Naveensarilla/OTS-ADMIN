@@ -2,6 +2,7 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Header from './components/Header.jsx';
 import Leftnav from './components/Leftnav.jsx';
+import  Dashbaord from './components/Dashboard.jsx'
 import ExamCreation from './components/Examcreation.jsx';
 import Coursecreation from './components/Coursecreation.jsx';
 import NewExamUpdataion from './components/NewExamUpdataion.jsx'
@@ -18,7 +19,8 @@ function App() {
       <Header />
       <div className='common_grid_app'>
       <Leftnav />
-      <Routes>         
+      <Routes>  
+        <Route path='/' element={<Dashbaord />} />       
         <Route path="/exams" element={<ExamCreation />} />  
         <Route path='/update/:examId' element={<NewExamUpdataion/>} />
         <Route path='Coursecreation' element={<Coursecreation />} />

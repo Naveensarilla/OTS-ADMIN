@@ -30,8 +30,8 @@ const storage = multer.diskStorage({
   filename: (req, file, cb) => {
     // const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
     // cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname));
-    // cb(null, Date.now() + path.extname(file.originalname));
-    cb(null, file.originalname);
+    cb(null, Date.now() + path.extname(file.originalname));
+    // cb(null, file.originalname);
   },
 });
 
@@ -50,6 +50,7 @@ app.get('/subjects', async (req, res) => {
     res.status(500).json({ error: 'Internal Server Error' });
   }
 });
+
 app.get('/feachingexams/:examId', async (req, res) => {
   const { examId } = req.params;
   try {
@@ -708,7 +709,7 @@ app.use((req, res, next) => {
   next();
 });
 // kevin ---------
-app.post('/upload', upload.single('file'), async (req, res) => {
+app.post('/instructionupload', upload.single('file'), async (req, res) => {
   try {
     const { file } = req;
     const fileName = file.originalname;
@@ -1239,9 +1240,42 @@ async function insertRecord(table, record) {
       throw err;
   }
 }
+//_________________________________________________Dashboard_____________________________________
+app.get('/courses/count', async (req, res) => {
+  try {
+    const [results, fields] = await db.execute(
+      'SELECT COUNT(courseCreationId) AS count FROM course_creation_table'
+    );
+    res.json(results);
+  } catch (error) {
+    console.error('Error fetching course count:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+app.get('/test/count', async (req, res) => {
+  try {
+    const [results, fields] = await db.execute(
+      'SELECT COUNT(testCreationTableId) AS count FROM test_creation_table'
+    );
+    res.json(results);
+  } catch (error) {
+    console.error('Error fetching course count:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+app.get('/question/count', async (req, res) => {
+  try {
+    const [results, fields] = await db.execute(
+      'SELECT COUNT(qustion_id) AS count FROM questions'
+    );
+    res.json(results);
+  } catch (error) {
+    console.error('Error fetching course count:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
 
-
-
+//_____________________________________________________END________________________________
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
 });

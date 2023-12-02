@@ -60,7 +60,7 @@ const InstructionPage = () => {
                 formData.append('examId', selectedExam);
                 formData.append('instructionHeading', instructionHeading);
 
-                await axios.post('http://localhost:3081/upload', formData, {
+                await axios.post('http://localhost:3081/instructionupload', formData, {
                     headers: {
                         'Content-Type': 'multipart/form-data',
                     },
