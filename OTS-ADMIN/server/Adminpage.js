@@ -2,6 +2,8 @@ const express = require('express');
 const mysql = require('mysql2/promise');
 const cors = require('cors');
 const multer = require('multer');
+const mammoth = require('mammoth');
+const cheerio = require('cheerio');
 const path = require('path');
 const fs = require('fs').promises;
 const app = express();
@@ -17,7 +19,8 @@ const db = mysql.createPool({
   password: '',
   database: 'admin_project',
 });
-const mammoth = require('mammoth');
+
+
 const storage = multer.diskStorage({
   destination: async (req, file, cb) => {
     const uploadDir = 'uploads/';
@@ -27,7 +30,8 @@ const storage = multer.diskStorage({
   filename: (req, file, cb) => {
     // const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
     // cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname));
-    cb(null, Date.now() + path.extname(file.originalname));
+    // cb(null, Date.now() + path.extname(file.originalname));
+    cb(null, file.originalname);
   },
 });
 
@@ -609,6 +613,7 @@ app.get('/courseupdate/:courseCreationId', async (req, res) => {
       res.status(500).json({ error: 'Internal Server Error' });
     }
   });
+
 //______________________courese creation end __________________________
 //______________________INSTRUCTION page __________________________
 
@@ -1170,12 +1175,8 @@ app.get('/sections/:testCreationTableId', async (req, res) => {
 app.post('/upload', upload.single('document'), async (req, res) => {
   const docxFilePath = `uploads/${req.file.filename}`;
   const outputDir = `uploads/${req.file.originalname}_images`;
-
-  if (!fs.existsSync(outputDir)) {
-      fs.mkdirSync(outputDir);
-  }
-
   try {
+    await fs.mkdir(outputDir, { recursive: true });
       const result = await mammoth.convertToHtml({ path: docxFilePath });
       const htmlContent = result.value;
       const $ = cheerio.load(htmlContent);
@@ -1238,8 +1239,6 @@ async function insertRecord(table, record) {
       throw err;
   }
 }
-
-
 
 
 
