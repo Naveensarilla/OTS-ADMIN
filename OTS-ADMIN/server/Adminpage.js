@@ -609,79 +609,6 @@ app.get('/courseupdate/:courseCreationId', async (req, res) => {
       res.status(500).json({ error: 'Internal Server Error' });
     }
   });
-
-  // app.put('/update-course/:courseCreationId', async (req, res) => {
-  //   const courseCreationId = req.params.courseCreationId;
-  
-  //   const {
-  //     courseName,
-  //     selectedExam,
-  //     courseStartDate,
-  //     courseEndDate,
-  //     cost,
-  //     discount,
-  //     totalPrice,
-  //   } = req.body;
-  
-  //   const updateQuery = `
-  //     UPDATE course_creation_table
-  //     SET
-  //       courseName = ?,
-  //       examId = ?,
-  //       courseStartDate = ?,
-  //       courseEndDate = ?,
-  //       cost = ?,
-  //       Discount = ?,       
-  //       totalPrice = ?
-  //     WHERE courseCreationId = ?;
-  //   `;
-  
-  //   try {
-  //     await db.query(updateQuery, [
-  //       courseName,
-  //       selectedExam,
-  //       courseStartDate,
-  //       courseEndDate,
-  //       cost,
-  //       discount,
-  //       totalPrice,
-  //       courseCreationId,
-  //     ]);
-  //     const selectedtypeOfTests = req.body.selectedtypeOfTests;
-  //     const deleteTypeOfTestQuery = 'DELETE FROM course_typeoftests WHERE courseCreationId = ?';
-  //     await db.query(deleteTypeOfTestQuery, [courseCreationId]);
-  
-  //     const insertTestOfTestQuery = 'INSERT INTO course_typeoftests (courseCreationId, typeOfTestId) VALUES (?, ?)';
-  //     for (const typeOfTestId of selectedtypeOfTests) {
-  //       await db.query(insertTestOfTestQuery, [courseCreationId, typeOfTestId]);
-  //     }
-
-  //     // Handle subjects update (assuming course_subjects table has columns courseCreationId and subjectId)
-  //     const selectedSubjects = req.body.selectedSubjects;
-  //     const deleteSubjectsQuery = 'DELETE FROM course_subjects WHERE courseCreationId = ?';
-  //     await db.query(deleteSubjectsQuery, [courseCreationId]);
-  
-  //     const insertSubjectsQuery = 'INSERT INTO course_subjects (courseCreationId, subjectId) VALUES (?, ?)';
-  //     for (const subjectId of selectedSubjects) {
-  //       await db.query(insertSubjectsQuery, [courseCreationId, subjectId]);
-  //     }
-  
-  //     // Handle question types update (assuming course_type_of_question table has columns courseCreationId and quesionTypeId)
-  //     const selectedQuestionTypes = req.body.selectedQuestionTypes;
-  //     const deleteQuestionTypesQuery = 'DELETE FROM course_type_of_question WHERE courseCreationId = ?';
-  //     await db.query(deleteQuestionTypesQuery, [courseCreationId]);
-  
-  //     const insertQuestionTypesQuery = 'INSERT INTO course_type_of_question (courseCreationId, quesionTypeId) VALUES (?, ?)';
-  //     for (const quesionTypeId of selectedQuestionTypes) {
-  //       await db.query(insertQuestionTypesQuery, [courseCreationId, quesionTypeId]);
-  //     }
-  
-  //     res.json({ message: 'Course updated successfully' });
-  //   } catch (error) {
-  //     console.error(error);
-  //     res.status(500).json({ error: 'Internal Server Error' });
-  //   }
-  // });
 //______________________courese creation end __________________________
 //______________________INSTRUCTION page __________________________
 
@@ -1086,27 +1013,45 @@ app.get('/testupdate/:testCreationTableId', async (req, res) => {
 
   try {
     const [rows] = await db.query(`
-      SELECT 
-        test_creation_table.*, 
-        course_creation_table.courseName, 
-        type_of_test.TypeOfTestName,
-        sections.sectionName,
-        sections.noOfQuestions,
-        sections.QuestionLimit
-      FROM 
-        test_creation_table
-      INNER JOIN 
-        course_creation_table ON test_creation_table.courseCreationId = course_creation_table.courseCreationId
-      INNER JOIN 
-        course_typeoftests ON test_creation_table.courseTypeOfTestId = course_typeoftests.courseTypeOfTestId
-      INNER JOIN 
-        type_of_test ON course_typeoftests.TypeOfTestId = type_of_test.TypeOfTestId
-      INNER JOIN
-        sections ON test_creation_table.testCreationTableId = sections.testCreationTableId
-        INNER JOIN 
-        instruction  ON test_creation_table.instructionId = instruction.instructionId
-      WHERE 
-        test_creation_table.testCreationTableId = ?
+    SELECT
+    tc.testCreationTableId,
+    tc.TestName,
+    tc.testStartDate,
+    tc.testEndDate,
+    tc.testStartTime,
+    tc.testEndTime,
+    tc.Duration,
+    tc.TotalQuestions,
+    tc.totalMarks,
+    tc.calculator,
+    tc.status,
+    cc.courseCreationId,
+    cc.courseName,
+    ctt.courseTypeOfTestId,
+    tt.TypeOfTestName,
+    i.instructionId,
+    i.instructionHeading,
+    s.sectionName,
+    s.noOfQuestions,
+    s.QuestionLimit
+FROM
+    test_creation_table AS tc
+INNER JOIN course_creation_table AS cc
+ON
+    tc.courseCreationId = cc.courseCreationId
+INNER JOIN course_typeoftests AS ctt
+ON
+    tc.courseCreationId = ctt.courseCreationId
+INNER JOIN type_of_test AS tt
+ON
+    ctt.TypeOfTestId = tt.TypeOfTestId
+INNER JOIN instruction AS i
+ON
+    tc.instructionId = i.instructionId
+     INNER JOIN
+        sections AS s ON tc.testCreationTableId = s.testCreationTableId
+WHERE
+    tc.testCreationTableId = ?
     `, [testCreationTableId]);
 
     if (rows.length > 0) {
