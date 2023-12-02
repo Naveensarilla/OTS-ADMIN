@@ -65,7 +65,7 @@ const InstructionUpdate = () => {
             formData.append('examId', selectedExam);
             formData.append('instructionHeading', instructionHeading);
              formData.append('instruction', instructionPoint);
-            await axios.put(`http://localhost:3081/InstructionsUpdate/${instructionId}`, formData, {
+            await axios.put(`http://localhost:3081/instructionupload/${instructionId}`, formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data',
                 },

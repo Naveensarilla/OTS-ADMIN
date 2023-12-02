@@ -41,13 +41,13 @@ const Coureseupdate = () => {
           setSelectedExam(
             courseData.examId !== undefined ? courseData.examId.toString() : ""
           );
-          // setSelectedTypeOfTest(
+          // setSelectedTypeOfTests(
           //   courseData.typeOfTestId !== undefined
           //     ? courseData.typeOfTestId.toString()
           //     : ""
           // );
-          setCourseStartDate(formatDate(courseData.courseStartDate) || "");
-          setCourseEndDate(formatDate(courseData.courseEndDate) || "");
+          setCourseStartDate(courseData.courseStartDate || "");
+          setCourseEndDate(courseData.courseEndDate || "");
           setCost(
             courseData.cost !== undefined ? courseData.cost.toString() : ""
           );
@@ -112,7 +112,7 @@ const Coureseupdate = () => {
     const fetchQuestionTypes = async () => {
       try {
         const response = await axios.get(
-          "http://localhost:3081/question_types"
+          "http://localhost:3081/type_of_questions"
         );
         setQuestionTypes(response.data);
       } catch (error) {
@@ -214,17 +214,17 @@ const Coureseupdate = () => {
     setSelectedSubjects(updatedSubjects);
   };
 
-  const formatDate = (dateString) => {
-    if (!dateString) {
-      return "";
-    }
-    const date = new Date(dateString);
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, "0");
-    const day = String(date.getDate()).padStart(2, "0");
+  // const formatDate = (dateString) => {
+  //   if (!dateString) {
+  //     return "";
+  //   }
+  //   const date = new Date(dateString);
+  //   const year = date.getFullYear();
+  //   const month = String(date.getMonth() + 1).padStart(2, "0");
+  //   const day = String(date.getDate()).padStart(2, "0");
 
-    return `${year}-${month}-${day}`;
-  };
+  //   return `${year}-${month}-${day}`;
+  // };
 
   const handleCalculateTotal = () => {
     // Assuming cost and discount are numbers
@@ -381,7 +381,7 @@ const Coureseupdate = () => {
       </label>
       <input
           type="date"
-          value={formatDate(courseStartDate)}
+          value={courseStartDate}
           onChange={(e) => setCourseStartDate(e.target.value)}
 
           min={new Date().toISOString().split("T")[0]} // Set max attribute to today
@@ -397,7 +397,7 @@ const Coureseupdate = () => {
       </label>
       <input
           type="date"
-          value={formatDate(courseEndDate)}
+          value={courseEndDate}
           onChange={(e) => setCourseEndDate(e.target.value)}
 
           min={new Date().toISOString().split("T")[0]} // Set max attribute to today
