@@ -19,22 +19,15 @@ const Leftnav = () => {
                   </div>
     <div className={showMenu?"left-nav-bar left-nav-bar_":"left-nav-bar"}>
        <ul className='left-nav-bar-ul'>
+        <li><Link to="/">Dashboard</Link></li>
       <li><Link to="/exams" >Exam Creation</Link></li>
       <li><Link to="/Coursecreation">Course Creation</Link></li>
       <li><Link to="/InstructionPage" >Instruction</Link></li>
-
-    
-
-        
-
       <li><Link to="/Testcreation">Test Creation</Link></li>     
-
+      <li><Link to="/DocumentUpload">Document Upload</Link></li>  
       </ul>
     </div>
-    </div>
-
-
-                 
+    </div>          
     </>
   )
 }

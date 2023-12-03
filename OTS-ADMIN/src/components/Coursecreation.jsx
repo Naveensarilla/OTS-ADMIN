@@ -119,21 +119,34 @@ const Coursecreation = () => {
     setSelectedexams(selectedExamId);
   };
 
+  // const handleSubjectChange = (event, subjectId) => {
+  //   const { checked } = event.target;
+  
+  //   const subject = subjectsData.find((subj) => subj.subjectId === subjectId);
+  
+  //   if (subject) {
+  //     setSelectedSubjects((prevSelectedSubjects) => {
+  //       const updatedSelectedSubjects = checked
+  //         ? [...prevSelectedSubjects, subjectId]
+  //         : prevSelectedSubjects.filter((id) => id !== subjectId);
+  
+  //       console.log('Selected Subjects:', updatedSelectedSubjects);
+  //       return updatedSelectedSubjects;
+  //     });
+  //   }
+  // };
   const handleSubjectChange = (event, subjectId) => {
     const { checked } = event.target;
   
-    const subject = subjectsData.find((subj) => subj.subjectId === subjectId);
-  
-    if (subject) {
-      setSelectedSubjects((prevSelectedSubjects) => {
-        const updatedSelectedSubjects = checked
-          ? [...prevSelectedSubjects, subjectId]
-          : prevSelectedSubjects.filter((id) => id !== subjectId);
-  
-        console.log('Selected Subjects:', updatedSelectedSubjects);
-        return updatedSelectedSubjects;
-      });
-    }
+    setSelectedSubjects((prevSelectedSubjects) => {
+      if (checked) {
+        // Add the subjectId to the array if it's not already present
+        return [...new Set([...prevSelectedSubjects, subjectId])];
+      } else {
+        // Remove the subjectId from the array
+        return prevSelectedSubjects.filter((id) => id !== subjectId);
+      }
+    });
   };
   
   useEffect(() => {
@@ -304,13 +317,13 @@ const Coursecreation = () => {
     }
   };
 
-  function formatDate(dateString) {
-    const date = new Date(dateString);
-    const day = date.getDate().toString().padStart(2, "0");
-    const month = (date.getMonth() + 1).toString().padStart(2, "0"); // Month is 0-based
-    const year = date.getFullYear();
-    return `${day}/${month}/${year}`;
-  }
+  // function formatDate(dateString) {
+  //   const date = new Date(dateString);
+  //   const day = date.getDate().toString().padStart(2, "0");
+  //   const month = (date.getMonth() + 1).toString().padStart(2, "0"); // Month is 0-based
+  //   const year = date.getFullYear();
+  //   return `${day}/${month}/${year}`;
+  // }
 
   const handleDelete = async (courseCreationId) => {
     // Display a confirmation dialog before deleting
@@ -598,14 +611,12 @@ const Coursecreation = () => {
               <tr key={course.courseCreationId}>
                 <td>{index + 1}</td>
                 <td>{course.courseName}</td>
-                 <td>
+                <td>
                   {Array.isArray(course.typeOfTestName) &&
                   course.typeOfTestName.length > 0
                     ? course.typeOfTestName.join(", ")
                     : "N/A"}
                 </td>
-              
-
                 <td>{course.examName}</td>
                 <td>
                   {Array.isArray(course.subjects) && course.subjects.length > 0
@@ -618,16 +629,14 @@ const Coursecreation = () => {
                     ? course.typeofQuestion.join(", ")
                     : "N/A"}
                 </td>
-                <td>{formatDate(course.courseStartDate)}</td>
-                <td>{formatDate(course.courseEndDate)}</td>
+                <td>{course.courseStartDate}</td>
+                <td>{course.courseEndDate}</td>
                 <td>{course.cost}</td>
                 <td>{course.Discount}</td>
                 <td>{course.totalPrice}</td>
                 <td>
-
                   <div className="courseupdate_btn_container">
                     <Link to={`/courseupdate/${course.courseCreationId}`}>
-                      {" "}
                       <button className="courseupdate_btn">
                         <i className="fa-solid fa-pencil"></i>
                       </button>

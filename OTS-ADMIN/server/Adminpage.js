@@ -2,8 +2,10 @@ const express = require('express');
 const mysql = require('mysql2/promise');
 const cors = require('cors');
 const multer = require('multer');
+const mammoth = require('mammoth');
+const cheerio = require('cheerio');
 const path = require('path');
-// const fs = require('fs').promises;
+const fs = require('fs').promises;
 const app = express();
 const port = 3081;
 
@@ -18,19 +20,22 @@ const db = mysql.createPool({
   database: 'admin_project',
 });
 
-// const storage = multer.diskStorage({
-//   destination: async (req, file, cb) => {
-//     const uploadDir = 'uploads/';
-//     await fs.mkdir(uploadDir, { recursive: true });
-//     cb(null, uploadDir);
-//   },
-//   filename: (req, file, cb) => {
-//     const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-//     cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname));
-//   },
-// });
 
-// const upload = multer({ storage });
+const storage = multer.diskStorage({
+  destination: async (req, file, cb) => {
+    const uploadDir = 'uploads/';
+    await fs.mkdir(uploadDir, { recursive: true });
+    cb(null, uploadDir);
+  },
+  filename: (req, file, cb) => {
+    // const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    // cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname));
+    cb(null, Date.now() + path.extname(file.originalname));
+    // cb(null, file.originalname);
+  },
+});
+
+const upload = multer({ storage });
 
 //______________________exam creation start__________________________
 
@@ -45,6 +50,73 @@ app.get('/subjects', async (req, res) => {
     res.status(500).json({ error: 'Internal Server Error' });
   }
 });
+
+app.get('/feachingexams/:examId', async (req, res) => {
+  const { examId } = req.params;
+  try {
+    // Fetch exams from the database
+    const [rows] = await db.query('SELECT * FROM exams WHERE examId = ?', [examId]);
+
+    res.json(rows);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
+app.get('/exams/:examId/subjects', async (req, res) => {
+  const { examId } = req.params;
+
+  try {
+    console.log('Fetching subjects for examId:', examId);
+
+    const [rows] = await db.query(
+      'SELECT subjectId FROM exam_creation_table WHERE examId = ?',
+      [examId]
+    );
+
+    const selectedSubjects = rows.map(row => row.subjectId);
+    console.log('Selected subjects:', selectedSubjects);
+
+    res.json(selectedSubjects);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
+
+app.put('/update/:examId', async (req, res) => {
+  const { examId } = req.params;
+  const { examName, startDate, endDate, subjects } = req.body;
+
+  try {
+    // Update data in the exams table
+    await db.query('UPDATE exams SET examName = ?, startDate = ?, endDate = ? WHERE examId = ?', [examName, startDate, endDate, examId]);
+
+    // Update subjects in the exam_creation_table
+    // 1. Delete existing subjects that are not in the updated list
+    await db.query('DELETE FROM exam_creation_table WHERE examId = ? AND subjectId NOT IN (?)', [examId, subjects]);
+
+    // 2. Insert new subjects that are not already in the table
+    const existingSubjects = await db.query('SELECT subjectId FROM exam_creation_table WHERE examId = ?', [examId]);
+    const existingSubjectIds = existingSubjects[0].map(row => row.subjectId);
+
+    const newSubjects = subjects.filter(subjectId => !existingSubjectIds.includes(subjectId));
+
+    const subjectInsertPromises = newSubjects.map(subjectId =>
+      db.query('INSERT INTO exam_creation_table (examId, subjectId) VALUES (?, ?)', [examId, subjectId])
+    );
+
+    await Promise.all(subjectInsertPromises);
+
+    res.json({ success: true, message: 'Exam data updated successfully' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
 //--------------------------------------------END--------------------------------------------------
 //---------------------------------------------inserting exam creation page data-------------------------------------------------
 
@@ -171,20 +243,21 @@ app.put('/updatedata/:examId', async (req, res) => {
     res.status(500).json({ error: 'Internal Server Error' });
   }
 });
+
 //--------------------------------------------END--------------------------------------------------
 //--------------------------------------------geting only selected subjects in edit page--------------------------------------------------
-app.get('/exams/:examId/subjects', async (req, res) => {
-    const examId = req.params.examId;
+// app.get('/exams/:examId/subjects', async (req, res) => {
+//     const examId = req.params.examId;
   
-    try {
-      const [rows] = await db.query('SELECT subjectId FROM exam_creation_table WHERE examId = ?', [examId]);
-      const selectedSubjects = rows.map(row => row.subjectId);
-      res.json(selectedSubjects);
-    } catch (error) {
-      console.error(error);
-      res.status(500).json({ error: 'Internal Server Error' });
-    }
-  });
+//     try {
+//       const [rows] = await db.query('SELECT subjectId FROM exam_creation_table WHERE examId = ?', [examId]);
+//       const selectedSubjects = rows.map(row => row.subjectId);
+//       res.json(selectedSubjects);
+//     } catch (error) {
+//       console.error(error);
+//       res.status(500).json({ error: 'Internal Server Error' });
+//     }
+//   });
 //--------------------------------------------END--------------------------------------------------
 //--------------------------------------------updating subjects--------------------------------------------------
   app.put('/exams/:examId/subjects', async (req, res) => {
@@ -233,18 +306,6 @@ app.get('/type_of_questions', async (req, res) => {
     res.status(500).json({ error: 'Internal Server Error' });
   }
 });
-// app.get('/question_types', async (req, res) => {
-//   try {
-//     const query = 'SELECT * FROM quesion_type'; // Replace with your actual query
-//     const [rows] = await db.query(query);
-//     res.json(rows);
-//   } catch (error) {
-//     console.error(error);
-//     res.status(500).json({ error: 'Internal Server Error' });
-//   }
-// });
-
-
 // --------------- fetch exams -----------------------------
 app.get('/courese-exams', async (req, res) =>{
   try{
@@ -322,6 +383,7 @@ app.post('/course_type_of_question', async (req, res) => {
     }
     
     // Insert subjects into the course_subjects table
+    console.log('Received data:', req.body);
     for (const subjectId of subjectIds) {
       const query = 'INSERT INTO course_subjects (courseCreationId, subjectId) VALUES (?, ?)';
       const values = [courseCreationId, subjectId]
@@ -345,7 +407,7 @@ app.post('/course_type_of_question', async (req, res) => {
   }
 });
 
-// --------------- geting data into course_creation_table,course_typeOftests,course_subjects,course_type_of_question  -----------------------------
+// --------------- geting data  course_creation_table,course_typeOftests,course_subjects,course_type_of_question  -----------------------------
 app.get('/course_creation_table', async (req, res) => {
   try {
     const query = `
@@ -553,10 +615,41 @@ app.get('/courseupdate/:courseCreationId', async (req, res) => {
     }
   });
 
-  app.put('/update-course/:courseCreationId', async (req, res) => {
-    const courseCreationId = req.params.courseCreationId;
-  
-    const {
+//______________________courese creation end __________________________
+//______________________INSTRUCTION page __________________________
+
+
+app.put('/update-course/:courseCreationId', async (req, res) => {
+  const courseCreationId = req.params.courseCreationId;
+
+  const {
+    courseName,
+    selectedExam,
+    courseStartDate,
+    courseEndDate,
+    cost,
+    discount,
+    totalPrice,
+    selectedTypeOfTests,
+    selectedSubjects,
+    selectedQuestionTypes,
+  } = req.body;
+
+  const updateQuery = `
+    UPDATE course_creation_table
+    SET
+      courseName = ?,
+      examId = ?,
+      courseStartDate = ?,
+      courseEndDate = ?,
+      cost = ?,
+      Discount = ?,       
+      totalPrice = ?
+    WHERE courseCreationId = ?;
+  `;
+
+  try {
+    await db.query(updateQuery, [
       courseName,
       selectedExam,
       courseStartDate,
@@ -564,69 +657,247 @@ app.get('/courseupdate/:courseCreationId', async (req, res) => {
       cost,
       discount,
       totalPrice,
-    } = req.body;
-  
-    const updateQuery = `
-      UPDATE course_creation_table
-      SET
-        courseName = ?,
-        examId = ?,
-        courseStartDate = ?,
-        courseEndDate = ?,
-        cost = ?,
-        Discount = ?,       
-        totalPrice = ?
-      WHERE courseCreationId = ?;
-    `;
-  
-    try {
-      await db.query(updateQuery, [
-        courseName,
-        selectedExam,
-        courseStartDate,
-        courseEndDate,
-        cost,
-        discount,
-        totalPrice,
-        courseCreationId,
-      ]);
-      const selectedtypeOfTest = req.body.selectedtypeOfTest;
-      const deleteTypeOfTestQuery = 'DELETE FROM course_typeoftests WHERE courseCreationId = ?';
-      await db.query(deleteTypeOfTestQuery, [courseCreationId]);
-  
-      const insertTestOfTestQuery = 'INSERT INTO course_typeoftests (courseCreationId, typeOfTestId) VALUES (?, ?)';
-      for (const typeOfTestId of selectedtypeOfTest) {
-        await db.query(insertTestOfTestQuery, [courseCreationId, typeOfTestId]);
-      }
+      courseCreationId,
+    ]);
 
-      // Handle subjects update (assuming course_subjects table has columns courseCreationId and subjectId)
-      const selectedSubjects = req.body.selectedSubjects;
-      const deleteSubjectsQuery = 'DELETE FROM course_subjects WHERE courseCreationId = ?';
-      await db.query(deleteSubjectsQuery, [courseCreationId]);
-  
-      const insertSubjectsQuery = 'INSERT INTO course_subjects (courseCreationId, subjectId) VALUES (?, ?)';
-      for (const subjectId of selectedSubjects) {
-        await db.query(insertSubjectsQuery, [courseCreationId, subjectId]);
-      }
-  
-      // Handle question types update (assuming course_type_of_question table has columns courseCreationId and quesionTypeId)
-      const selectedQuestionTypes = req.body.selectedQuestionTypes;
-      const deleteQuestionTypesQuery = 'DELETE FROM course_type_of_question WHERE courseCreationId = ?';
-      await db.query(deleteQuestionTypesQuery, [courseCreationId]);
-  
-      const insertQuestionTypesQuery = 'INSERT INTO course_type_of_question (courseCreationId, quesionTypeId) VALUES (?, ?)';
-      for (const quesionTypeId of selectedQuestionTypes) {
-        await db.query(insertQuestionTypesQuery, [courseCreationId, quesionTypeId]);
-      }
-  
-      res.json({ message: 'Course updated successfully' });
-    } catch (error) {
-      console.error(error);
-      res.status(500).json({ error: 'Internal Server Error' });
+    // Handle type of tests update
+    const deleteTypeOfTestQuery = 'DELETE FROM course_typeoftests WHERE courseCreationId = ?';
+    await db.query(deleteTypeOfTestQuery, [courseCreationId]);
+
+    const insertTestOfTestQuery = 'INSERT INTO course_typeoftests (courseCreationId, typeOfTestId) VALUES (?, ?)';
+    for (const typeOfTestId of selectedTypeOfTests) {
+      await db.query(insertTestOfTestQuery, [courseCreationId, typeOfTestId]);
     }
-  });
-//______________________courese creation end __________________________
-//______________________INSTRUCTION page __________________________
+
+    // Handle subjects update (assuming course_subjects table has columns courseCreationId and subjectId)
+    const deleteSubjectsQuery = 'DELETE FROM course_subjects WHERE courseCreationId = ?';
+    await db.query(deleteSubjectsQuery, [courseCreationId]);
+
+    const insertSubjectsQuery = 'INSERT INTO course_subjects (courseCreationId, subjectId) VALUES (?, ?)';
+    for (const subjectId of selectedSubjects) {
+      await db.query(insertSubjectsQuery, [courseCreationId, subjectId]);
+    }
+
+    // Handle question types update (assuming course_type_of_question table has columns courseCreationId and quesionTypeId)
+    const deleteQuestionTypesQuery = 'DELETE FROM course_type_of_question WHERE courseCreationId = ?';
+    await db.query(deleteQuestionTypesQuery, [courseCreationId]);
+
+    const insertQuestionTypesQuery = 'INSERT INTO course_type_of_question (courseCreationId, quesionTypeId) VALUES (?, ?)';
+    for (const quesionTypeId of selectedQuestionTypes) {
+      await db.query(insertQuestionTypesQuery, [courseCreationId, quesionTypeId]);
+    }
+
+    res.json({ message: 'Course updated successfully' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
+app.get('/exams', async (req, res) => {
+  try {
+    const query = 'SELECT examId,examName FROM exams'; 
+    const [rows] = await db.query(query);
+    res.json(rows);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+} )
+app.use((req, res, next) => {
+  res.setHeader('Content-Type', 'text/html; charset=utf-8');
+  next();
+});
+// kevin ---------
+app.post('/instructionupload', upload.single('file'), async (req, res) => {
+  try {
+    const { file } = req;
+    const fileName = file.originalname;
+
+    // Read the content of the Word document
+    const { value: fileContent } = await mammoth.extractRawText({ path: file.path });
+
+    // Split the text into points based on a specific delimiter (e.g., dot)
+    const pointsArray = fileContent.split('/').map(point => point.trim());
+
+    // Filter out empty points
+    const filteredPointsArray = pointsArray.filter(point => point !== '');
+
+    // Join the array of points with a separator (e.g., comma)
+    const pointsText = filteredPointsArray.join(', ');
+
+    // Insert data into the instruction table
+    const queryInstruction = 'INSERT INTO instruction (examId, instructionHeading, documentName) VALUES (?, ?,  ?)';
+    const valuesInstruction = [req.body.examId, req.body.instructionHeading,  fileName];
+    
+    const resultInstruction = await db.query(queryInstruction, valuesInstruction);
+
+if (!resultInstruction || resultInstruction[0].affectedRows !== 1) {
+  // Handle the case where the query did not succeed
+  console.error('Error uploading file: Failed to insert into instruction table.', resultInstruction);
+  res.status(500).send('Failed to upload file.');
+  return;
+}
+
+const instructionId = resultInstruction[0].insertId;
+
+
+    // Log the obtained instructionId
+    console.log('Obtained instructionId:', instructionId);
+
+    // Insert each point into the instructions_points table with the correct instructionId
+    const queryPoints = 'INSERT INTO instructions_points (examId, points, instructionId) VALUES (?, ?, ?)';
+    for (const point of filteredPointsArray) {
+      // Log each point and instructionId before the insertion
+      console.log('Inserting point:', point, 'with instructionId:', instructionId);
+      await db.query(queryPoints, [req.body.examId, point, instructionId]);
+    }
+
+    // Log data to the console
+    console.log('File uploaded successfully:', {
+      success: true,
+      instructionId,
+      message: 'File uploaded successfully.',
+    });
+
+    // Respond with a simple success message
+    res.send('File uploaded successfully');
+  } catch (error) {
+    // Log error to the console
+    console.error('Error uploading file:', error);
+
+    // Respond with a simple error message
+    res.status(500).send('Failed to upload file.');
+  }
+});
+
+
+
+app.get('/instructionpointsGet', async (req, res) => {
+  try {
+    // Extract examId from request parameters
+    const { instructionId } = req.params;
+
+    // Select all points for the specified examId from the instructions_points table
+    const query = 'SELECT * FROM instructions_points';
+    const [rows] = await db.query(query, [instructionId]);
+
+    // Send the fetched data in the response
+    res.json({ success: true, points: rows });
+  } catch (error) {
+    console.error('Error fetching instruction points:', error);
+
+    // Send a consistent error response
+    res.status(500).json({ success: false, message: 'Failed to fetch instruction points.', error: error.message });
+  }
+});
+
+app.get('/instructionpoints/:instructionId/:id', async (req, res) => {
+  try {
+    const { instructionId, id } = req.params;
+
+    // Select points for the specified instructionId and examId from the instructions_points table
+    const query = 'SELECT * FROM instructions_points WHERE instructionId = ? AND id = ?';
+    const [rows] = await db.query(query, [instructionId, id]);
+
+    // Send the fetched data in the response
+    res.json({ success: true, points: rows });
+  } catch (error) {
+    console.error('Error fetching instruction points:', error);
+
+    // Send a consistent error response
+    res.status(500).json({ success: false, message: 'Failed to fetch instruction points.', error: error.message });
+  }
+});
+
+
+// Assuming you have an Express app and a MySQL connection pool (`db`)
+
+app.put('/updatepoints/:instructionId/:id', async (req, res) => {
+  try {
+    const { instructionId, id } = req.params;
+    const { points } = req.body;
+
+    // Update the instruction point in the database
+    const updateQuery = 'UPDATE instructions_points SET points = ? WHERE instructionId = ? AND id = ?';
+    await db.query(updateQuery, [points, instructionId, id]);
+
+    res.json({ success: true, message: 'Instruction points updated successfully.' });
+  } catch (error) {
+    console.error('Error updating instruction points:', error);
+    res.status(500).json({ success: false, message: 'Failed to update instruction points.' });
+  }
+});
+
+
+// its delets evrey this 
+app.delete('/deleteinstruction/:instructionId', async (req, res) => {
+  try {
+    const { instructionId } = req.params;
+
+    // Delete data from the instructions_points table
+    const deletePointsQuery = 'DELETE FROM instructions_points WHERE instructionId = ?';
+    const [deletePointsResult] = await db.query(deletePointsQuery, [instructionId]);
+
+    // Delete data from the instruction table
+    const deleteInstructionQuery = 'DELETE FROM instruction WHERE instructionId = ?';
+    const [deleteInstructionResult] = await db.query(deleteInstructionQuery, [instructionId]);
+
+    if (deletePointsResult.affectedRows > 0 || deleteInstructionResult.affectedRows > 0) {
+      res.json({ success: true, message: 'Data deleted successfully.' });
+    } else {
+      res.status(404).json({ success: false, message: 'No data found for the given instructionId.' });
+    }
+  } catch (error) {
+    console.error('Error deleting data:', error);
+    res.status(500).json({ success: false, message: 'Failed to delete data.', error: error.message });
+  }
+});
+
+
+
+// Add a new route to handle the deletion of a specific point
+app.delete('/deletepoint/:instructionId/:id', async (req, res) => {
+  try {
+    const { instructionId, id } = req.params;
+
+    // Delete the point from the instructions_points table
+    const deletePointQuery = 'DELETE FROM instructions_points WHERE instructionId = ? AND id = ?';
+    const [deleteResult] = await db.query(deletePointQuery, [instructionId, id]);
+
+    if (deleteResult.affectedRows > 0) {
+      res.json({ success: true, message: 'Point deleted successfully.' });
+    } else {
+      res.status(404).json({ success: false, message: 'No point found for the given instructionId and id.' });
+    }
+  } catch (error) {
+    console.error('Error deleting point:', error);
+    res.status(500).json({ success: false, message: 'Failed to delete point.', error: error.message });
+  }
+});
+
+
+app.get('/instructionpointEdit/:instructionId', async (req, res) => {
+  const instructionId = req.params.instructionId;
+
+  try {
+    // Select all points for a specific instructionId from the instructions_points table
+    const query = 'SELECT * FROM instructions_points WHERE instructionId = ?';
+    const [rows] = await db.query(query, [instructionId]);
+
+    // Send the fetched data in the response
+    res.json({ success: true, points: rows });
+  } catch (error) {
+    console.error('Error fetching instruction points:', error);
+
+    // Send a consistent error response
+    res.status(500).json({ success: false, message: 'Failed to fetch instruction points.', error: error.message });
+  }
+});
+
+
+
+
 //______________________end __________________________
 
 //______________________TEST CREATION PAGE __________________________
@@ -646,6 +917,7 @@ app.post('/create-test', async (req, res) => {
   const {
     testName,
     selectedCourse,
+    selectedtypeOfTest,  // Assuming this is the correct property name
     startDate,
     startTime,
     endDate,
@@ -655,17 +927,31 @@ app.post('/create-test', async (req, res) => {
     totalMarks,
     calculator,
     status,
+    sectionsData,
+    selectedInstruction,
   } = req.body;
 
   try {
     const [result] = await db.query(
-      'INSERT INTO test_creation_table (TestName, courseCreationId, testStartDate, teatEndDate, testStartTime, testEndTime, Duration, TotalQuestions, totalMarks, calculator, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
-      [testName, selectedCourse, startDate, endDate, startTime, endTime, duration, totalQuestions, totalMarks, calculator, status]
+      'INSERT INTO test_creation_table (TestName, courseCreationId, courseTypeOfTestId, testStartDate, testEndDate, testStartTime, testEndTime, Duration, TotalQuestions, totalMarks, calculator, status, instructionId) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+      [testName, selectedCourse, selectedtypeOfTest, startDate, endDate, startTime, endTime, duration, totalQuestions, totalMarks, calculator, status, selectedInstruction]
     );
 
     if (result && result.insertId) {
       const testCreationTableId = result.insertId;
-      res.json({ success: true, testCreationTableId, message: 'Test created successfully' });
+
+      // Process sectionsData and insert into sections table
+      const results = await Promise.all(
+        sectionsData.map(async (section) => {
+          const [sectionResult] = await db.query(
+            'INSERT INTO sections (testCreationTableId, sectionName, noOfQuestions, QuestionLimit) VALUES (?, ?, ?, ?)',
+            [testCreationTableId, section.sectionName || null, section.noOfQuestions, section.QuestionLimit || null]
+          );
+          return sectionResult;
+        })
+      );
+
+      res.json({ success: true, testCreationTableId, results, message: 'Test created successfully' });
     }
   } catch (error) {
     console.error('Error creating test:', error);
@@ -674,8 +960,358 @@ app.post('/create-test', async (req, res) => {
 });
 
 
+app.get('/instructions', async (req, res) => {
+  try {
+    const [instructions] = await db.query('SELECT instructionId, instructionHeading FROM instruction');
+    res.json(instructions);
+  } catch (error) {
+    console.error('Error fetching instructions:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+// Add this new API endpoint
+app.get('/course-typeoftests/:courseCreationId', async (req, res) => {
+  const { courseCreationId } = req.params;
+
+  try {
+    const [rows] = await db.query(
+      'SELECT type_of_test.TypeOfTestId, type_of_test.TypeOfTestName,course_typeoftests.courseTypeOfTestId ' +
+      'FROM course_typeoftests ' +
+      'INNER JOIN type_of_test ON course_typeoftests.TypeOfTestId = type_of_test.TypeOfTestId ' +
+      'WHERE course_typeoftests.courseCreationId = ?',
+      [courseCreationId]
+    );
+
+    res.json(rows);
+  } catch (error) {
+    console.error('Error fetching course_typeoftests:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
+
+app.get('/test_creation_table', async (req, res) => {
+  try {
+    const query =` SELECT tt.testCreationTableId,tt.TestName,cc.courseName,tt.testStartDate,tt.testEndDate,tt.testStartTime,tt.testEndTime,tt.status  FROM test_creation_table tt JOIN  course_creation_table cc ON tt.courseCreationId=cc.courseCreationId `
+    const [rows] = await db.query(query);
+    res.json(rows);
+  } catch (error) {
+    console.error('Error creating sections:', error);
+    res.status(500).json({ success: false, error: 'Internal Server Error' });
+  }
+});
+
+app.delete('/test_table_data_delete/:testCreationTableId', async (req, res) => {
+  const testCreationTableId = req.params.testCreationTableId;
+
+  try {
+    await db.query('DELETE test_creation_table, sections FROM test_creation_table LEFT JOIN sections ON test_creation_table.testCreationTableId = sections.testCreationTableId WHERE test_creation_table.testCreationTableId = ?', [testCreationTableId]);
+    res.json({ message: `course with ID ${testCreationTableId} deleted from the database` });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
+
+app.get('/testupdate/:testCreationTableId', async (req, res) => {
+  const { testCreationTableId } = req.params;
+
+  try {
+    const [rows] = await db.query(`
+    SELECT
+    tc.testCreationTableId,
+    tc.TestName,
+    tc.testStartDate,
+    tc.testEndDate,
+    tc.testStartTime,
+    tc.testEndTime,
+    tc.Duration,
+    tc.TotalQuestions,
+    tc.totalMarks,
+    tc.calculator,
+    tc.status,
+    cc.courseCreationId,
+    cc.courseName,
+    ctt.courseTypeOfTestId,
+    tt.TypeOfTestName,
+    i.instructionId,
+    i.instructionHeading,
+    s.sectionName,
+    s.noOfQuestions,
+    s.QuestionLimit
+FROM
+    test_creation_table AS tc
+INNER JOIN course_creation_table AS cc
+ON
+    tc.courseCreationId = cc.courseCreationId
+INNER JOIN course_typeoftests AS ctt
+ON
+    tc.courseCreationId = ctt.courseCreationId
+INNER JOIN type_of_test AS tt
+ON
+    ctt.TypeOfTestId = tt.TypeOfTestId
+INNER JOIN instruction AS i
+ON
+    tc.instructionId = i.instructionId
+     INNER JOIN
+        sections AS s ON tc.testCreationTableId = s.testCreationTableId
+WHERE
+    tc.testCreationTableId = ?
+    `, [testCreationTableId]);
+
+    if (rows.length > 0) {
+      res.json(rows[0]);
+    } else {
+      res.status(404).json({ error: 'Test not found' });
+    }
+  } catch (error) {
+    console.error('Error fetching test data:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
+
+
+app.put('/test-update/:testCreationTableId', async (req, res) => {
+  const testCreationTableId = req.params.testCreationTableId;
+  const {
+    TestName,
+    selectedCourse,
+    selectedTypeOfTests,
+    testStartDate,
+    testEndDate,
+    testStartTime,
+    testEndTime,
+    Duration,
+    TotalQuestions,
+    totalMarks,
+    calculator,
+    status,
+    sectionId,
+    sectionName,
+    noOfQuestions,
+    QuestionLimit,
+    selectedInstruction,
+  } = req.body;
+
+  const updateQuery = `UPDATE test_creation_table 
+                       SET TestName=?, courseCreationId=?, courseTypeOfTestId=?, 
+                           testStartDate=?, testEndDate=?, testStartTime=?, 
+                           testEndTime=?, Duration=?, TotalQuestions=?, 
+                           totalMarks=?, calculator=?, status=?, instructionId=?
+                       WHERE testCreationTableId=?`;
+
+  try {
+    await db.query(updateQuery, [
+      TestName,
+      selectedCourse,
+      selectedTypeOfTests,
+      testStartDate,
+      testEndDate,
+      testStartTime,
+      testEndTime,
+      Duration,
+      TotalQuestions,
+      totalMarks,
+      calculator,
+      status,
+      selectedInstruction,
+      testCreationTableId,
+    ]);
+
+    // Log the update result
+    const updateResult = await db.query('SELECT * FROM test_creation_table WHERE testCreationTableId = ?', [testCreationTableId]);
+    console.log('Update Result:', updateResult);
+
+    // Update section
+    const updateSectionQuery = `UPDATE sections 
+                                SET sectionName=?, noOfQuestions=?, QuestionLimit=? 
+                                WHERE testCreationTableId=? AND sectionId=?`;
+
+    await db.query(updateSectionQuery, [
+      sectionName,
+      noOfQuestions,
+      QuestionLimit,
+      testCreationTableId,
+      sectionId,
+    ]);
+
+    res.json({ message: 'Test and section updated successfully' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
+
+
+
 
 //______________________end __________________________
+
+//________________________________________Document upload_________________________________
+
+app.get('/tests', async (req, res) => {
+  try {
+      const [rows] = await db.query('SELECT testCreationTableId, TestName FROM test_creation_table');
+      res.json(rows);
+  } catch (error) {
+      console.error('Error fetching test data:', error);
+      res.status(500).send('Internal Server Error');
+  }
+});
+
+app.get('/sections/:testCreationTableId', async (req, res) => {
+  const { testCreationTableId } = req.params;
+  try {
+      const [rows] = await db.query('SELECT testCreationTableId, sectionId, sectionName FROM sections WHERE testCreationTableId = ?', [testCreationTableId]);
+      res.json(rows);
+  } catch (error) {
+      console.error('Error fetching sections data:', error);
+      res.status(500).send('Internal Server Error');
+  }
+});
+
+app.post('/upload', upload.single('document'), async (req, res) => {
+  const docxFilePath = `uploads/${req.file.filename}`;
+  const outputDir = `uploads/${req.file.originalname}_images`;
+  try {
+    await fs.mkdir(outputDir, { recursive: true });
+      const result = await mammoth.convertToHtml({ path: docxFilePath });
+      const htmlContent = result.value;
+      const $ = cheerio.load(htmlContent);
+      const textResult = await mammoth.extractRawText({ path: docxFilePath });
+      const textContent = textResult.value;
+      const textSections = textContent.split('\n\n');
+
+      // Get all images in the order they appear in the HTML
+      const images = [];
+      $('img').each(function (i, element) {
+          const base64Data = $(this).attr('src').replace(/^data:image\/\w+;base64,/, '');
+          const imageBuffer = Buffer.from(base64Data, 'base64');
+          images.push(imageBuffer);
+      });
+
+      let j = 0;
+      let Question_id;
+      for (let i = 0; i < images.length; i++) {
+          if (j == 0) {
+              const questionRecord = {
+                  "question_img": images[i],
+                  "testCreationTableId": req.body.testCreationTableId,
+                  "sectionId": req.body.sectionId
+              };
+              console.log(j);
+              Question_id = await insertRecord('questions', questionRecord);
+              j++;
+          } else if (j > 0 && j < 5) {
+              const optionRecord = {
+                  "option_img": images[i],
+                  "question_id": Question_id
+              };
+              console.log(j);
+              await insertRecord('options', optionRecord);
+              j++;
+          } else if (j == 5) {
+              const solutionRecord = {
+                  "solution_img": images[i],
+                  "question_id": Question_id
+              };
+              console.log(j);
+              await insertRecord('solution', solutionRecord);
+              j = 0;
+          }
+      }
+      res.send('Text content and images extracted and saved to the database with the selected topic ID successfully.');
+  } catch (error) {
+      console.error(error);
+      res.status(500).send('Error extracting content and saving it to the database.');
+  }
+});
+
+async function insertRecord(table, record) {
+  try {
+      const [result] = await db.query(`INSERT INTO ${table} SET ?`, record);
+      console.log(`${table} id: ${result.insertId}`);
+      return result.insertId;
+  } catch (err) {
+      console.error(`Error inserting data into ${table}: ${err}`);
+      throw err;
+  }
+}
+//_________________________________________________Dashboard_____________________________________
+app.get('/courses/count', async (req, res) => {
+  try {
+    const [results, fields] = await db.execute(
+      'SELECT COUNT(courseCreationId) AS count FROM course_creation_table'
+    );
+    res.json(results);
+  } catch (error) {
+    console.error('Error fetching course count:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+app.get('/test/count', async (req, res) => {
+  try {
+    const [results, fields] = await db.execute(
+      'SELECT COUNT(testCreationTableId) AS count FROM test_creation_table'
+    );
+    res.json(results);
+  } catch (error) {
+    console.error('Error fetching course count:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+app.get('/question/count', async (req, res) => {
+  try {
+    const [results, fields] = await db.execute(
+      'SELECT COUNT(qustion_id) AS count FROM questions'
+    );
+    res.json(results);
+  } catch (error) {
+    console.error('Error fetching course count:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
+//_____________________________________________________END________________________________
+
+
+
+//_________________________________________________FRONT END_______________________________________
+
+app.get('/examData', async (req, res) => {
+  // FetchData
+  try {
+      const [rows] = await db.query('SELECT * FROM exams');
+      res.json(rows);
+
+  } catch (error) {
+      console.error(error);
+      res.status(500).json({ error: 'Internal Server Error' });
+    }
+  });
+
+
+  app.get('/feachingcourse/:examId', async (req, res) => {
+      const { examId } = req.params;
+      try {
+        // Fetch exams from the database
+        const [rows] = await db.query('SELECT * FROM course_creation_table WHERE examId = ?', [examId]);
+    
+        res.json(rows);
+      } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Internal Server Error' });
+      }
+    });
+
+
+    
+
+
+
 
 
 
