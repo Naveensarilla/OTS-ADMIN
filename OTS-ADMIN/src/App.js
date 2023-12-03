@@ -12,6 +12,7 @@ import {UpdateInstruction} from './components/UpdateInstruction.jsx';
 import Testcreation from './components/Testcreation.jsx';
 import TestUpdate from './components/TestUpdate.jsx'
 import DocumentUpload from './components/DocumentUpload.jsx'
+import GettinggInstructions from './components/GettinggInstructions .jsx';
 function App() {
   return (
     <Router>
@@ -29,9 +30,13 @@ function App() {
         <Route path='/testUpdate/:testCreationTableId' element={<TestUpdate/>} />
         <Route path='/DocumentUpload' element={<DocumentUpload />}/>
         {/* <Route path="/Testcreation" element={<EditInstructions />} /> */}
-          <Route
+        <Route
             path="/InstructionPage/editIns/:instructionId/:id"
             element={<UpdateInstruction />}
+          />
+          <Route
+            path="/Instruction/editIns/:instructionId/"
+            element={<GettinggInstructions />}
           />
       </Routes>
       </div>

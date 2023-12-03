@@ -53,25 +53,10 @@ const InstructionUpdate = () => {
     return <p>{error}</p>; // Display the error message to the user
   }
 
-
-    const handleUpdate = async () => {
-        try {
-            const formData = new FormData();
-            formData.append('file', file);
-            formData.append('examId', selectedExam);
-            formData.append('instructionHeading', instructionHeading);
-             formData.append('instruction', instructionPoint);
-            await axios.put(`http://localhost:3081/instructionupload/${instructionId}`, formData, {
-                headers: {
-                    'Content-Type': 'multipart/form-data',
-                },
-            });
-
   // const handleFileUpload = (files) => {
   //     const selectedFile = files[0];
   //     setFile(selectedFile);
   // };
-
 
   const handleUpdate = async () => {
     try {
