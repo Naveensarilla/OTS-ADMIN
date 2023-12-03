@@ -6,12 +6,6 @@ const Leftnav = () => {
   const[showMenu, setshowMenu] = useState(0);
   return (
     <>
-
-<>
-</>
-
-
-
 <div className='left_nav_bar_container'>
 <div className={showMenu ? "mobile_menu mobile_menu_non  " :"mobile_menu_non_black "} onClick={() => setshowMenu(!showMenu)}  >
                   <div className={showMenu ? "rotate_right  " :"lines Line_one"}></div>
@@ -24,7 +18,8 @@ const Leftnav = () => {
       <li><Link to="/Coursecreation">Course Creation</Link></li>
       <li><Link to="/InstructionPage" >Instruction</Link></li>
       <li><Link to="/Testcreation">Test Creation</Link></li>     
-      <li><Link to="/DocumentUpload">Document Upload</Link></li>  
+      <li><Link to="/DocumentUpload">Document Upload</Link></li> 
+      <li><Link to="/ExamPage">Quiz App</Link></li> 
       </ul>
     </div>
     </div>          
