@@ -63,14 +63,18 @@
 
 .header {
   /* background-color: #000000; */
-  background: #e2f7fb;
-  height: 4rem;
+  /* background: #e2f7fb; */
+  background: #1A374D;
+  /* height: 4rem; */
 
   display: flex;
   /* justify-content: center; */
   align-items: center;
   color: #fff;
-  padding: 5px 100px;
+  /* padding: 5px 100px; */
+  padding: 11px 16px;
+  box-shadow: 3px 0px 10px 0px;
+
 
 }
 
@@ -93,7 +97,10 @@
   width: 200px;
   height: 100vh;
   /* background-color: #000000; */
-  background: #e2f7fb;
+  /* background: #e2f7fb; */
+  background: #1A374D;
+  box-shadow: 3px 0px 10px 0px;
+
 
 
 }
@@ -112,13 +119,15 @@
   padding: 1rem 0;
   transition: 0.3s all;
 
+
   &:hover {
     background-color: #000000;
+
   }
 }
 
 .left-nav-bar ul a {
-  color: #080808;
+  color: #ffffff;
   font-size: 1.2rem;
   font-weight: 500;
   width: 100%;
@@ -137,8 +146,8 @@
 
 .create_exam_content {
   position: relative;
-  width: 90%;
-  margin: 1rem auto;
+  /* width: 90%; */
+  margin: 3rem ;
 }
 
 .create_exam_header {
@@ -162,7 +171,7 @@
 /* } */
 
 .Create_exam_page>h2 {
-  text-align: center;
+  /* text-align: center; */
   margin: 1rem 0;
 }
 
@@ -184,8 +193,9 @@
 }
 
 .Create_exam_page>table td button {
-  padding: 0.52rem;
-  margin: 0.5rem;
+  /* padding: 0.52rem; */
+  /* margin: 0.5rem; */
+  padding: 5px;
   background: #3673ce;
   border: none;
   color: #fff;
@@ -201,7 +211,7 @@
 .Create_exam_page>table tr,
 .Create_exam_page>table td,
 .Create_exam_page>table th {
-  padding: 0.5rem;
+  /* padding: 0.5rem; */
 }
 
 .Create_Exam_from {

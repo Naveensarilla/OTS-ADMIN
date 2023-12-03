@@ -1,0 +1,136 @@
+
+
+
+.instruction_container {
+    margin: 2rem;
+  }
+  .instruction_openMenu {
+    margin: 1rem 0px;
+  }
+  /* .instruction_content{
+      display: none;
+  } */
+  .instructionBTN {
+    border: none;
+    background: rgb(20, 62, 126);
+    color: white;
+    padding: 5px;
+    font-weight: 800;
+    text-transform: uppercase;
+    border-radius: 5px;
+    cursor: pointer;
+    /* float: right; */
+  }
+  .instructionUpload {
+    border: none;
+    background: #1A374D;
+    color: white;
+    padding: 5px;
+    font-weight: 800;
+    text-transform: uppercase;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+  .instruction_input_contant {
+    display: flex;
+    padding: 2rem 0;
+    gap: 10px;
+    justify-content: center;
+    align-items: center;
+    background: #d5d5d5;
+  }
+  .inst {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    align-items: center;
+  }
+  .Open_Instruction_Points a {
+    background: #1A374D;
+    padding: 2px 12px;
+    text-transform: uppercase;
+    color: white;
+    border-radius: 4px;
+}
+  .inst input,
+  select {
+    width: 350px;
+    padding: 6px;
+    border: none;
+    box-shadow: 1px 4px 11px 0px #1A374D;
+  }
+  .inst label {
+    font-size: 15px;
+    font-weight: 500;
+  }
+  
+  .InstructionBoredr {
+    /* border: 1px solid #54808a; */
+    margin-bottom: 1rem;
+  }
+ table {
+    border-collapse: collapse;
+
+  }
+  .Instruction_containerTable table {
+    border-collapse: collapse;
+    text-align: center;
+    width: 85vw;
+  }
+  .Instruction_containerTable table tr th{
+    text-transform: uppercase;
+  }
+  .Instruction_containerTable table tr th,
+  tr td {
+    border: 2px solid #54808a;
+    padding: 3px;
+  }
+  .Instruction_containerTable table tr th {
+    padding: 0px 30px;
+  }
+  
+  .Instruction_points {
+      margin: 2rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+  }
+  .Instruction_points ul {
+    display: flex;
+    gap: 2rem;
+  
+  }
+  .Instruction_points ul li {
+      list-style: disc;
+  }
+  .Instruction_points ul a {
+    background-color: #3673ce;
+    padding: 4px;
+    color: rgb(255, 255, 255);
+    border-radius: 5px;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  
+  .InstructiondelPoint {
+    background-color: #ce3636;
+    padding: 4px;
+    color: rgb(255, 255, 255);
+    border-radius: 5px;
+    cursor: pointer;
+    border: none;
+  }
+  
+  .Instruction_points ul :nth-child(1){
+      list-style: none;
+  }
+  
+  .Instruction_points:nth-col{
+      display: none;
+  }
+
+
+
+  
