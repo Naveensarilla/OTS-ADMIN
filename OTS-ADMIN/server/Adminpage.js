@@ -2078,6 +2078,43 @@ app.get('/question/count', async (req, res) => {
 //_____________________________________________________END________________________________
 
 
+
+//_________________________________________________FRONT END_______________________________________
+
+app.get('/examData', async (req, res) => {
+  // FetchData
+  try {
+      const [rows] = await db.query('SELECT * FROM exams');
+      res.json(rows);
+
+  } catch (error) {
+      console.error(error);
+      res.status(500).json({ error: 'Internal Server Error' });
+    }
+  });
+
+
+  app.get('/feachingcourse/:examId', async (req, res) => {
+      const { examId } = req.params;
+      try {
+        // Fetch exams from the database
+        const [rows] = await db.query('SELECT * FROM course_creation_table WHERE examId = ?', [examId]);
+    
+        res.json(rows);
+      } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Internal Server Error' });
+      }
+    });
+
+
+    
+
+
+
+
+
+
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
 });
