@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import "../components/header.css";
+import { Link } from 'react-router-dom'; 
 
 const ExamPage = () => {
   const [examData, setExamData] = useState([]);
@@ -32,7 +33,12 @@ const ExamPage = () => {
             <li>
               End Date: {exam.endDate}
             </li>
-            <li>next page</li>
+            <li>
+              {/* Link to CoursePage with the specific examId */}
+              <Link to={`/feachingcourse/${exam.examId}`}>
+                View Courses for {exam.examName}
+              </Link>
+            </li>
           </React.Fragment>
         ))}
       </ul>

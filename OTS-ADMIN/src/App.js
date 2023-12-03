@@ -14,6 +14,11 @@ import Testcreation from './components/Testcreation.jsx';
 import TestUpdate from './components/TestUpdate.jsx'
 import DocumentUpload from './components/DocumentUpload.jsx'
 import ExamPage from './FrontEnd/ExamPage.jsx';
+import CoursePage from './FrontEnd/CoursePage.jsx';
+import TestPage from './FrontEnd/TestPage.jsx';
+import Instructions from './FrontEnd/Instructions';
+import GeneralInstructionsPage from './FrontEnd/GeneralInstructionsPage.jsx';
+import QuizPage from './FrontEnd/QuizPage.jsx';
 function App() {
   return (
     <Router>
@@ -38,7 +43,14 @@ function App() {
           />
 
           {/* Front end */}
-          <Route path="/ExamPage" element={<ExamPage/>} />
+          <Route path="/ExamPage" element={<ExamPage />} />
+          <Route path="/feachingcourse/:examId" element={<CoursePage />} />
+          <Route path="/feachingtest/:courseCreationId"  element={<TestPage />} />
+          <Route path="/Instructions/:testCreationTableId"  element={<Instructions />} />
+<Route path="/fetchinstructions/:testCreationTableId" element={<GeneralInstructionsPage />} />
+<Route path="/fetchSections/:testCreationTableId" element={<QuizPage/>}/>
+
+
       </Routes>
       </div>
       

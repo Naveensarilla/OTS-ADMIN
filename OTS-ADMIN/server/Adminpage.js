@@ -1307,7 +1307,7 @@ app.get('/examData', async (req, res) => {
       }
     });
 
-    app.get('/feachingtest/:courseCreationId ', async (req, res) => {
+    app.get('/feachingtest/:courseCreationId', async (req, res) => {
       const { 	courseCreationId  } = req.params;
       try {
         // Fetch exams from the database
@@ -1320,13 +1320,173 @@ app.get('/examData', async (req, res) => {
       }
     });
 
-
+    app.get('/feachingtypeoftest', async (req, res) => {
+      try {
+        // Fetch type_of_test data from the database
+        const [typeOfTestRows] = await db.query('SELECT * FROM type_of_test');
+        res.json(typeOfTestRows);
+      } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Internal Server Error' });
+      }
+    });
     
+    app.get('/feachingtestbytype/:typeOfTestId', async (req, res) => {
+      const { typeOfTestId } = req.params;
+      try {
+        // Fetch tests from the database based on typeOfTestId
+        const [testRows] = await db.query('SELECT * FROM test_creation_table WHERE courseTypeOfTestId = ?', [typeOfTestId]);
+        res.json(testRows);
+      } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Internal Server Error' });
+      }
+    });
+
+    app.get('/fetchinstructions/:testCreationTableId', async (req, res) => {
+      const { testCreationTableId } = req.params;
+      try {
+        // Fetch instructions from the database based on testCreationTableId
+        const [instructionsRows] = await db.query(
+          'SELECT instruction.instructionId, instructionHeading, points, id FROM instructions_points ' +
+          'JOIN instruction ON instructions_points.instructionId = instruction.instructionId ' +
+          'JOIN test_creation_table ON instruction.instructionId = test_creation_table.instructionId ' +
+          'WHERE test_creation_table.testCreationTableId = ?',
+          [testCreationTableId]
+        );
+        res.json(instructionsRows);
+      } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Internal Server Error' });
+      }
+    });
+
+
+    app.get('/fetchSections/:testCreationTableId', async (req, res) => {
+      const { testCreationTableId } = req.params;
+      try {
+        const [rows] = await db.query('SELECT * FROM sections WHERE testCreationTableId = ?', [testCreationTableId]);
+        res.json(rows);
+      } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Internal Server Error' });
+      }
+    });
 
 
 
-
-
+    // app.get("/quiz_all/:testCreationTableId", (req, res) => {
+    //   const sql = "SELECT tt.testCreationTableId, s.sectionId, q.qustion_id, q.question_img, o.option_id, o.option_img, o.option_index FROM `test_creation_table` tt,`sections` s,`questions` q,`options` o WHERE tt.testCreationTableId=q.testCreationTableId AND s.testCreationTableId=tt.testCreationTableId AND q.qustion_id=o.question_id AND tt.testCreationTableId=?";
+    //   const testCreationTableId = req.params.testCreationTableId;
+    
+    //   db.query(sql, [testCreationTableId], (err, results) => {
+    //     if (err) {
+    //       console.error('Error querying the database: ' + err.message);
+    //       res.status(500).json({ error: 'Error fetching testCreationTableId' });
+    //       return;
+    //     }
+    
+    //     const sections = {};
+    
+    //     results.forEach((row) => {
+    //       const { sectionId, sectionName, qustion_id, question_img, Option_Index, option_img } = row;
+    
+    //       if (!sections[sectionName]) {
+    //         sections[sectionName] = {
+    //           sectionId,
+    //           sectionName,
+    //           questions: [],
+    //         };
+    //       }
+    
+    //       const question = sections[sectionName].questions.find(q => q.qustion_id === qustion_id);
+    //       if (!question) {
+    //         sections[sectionName].questions.push({
+    //           qustion_id,
+    //           userAnswers: "",
+    //           isvisited: 0,
+    //           question_img: question_img.toString('base64'),
+    //           option_img: [],
+    //         });
+    //       }
+    
+    //       const option = {
+    //         Option_Index,
+    //         option_img: option_img.toString('base64'),
+    //         optiontype
+    //       };
+    
+    //       sections[sectionName].questions.find(q => q.qustion_id === qustion_id).option_img.push(option);
+    //     });
+    
+    //     res.json(sections);
+    //   });
+    // });
+    app.get("/quiz_all/:testCreationTableId", (req, res) => {
+      const sql = `
+        SELECT 
+          tt.testCreationTableId, 
+          s.sectionId, 
+          q.qustion_id, 
+          q.question_img, 
+          o.option_id, 
+          o.option_img, 
+          o.option_index 
+        FROM 
+          test_creation_table tt,
+          sections s,
+          questions q,
+          options o 
+        WHERE 
+          tt.testCreationTableId = q.testCreationTableId 
+          AND s.testCreationTableId = tt.testCreationTableId 
+          AND q.qustion_id = o.question_id 
+          AND tt.testCreationTableId = ?`;
+    
+      const testCreationTableId = req.params.testCreationTableId;
+    
+      db.query(sql, [testCreationTableId], (err, results) => {
+        if (err) {
+          console.error('Error querying the database: ' + err.message);
+          res.status(500).json({ error: 'Error fetching testCreationTableId' });
+          return;
+        }
+    
+        const sections = {};
+    
+        results.forEach((row) => {
+          const { sectionId, sectionName, qustion_id, question_img, Option_Index, option_img } = row;
+    
+          if (!sections[sectionName]) {
+            sections[sectionName] = {
+              sectionId,
+              sectionName,
+              questions: [],
+            };
+          }
+    
+          const question = sections[sectionName].questions.find(q => q.qustion_id === qustion_id);
+          if (!question) {
+            sections[sectionName].questions.push({
+              qustion_id,
+              userAnswers: "",
+              isvisited: 0,
+              question_img: Buffer.from(question_img).toString('base64'),
+              option_img: [],
+            });
+          }
+    
+          const option = {
+            Option_Index,
+            option_img: Buffer.from(option_img).toString('base64'),
+          };
+    
+          sections[sectionName].questions.find(q => q.qustion_id === qustion_id).option_img.push(option);
+        });
+    
+        res.json(Object.values(sections)); // Convert the object to an array before sending it
+      });
+    });
 
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
