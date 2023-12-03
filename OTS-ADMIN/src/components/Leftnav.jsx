@@ -25,6 +25,7 @@ const Leftnav = () => {
       <li><Link to="/InstructionPage" >Instruction</Link></li>
       <li><Link to="/Testcreation">Test Creation</Link></li>     
       <li><Link to="/DocumentUpload">Document Upload</Link></li>  
+      <li><Link to="/HomeHeader">Quiz App</Link></li>
       </ul>
     </div>
     </div>          
