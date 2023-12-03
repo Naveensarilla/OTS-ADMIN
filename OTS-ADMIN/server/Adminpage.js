@@ -1307,6 +1307,19 @@ app.get('/examData', async (req, res) => {
       }
     });
 
+    app.get('/feachingtest/:courseCreationId ', async (req, res) => {
+      const { 	courseCreationId  } = req.params;
+      try {
+        // Fetch exams from the database
+        const [rows] = await db.query('SELECT * FROM test_creation_table WHERE 	courseCreationId  = ?', [	courseCreationId ]);
+    
+        res.json(rows);
+      } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Internal Server Error' });
+      }
+    });
+
 
     
 
