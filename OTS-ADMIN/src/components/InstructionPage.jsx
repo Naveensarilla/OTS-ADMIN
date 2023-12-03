@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import InstructionsDisplay from "./InstructionDisplay";
 import base64 from 'base64-js';
 // import { Link } from "react-router-dom";
 const InstructionPage = () => {
@@ -59,7 +60,7 @@ const InstructionPage = () => {
                 formData.append('examId', selectedExam);
                 formData.append('instructionHeading', instructionHeading);
 
-                await axios.post('http://localhost:3081/upload', formData, {
+                await axios.post('http://localhost:3081/instructionupload', formData, {
                     headers: {
                         'Content-Type': 'multipart/form-data',
                     },
@@ -165,8 +166,9 @@ const InstructionPage = () => {
         </tbody>
       </table>
 
-      <div></div>
+      <div><InstructionsDisplay /></div>
         </div>
+        
     );
 };
 
