@@ -46,6 +46,20 @@ const DocumentUpload = ({ testCreationTableId }) => {
     formData.append("sectionId", selectedSection);
     formData.append("testCreationTableId", selectedTest);
 
+
+    fetch('http://localhost:3081/upload', {
+      method: 'POST',
+      body: formData,
+    })
+      .then((response) => response.text())
+      .then((result) => {
+        console.log(result);
+        alert('Successfully uploaded Document');
+      })
+      .catch((error) => {
+        console.error(error);
+      });
+
     console.log("FormData:", formData);
 
     try {
@@ -55,6 +69,7 @@ const DocumentUpload = ({ testCreationTableId }) => {
     } catch (error) {
       console.error("Error uploading document:", error);
     }
+
   };
 
   return (
