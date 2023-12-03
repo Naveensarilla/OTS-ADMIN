@@ -1,11 +1,9 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import InstructionsDisplay from "./InstructionDisplay";
-import base64 from "base64-js";
 
 import "./InstructionPage.css";
 
-// import { Link } from "react-router-dom";
 const InstructionPage = () => {
   const [instructionHeading, setInstructionHeading] = useState("");
   const [exams, setExams] = useState([]);
@@ -25,7 +23,6 @@ const InstructionPage = () => {
       }
     };
     fetchExams();
-
   }, []);
 
   const handleFileUpload = (files) => {
@@ -66,49 +63,23 @@ const InstructionPage = () => {
     setFormOpen(false);
   };
 
-
-                await axios.post('http://localhost:3081/instructionupload', formData, {
-                    headers: {
-                        'Content-Type': 'multipart/form-data',
-                    },
-                });
-                document.getElementById('fileInput').value = '';
-                alert('File uploaded successfully!');
-                fetchInstructions();
-            } else {
-                alert('Please select a file to upload.');
-            }
-        } catch (error) {
-            console.error('Error uploading file:', error.response);
-            alert('Failed to upload file. Please try again.');
-        }
-    }; 
-    
-    const openForm = () => {
-        setFormOpen(true);
-      };
-    
-      const closeForm = () => {
-        setFormOpen(false);
-      };
-      const handleDelete = async (instructionId) => {
-        try {
-          // Send a request to delete the instruction
-          await axios.delete(`http://localhost:3081/instructions/${instructionId}`);
-          alert('Instruction deleted successfully!');
-          fetchInstructions(); // Fetch updated instructions after deletion
-        } catch (error) {
-          console.error('Error deleting instruction:', error);
-          alert('Failed to delete instruction. Please try again.');
-        }
-      };
-      
-    return (
-        <div>
+  const handleDelete = async (instructionId) => {
+    try {
+      // Send a request to delete the instruction
+      await axios.delete(`http://localhost:3081/instructions/${instructionId}`);
+      alert("Instruction deleted successfully!");
+      // fetchInstructions(); // Fetch updated instructions after deletion
+    } catch (error) {
+      console.error("Error deleting instruction:", error);
+      alert("Failed to delete instruction. Please try again.");
+    }
+  };
 
   return (
     <div className="instruction_container">
-      <h2 style={{textTransform:'uppercase',color:'#1A374D'}}>Instruction Page </h2>
+      <h2 style={{ textTransform: "uppercase", color: "#1A374D" }}>
+        Instruction Page{" "}
+      </h2>
 
       {formOpen ? (
         <form>
@@ -118,7 +89,7 @@ const InstructionPage = () => {
             onClick={closeForm}
             disabled={!formOpen}
           >
-            Close 
+            Cancel
           </button>
 
           <div className="instruction_input_contant">
@@ -160,36 +131,32 @@ const InstructionPage = () => {
             </div>
 
             <div className="">
-              <button className="instructionUpload" type="button" onClick={handleUpload}>
+              <button
+                className="instructionUpload"
+                type="button"
+                onClick={handleUpload}
+              >
                 Upload
               </button>
             </div>
           </div>
           <div className="InstructionBoredr"></div>
         </form>
-        
       ) : (
-        <button className="instruction_openMenu instructionBTN" type="button" onClick={openForm}>
-      Add Instruction
+        <button
+          className="instruction_openMenu instructionBTN"
+          type="button"
+          onClick={openForm}
+        >
+          Add Instruction
         </button>
       )}
       <div className="instruction_content">
-        <InstructionsDisplay />
+        <InstructionsDisplay handleDelete={handleDelete} />
         {/* <ExcelTable /> */}
       </div>
     </div>
   );
 };
 
-function decodeBase64(encodedString) {
-  try {
-    const decodedString = atob(encodedString);
-    return new TextDecoder("utf-8").decode(
-      new TextEncoder().encode(decodedString)
-    );
-  } catch (error) {
-    console.error("Error decoding Base64:", error);
-    return "Unable to decode";
-  }
-}
 export default InstructionPage;

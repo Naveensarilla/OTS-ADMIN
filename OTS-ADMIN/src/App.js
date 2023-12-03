@@ -31,11 +31,9 @@ function App() {
         {/* <Route path="/Testcreation" element={<EditInstructions />} /> */}
           <Route
             path="/InstructionPage/editIns/:instructionId/:id"
-            element={<UpdateInstruction />}
-          />
+            element={<UpdateInstruction />}/>
       </Routes>
       </div>
-      
     </Router>
   );
 }

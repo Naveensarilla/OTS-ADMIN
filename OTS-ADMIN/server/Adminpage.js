@@ -8,17 +8,13 @@ const cheerio = require('cheerio');
 const path = require('path');
 const fs = require('fs').promises;
 
-const express = require("express");
-const mysql = require("mysql2/promise");
-const cors = require("cors");
-const multer = require("multer");
-const path = require("path");
-const cheerio = require("cheerio");
+
+
 
 
 const fileupload = require("express-fileupload");
 
-const fs = require("fs").promises;
+
 
 const app = express();
 const port = 3081;
@@ -33,7 +29,7 @@ const db = mysql.createPool({
   database: "admin_project",
 });
 
-const mammoth = require("mammoth");
+
 // const storage = multer.diskStorage({
 //   destination: async (req, file, cb) => {
 //     const uploadDir = "uploads/";
@@ -1750,32 +1746,7 @@ WHERE
     tc.testCreationTableId = ?
     `, [testCreationTableId]);
 
-    const [rows] = await db.query(
-      `
-      SELECT 
-        test_creation_table.*, 
-        course_creation_table.courseName, 
-        type_of_test.TypeOfTestName,
-        sections.sectionName,
-        sections.noOfQuestions,
-        sections.QuestionLimit
-      FROM 
-        test_creation_table
-      INNER JOIN 
-        course_creation_table ON test_creation_table.courseCreationId = course_creation_table.courseCreationId
-      INNER JOIN 
-        course_typeoftests ON test_creation_table.courseTypeOfTestId = course_typeoftests.courseTypeOfTestId
-      INNER JOIN 
-        type_of_test ON course_typeoftests.TypeOfTestId = type_of_test.TypeOfTestId
-      INNER JOIN
-        sections ON test_creation_table.testCreationTableId = sections.testCreationTableId
-      WHERE 
-        test_creation_table.testCreationTableId = ?
-    `,
-      [testCreationTableId]
-    );
-
-
+  
     if (rows.length > 0) {
       res.json(rows[0]);
     } else {
@@ -1967,79 +1938,7 @@ app.get("/sections/:testCreationTableId", async (req, res) => {
   }
 });
 
-
-app.post('/upload', upload.single('document'), async (req, res) => {
-  const docxFilePath = `uploads/${req.file.filename}`;
-  const outputDir = `uploads/${req.file.originalname}_images`;
-
-  try {
-
-  console.log('Received request:', req.body, req.file);  try {
-
-    await fs.mkdir(outputDir, { recursive: true });
-      const result = await mammoth.convertToHtml({ path: docxFilePath });
-      const htmlContent = result.value;
-      const $ = cheerio.load(htmlContent);
-      const textResult = await mammoth.extractRawText({ path: docxFilePath });
-      const textContent = textResult.value;
-      const textSections = textContent.split('\n\n');
-
-      // Get all images in the order they appear in the HTML
-      const images = [];
-      $('img').each(function (i, element) {
-          const base64Data = $(this).attr('src').replace(/^data:image\/\w+;base64,/, '');
-          const imageBuffer = Buffer.from(base64Data, 'base64');
-          images.push(imageBuffer);
-      });
-
-      let j = 0;
-      let Question_id;
-      for (let i = 0; i < images.length; i++) {
-          if (j == 0) {
-              const questionRecord = {
-                  "question_img": images[i],
-                  "testCreationTableId": req.body.testCreationTableId,
-                  "sectionId": req.body.sectionId
-              };
-              console.log(j);
-              Question_id = await insertRecord('questions', questionRecord);
-              j++;
-          } else if (j > 0 && j < 5) {
-              const optionRecord = {
-                  "option_img": images[i],
-                  "question_id": Question_id
-              };
-              console.log(j);
-              await insertRecord('options', optionRecord);
-              j++;
-          } else if (j == 5) {
-              const solutionRecord = {
-                  "solution_img": images[i],
-                  "question_id": Question_id
-              };
-              console.log(j);
-              await insertRecord('solution', solutionRecord);
-              j = 0;
-          }
-      }
-      res.send('Text content and images extracted and saved to the database with the selected topic ID successfully.');
-  } catch (error) {
-      console.error(error);
-      res.status(500).send('Error extracting content and saving it to the database.');
-  }
-});
-
-async function insertRecord(table, record) {
-  try {
-      const [result] = await db.query(`INSERT INTO ${table} SET ?`, record);
-      console.log(`${table} id: ${result.insertId}`);
-      return result.insertId;
-  } catch (err) {
-      console.error(`Error inserting data into ${table}: ${err}`);
-      throw err;
-  }
-}
-//_________________________________________________Dashboard_____________________________________
+_________________________________________________Dashboard_____________________________________
 app.get('/courses/count', async (req, res) => {
   try {
     const [results, fields] = await db.execute(
@@ -2114,7 +2013,6 @@ app.get('/examData', async (req, res) => {
 
 
 
-
-app.listen(port, () => {
-  console.log(`Server is running on port ${port}`);
-});
+    app.listen(port, () => {
+      console.log(`Server is running on port ${port}`);
+    });
