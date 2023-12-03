@@ -66,9 +66,50 @@ const InstructionPage = () => {
     setFormOpen(false);
   };
 
+
+                await axios.post('http://localhost:3081/instructionupload', formData, {
+                    headers: {
+                        'Content-Type': 'multipart/form-data',
+                    },
+                });
+                document.getElementById('fileInput').value = '';
+                alert('File uploaded successfully!');
+                fetchInstructions();
+            } else {
+                alert('Please select a file to upload.');
+            }
+        } catch (error) {
+            console.error('Error uploading file:', error.response);
+            alert('Failed to upload file. Please try again.');
+        }
+    }; 
+    
+    const openForm = () => {
+        setFormOpen(true);
+      };
+    
+      const closeForm = () => {
+        setFormOpen(false);
+      };
+      const handleDelete = async (instructionId) => {
+        try {
+          // Send a request to delete the instruction
+          await axios.delete(`http://localhost:3081/instructions/${instructionId}`);
+          alert('Instruction deleted successfully!');
+          fetchInstructions(); // Fetch updated instructions after deletion
+        } catch (error) {
+          console.error('Error deleting instruction:', error);
+          alert('Failed to delete instruction. Please try again.');
+        }
+      };
+      
+    return (
+        <div>
+
   return (
     <div className="instruction_container">
       <h2 style={{textTransform:'uppercase',color:'#1A374D'}}>Instruction Page </h2>
+
       {formOpen ? (
         <form>
           <button
