@@ -25,13 +25,13 @@ function Examcreation() {
     };
 
 //....................................FORMATING dTATE...............................//
-    function formatDate(dateString) {
-        const date = new Date(dateString);
-        const day = date.getDate().toString().padStart(2, '0');
-        const month = (date.getMonth() + 1).toString().padStart(2, '0'); // Month is 0-based
-        const year = date.getFullYear();
-        return `${day}/${month}/${year}`;
-      }
+    // function formatDate(dateString) {
+    //     const date = new Date(dateString);
+    //     const day = date.getDate().toString().padStart(2, '0');
+    //     const month = (date.getMonth() + 1).toString().padStart(2, '0'); // Month is 0-based
+    //     const year = date.getFullYear();
+    //     return `${day}/${month}/${year}`;
+    //   }
 //....................................END...............................//
 
 //....................................FECHING SUBJECTS ...............................//
@@ -81,7 +81,7 @@ function Examcreation() {
                 // Reset form fields and state as needed
                 setSubmitting(false);
                 resetForm();
-                window.location.reload();
+                // window.location.reload();
                 // setShowSuccessPopup(true);
             })
             .catch(error => {
@@ -224,8 +224,10 @@ function Examcreation() {
             <tr key={exam.examId}>
               <td>{index + 1}</td>
               <td>{exam.examName}</td>
-              <td>{formatDate(exam.startDate)}</td>
-              <td>{formatDate(exam.endDate)}</td>
+              {/* <td>{formatDate(exam.startDate)}</td> */}
+              {/* <td>{formatDate(exam.endDate)}</td> */}
+              <td>{exam.startDate}</td>
+              <td>{exam.endDate}</td>
               <td>{exam.subjects}</td>
               <td>
                 <button>
