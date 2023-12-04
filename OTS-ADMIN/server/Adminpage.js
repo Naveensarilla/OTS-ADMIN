@@ -930,6 +930,22 @@ app.get('/testcourses', async (req, res) => {
   }
 });
 
+// Add a new endpoint to fetch subjects based on courseCreationId
+app.get('/course-subjects/:courseCreationId', async (req, res) => {
+  const { courseCreationId } = req.params;
+
+  try {
+    const [subjects] = await db.query(
+      'SELECT s.subjectId, s.subjectName FROM subjects s JOIN course_subjects cs ON s.subjectId = cs.subjectId WHERE cs.courseCreationId = ?',
+      [courseCreationId]
+    );
+
+    res.json(subjects);
+  } catch (error) {
+    console.error('Error fetching subjects:', error);
+    res.status(500).send('Error fetching subjects.');
+  }
+});
 
 app.post('/create-test', async (req, res) => {
   const {
@@ -961,14 +977,17 @@ app.post('/create-test', async (req, res) => {
       // Process sectionsData and insert into sections table
       const results = await Promise.all(
         sectionsData.map(async (section) => {
+          // Ensure selectedSubjects is defined and has a value
+          const subjectId = section.selectedSubjects || 0;
+      
           const [sectionResult] = await db.query(
-            'INSERT INTO sections (testCreationTableId, sectionName, noOfQuestions, QuestionLimit) VALUES (?, ?, ?, ?)',
-            [testCreationTableId, section.sectionName || null, section.noOfQuestions, section.QuestionLimit || null]
+            'INSERT INTO sections (testCreationTableId, sectionName, noOfQuestions, QuestionLimit, subjectId) VALUES (?, ?, ?, ?, ?)',
+            [testCreationTableId, section.sectionName || null, section.noOfQuestions, section.QuestionLimit || null, subjectId]
           );
           return sectionResult;
         })
       );
-
+      
       res.json({ success: true, testCreationTableId, results, message: 'Test created successfully' });
     }
   } catch (error) {

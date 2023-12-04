@@ -7,6 +7,9 @@ const TestUpdate = () => {
   const [courses, setCourses] = useState([]);
   const [typeOfTests, setTypeOfTests] = useState([]);
   const [instructionsData, setInstructionsData] = useState([]);
+  const [subjects, setSubjects] = useState([]);
+// const [selectedSubjects, setSelectedSubjects] = useState([]);
+
   const [testData, setTestData] = useState({
     TestName: '',
     selectedCourse: '',
@@ -24,6 +27,7 @@ const TestUpdate = () => {
     noOfQuestions: '',
     QuestionLimit: '',
     selectedInstruction:'',
+    selectedSubjects:'',
   });
 
   const handleChange = (e) => {
@@ -55,6 +59,8 @@ const TestUpdate = () => {
 
   //   return `${year}-${month}-${day}`;
   // };
+  
+  
   useEffect(() => {
   fetch('http://localhost:3081/instructions')
   .then((response) => response.json())
@@ -80,6 +86,17 @@ const TestUpdate = () => {
     }
   }, [testData.selectedCourse]);
 
+  useEffect(() => {
+    // Fetch subjects based on the selected course
+    if (testData.selectedCourse) {
+      console.log('Fetching subjects...');
+      fetch(`http://localhost:3081/course-subjects/${testData.selectedCourse}`)
+        .then((response) => response.json())
+        .then((data) =>  setSubjects(data))
+        .catch((error) => console.error('Error fetching subjects:', error));
+    }
+  }, [testData.selectedCourse]);
+
 
   useEffect(() => {
     fetch(`http://localhost:3081/testupdate/${testCreationTableId}`)
@@ -93,6 +110,7 @@ const TestUpdate = () => {
           ...data,
           selectedCourse: data.courseCreationId,
           selectedTypeOfTest: data.courseTypeOfTestId,
+          setSubjects:data.courseSubjectsId ,
           sectionName: data.sectionName,
           noOfQuestions: data.noOfQuestions,
           QuestionLimit: data.QuestionLimit,
@@ -101,7 +119,6 @@ const TestUpdate = () => {
       })
       .catch((error) => console.error('Error fetching test data:', error));
   }, [testCreationTableId]);
-  
 
 
 
@@ -131,7 +148,7 @@ const TestUpdate = () => {
           noOfQuestions: testData.noOfQuestions,
           QuestionLimit: testData.QuestionLimit,
           selectedInstruction:testData.selectedInstruction,
-
+          selectedSubjects: testData.selectedSubjects,
         }),
       });
    
@@ -191,6 +208,9 @@ const TestUpdate = () => {
           </select>
         </label>
         <br />
+
+
+
         <label>
           Test Start Date:
           <input type="date" name="testStartDate" value={testData.testStartDate} onChange={handleChange} />
@@ -232,6 +252,21 @@ const TestUpdate = () => {
           <input type="number" name="totalMarks" value={testData.totalMarks} onChange={handleChange} />
         </label>
         <br />
+        <label>
+  Select Subjects:
+  <select
+    name="selectedSubjects"
+    value={testData.selectedSubjects}
+    onChange={handleChange}>
+        <option value="">Select a Subject</option>
+    {subjects.map((subject) => (
+      <option key={subject.subjectId} value={subject.subjectId}>
+        {subject.subjectName}
+      </option>
+    ))}
+  </select>
+</label>
+
         <label>
           Section Name:
           <input type="text" name="sectionName" value={testData.sectionName} onChange={handleChange} />

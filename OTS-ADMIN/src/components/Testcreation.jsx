@@ -1,51 +1,50 @@
-import React, { useState, useEffect } from 'react';
-import moment from 'moment';
+import React, { useState, useEffect } from "react";
+import moment from "moment";
 import { Link } from "react-router-dom";
 const Testcreation = () => {
-  const [testName, setTestName] = useState('');
+  const [testName, setTestName] = useState("");
   const [courses, setCourses] = useState([]);
-  const [selectedCourse, setSelectedCourse] = useState('');
-  const [startDate, setStartDate] = useState('');
-  const [startTime, setStartTime] = useState('');
-  const [endDate, setEndDate] = useState('');
-  const [endTime, setEndTime] = useState('');
-  const [duration, setDuration] = useState('');
-  const [totalQuestions, setTotalQuestions] = useState('');
-  const [totalMarks, setTotalMarks] = useState('');
-  const [calculator, setCalculator] = useState('no');
-  const [status, setStatus] = useState('inactive');
+  const [selectedCourse, setSelectedCourse] = useState("");
+  const [startDate, setStartDate] = useState("");
+  const [startTime, setStartTime] = useState("");
+  const [endDate, setEndDate] = useState("");
+  const [endTime, setEndTime] = useState("");
+  const [duration, setDuration] = useState("");
+  const [totalQuestions, setTotalQuestions] = useState("");
+  const [totalMarks, setTotalMarks] = useState("");
+  const [calculator, setCalculator] = useState("no");
+  const [status, setStatus] = useState("inactive");
   const [typeOfTests, setTypeOfTests] = useState([]);
-  const [selectedtypeOfTest, setSelectedtypeOfTest] = useState('');
+  const [selectedtypeOfTest, setSelectedtypeOfTest] = useState("");
+  const [subjects, setSubjects] = useState([]);
+  const [selectedSubjects, setSelectedSubjects] = useState("");
   const [numberOfSections, setNumberOfSections] = useState(1);
   const [QuestionLimitChecked, setQuestionLimitChecked] = useState(false);
-  const [sectionsData, setSectionsData] = useState([]);
+const [sectionsData, setSectionsData] = useState([{ selectedSubjects: "", sectionName: "", noOfQuestions: "", QuestionLimit: "" }]);
   const [isFormVisible, setIsFormVisible] = useState(false);
   const [testData, setTestData] = useState([]);
-  const [selectedInstruction, setSelectedInstruction] = useState('');
+  const [selectedInstruction, setSelectedInstruction] = useState("");
   const [instructionsData, setInstructionsData] = useState([]);
 
   useEffect(() => {
     const fetchInstructions = async () => {
       try {
-        const response = await fetch('http://localhost:3081/instructions');
+        const response = await fetch("http://localhost:3081/instructions");
         const data = await response.json();
         setInstructionsData(data);
       } catch (error) {
-        console.error('Error fetching instructions:', error);
+        console.error("Error fetching instructions:", error);
       }
     };
 
     fetchInstructions();
   }, []);
 
-
-  
-
   useEffect(() => {
-    fetch('http://localhost:3081/testcourses')
+    fetch("http://localhost:3081/testcourses")
       .then((response) => response.json())
       .then((data) => setCourses(data))
-      .catch((error) => console.error('Error fetching courses:', error));
+      .catch((error) => console.error("Error fetching courses:", error));
   }, []);
 
   useEffect(() => {
@@ -53,9 +52,26 @@ const Testcreation = () => {
       fetch(`http://localhost:3081/course-typeoftests/${selectedCourse}`)
         .then((response) => response.json())
         .then((data) => setTypeOfTests(data))
-        .catch((error) => console.error('Error fetching course_typeoftests:', error));
+        .catch((error) =>
+          console.error("Error fetching course_typeoftests:", error)
+        );
     }
   }, [selectedCourse]);
+
+  useEffect(() => {
+    if (selectedCourse) {
+      fetch(`http://localhost:3081/course-subjects/${selectedCourse}`)
+        .then((response) => response.json())
+        .then((data) => {
+          console.log("Fetched subjects:", data);
+          setSubjects(data);
+        })
+        .catch((error) =>
+          console.error("Error fetching course-subjects:", error)
+        );
+    }
+  }, [selectedCourse]);
+
   const handleOpenForm = () => {
     setIsFormVisible(true);
   };
@@ -63,13 +79,17 @@ const Testcreation = () => {
   const handleCloseForm = () => {
     setIsFormVisible(false);
   };
-  
+
   const handleSelectChange = (e) => {
     setSelectedCourse(e.target.value);
   };
   const handleSelectTypeOfTest = (e) => {
     setSelectedtypeOfTest(e.target.value);
-  }
+  };
+
+  const handleSelectSubjects = (e) => {
+    setSelectedSubjects(e.target.value);
+  };
   const handleInputChange = (e) => {
     setTestName(e.target.value);
   };
@@ -88,7 +108,6 @@ const Testcreation = () => {
   const handleEndTimeChange = (e) => {
     setEndTime(e.target.value);
   };
-
 
   const handleDurationChange = (e) => {
     setDuration(e.target.value);
@@ -119,18 +138,19 @@ const Testcreation = () => {
   const handleSectionChange = (e, index, field) => {
     // Create a copy of the sectionsData array
     const updatedSectionsData = [...sectionsData];
-
+  
     // Ensure that the array at the given index is initialized
     if (!updatedSectionsData[index]) {
       updatedSectionsData[index] = {};
     }
-
+  
     // Update the specified field in the copied array
     updatedSectionsData[index][field] = e.target.value;
-
+  
     // Set the updated array to the state
     setSectionsData(updatedSectionsData);
   };
+  
 
   const addSection = () => {
     setNumberOfSections((prevSections) => prevSections + 1);
@@ -140,16 +160,16 @@ const Testcreation = () => {
     e.preventDefault();
     try {
       // Log the sectionsData before making the request
-      console.log('Sections Data Before Request:', sectionsData);
+      console.log("Sections Data Before Request:", sectionsData);
 
       // Assuming you have the testCreationTableId from the test creation
       // const testCreationTableId = getTestCreationTableId();
 
       // Make a request to create test and sections
-      const response = await fetch('http://localhost:3081/create-test', {
-        method: 'POST',
+      const response = await fetch("http://localhost:3081/create-test", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
           testName,
@@ -172,14 +192,16 @@ const Testcreation = () => {
       const data = await response.json();
       console.log(data);
     } catch (error) {
-      console.error('Error submitting form:', error);
+      console.error("Error submitting form:", error);
     }
   };
 
   useEffect(() => {
     const feachTestData = async () => {
       try {
-        const response = await fetch("http://localhost:3081/test_creation_table");
+        const response = await fetch(
+          "http://localhost:3081/test_creation_table"
+        );
         const data = await response.json(); // Convert the response to JSON
         setTestData(data);
       } catch (error) {
@@ -189,10 +211,11 @@ const Testcreation = () => {
     feachTestData();
   }, []);
 
-
   function formatTime(dateTimeString) {
-    const formattedTime = moment(dateTimeString, 'HH:mm:ss.SSSSSS').format('HH:mm');
-    return formattedTime !== 'Invalid date' ? formattedTime : 'Invalid Time';
+    const formattedTime = moment(dateTimeString, "HH:mm:ss.SSSSSS").format(
+      "HH:mm"
+    );
+    return formattedTime !== "Invalid date" ? formattedTime : "Invalid Time";
   }
 
   // function formatDate(dateString) {
@@ -234,7 +257,7 @@ const Testcreation = () => {
       // The user canceled the deletion
       console.log("Deletion canceled.");
     }
-  }
+  };
 
   return (
     <div>
@@ -245,7 +268,6 @@ const Testcreation = () => {
       )}
 
       {isFormVisible && (
-
         <form onSubmit={handleSubmit}>
           <button type="button" onClick={handleCloseForm}>
             Close Form
@@ -259,9 +281,14 @@ const Testcreation = () => {
           <label>
             Select Course:
             <select value={selectedCourse} onChange={handleSelectChange}>
-              <option value="" disabled>Select a course</option>
+              <option value="" disabled>
+                Select a course
+              </option>
               {courses.map((course) => (
-                <option key={course.courseCreationId} value={course.courseCreationId}>
+                <option
+                  key={course.courseCreationId}
+                  value={course.courseCreationId}
+                >
                   {course.courseName}
                 </option>
               ))}
@@ -272,10 +299,18 @@ const Testcreation = () => {
           <div>
             <label>
               Type of Tests:
-              <select value={selectedtypeOfTest} onChange={handleSelectTypeOfTest}>
-                <option value="" disabled>Select a type of test</option>
+              <select
+                value={selectedtypeOfTest}
+                onChange={handleSelectTypeOfTest}
+              >
+                <option value="" disabled>
+                  Select a type of test
+                </option>
                 {typeOfTests.map((typeOfTest) => (
-                  <option key={typeOfTest.TypeOfTestId} value={typeOfTest.TypeOfTestId}>
+                  <option
+                    key={typeOfTest.TypeOfTestId}
+                    value={typeOfTest.TypeOfTestId}
+                  >
                     {typeOfTest.TypeOfTestName}
                   </option>
                 ))}
@@ -283,14 +318,21 @@ const Testcreation = () => {
             </label>
           </div>
 
-
           <label>
-            Test  Start Date:
-            <input type="date" value={startDate} onChange={handleStartDateChange} />
+            Test Start Date:
+            <input
+              type="date"
+              value={startDate}
+              onChange={handleStartDateChange}
+            />
           </label>
           <label>
             Start Time:
-            <input type="time" value={startTime} onChange={handleStartTimeChange} />
+            <input
+              type="time"
+              value={startTime}
+              onChange={handleStartTimeChange}
+            />
           </label>
           <br />
           <label>
@@ -304,17 +346,32 @@ const Testcreation = () => {
           <br />
           <label>
             Duration (in minutes):
-            <input type="number" value={duration} onChange={handleDurationChange} min="1" />
+            <input
+              type="number"
+              value={duration}
+              onChange={handleDurationChange}
+              min="1"
+            />
           </label>
           <br />
           <label>
             Total Questions:
-            <input type="number" value={totalQuestions} onChange={handleTotalQuestionsChange} min="1" />
+            <input
+              type="number"
+              value={totalQuestions}
+              onChange={handleTotalQuestionsChange}
+              min="1"
+            />
           </label>
           <br />
           <label>
             Total Marks:
-            <input type="number" value={totalMarks} onChange={handleTotalMarksChange} min="1" />
+            <input
+              type="number"
+              value={totalMarks}
+              onChange={handleTotalMarksChange}
+              min="1"
+            />
           </label>
           <br />
           <div>
@@ -332,40 +389,70 @@ const Testcreation = () => {
               <thead>
                 <tr>
                   <th>#</th>
+                  <th>Subjects:</th>
                   <th>Section</th>
                   <th>No of Question</th>
                   {QuestionLimitChecked && <th>Question Limit</th>}
                 </tr>
               </thead>
               <tbody>
-                {Array.from({ length: numberOfSections }, (_, index) => (
-                  <tr key={index}>
-                    <td>{index + 1}</td>
-                    <td>
-                      <input
-                        type="text"
-                        value={sectionsData[index]?.sectionName || ''}
-                        onChange={(e) => handleSectionChange(e, index, 'sectionName')}
-                      />
-                    </td>
-                    <td>
-                      <input
-                        type="number"
-                        value={sectionsData[index]?.noOfQuestions || ''}
-                        onChange={(e) => handleSectionChange(e, index, 'noOfQuestions')}
-                      />
-                    </td>
-                    {QuestionLimitChecked && (
-                      <td>
-                        <input
-                          type="number"
-                          value={sectionsData[index]?.QuestionLimit || ''}
-                          onChange={(e) => handleSectionChange(e, index, 'QuestionLimit')}
-                        />
-                      </td>
-                    )}
-                  </tr>
-                ))}
+              {Array.from({ length: numberOfSections }, (_, index) => (
+  <tr key={index}>
+    <td>{index + 1}</td>
+    <td>
+      <div>
+        <select
+          value={sectionsData[index]?.selectedSubjects || ""}
+          onChange={(e) =>
+            handleSectionChange(e, index, "selectedSubjects")
+          }
+        >
+          <option value="" disabled>
+            Select a Subject
+          </option>
+          {subjects.map((Subject) => (
+            <option
+              key={Subject.subjectId}
+              value={Subject.subjectId}
+            >
+              {Subject.subjectName}
+            </option>
+          ))}
+        </select>
+      </div>
+    </td>
+    <td>
+      <input
+        type="text"
+        value={sectionsData[index]?.sectionName || ""}
+        onChange={(e) =>
+          handleSectionChange(e, index, "sectionName")
+        }
+      />
+    </td>
+    <td>
+      <input
+        type="number"
+        value={sectionsData[index]?.noOfQuestions || ""}
+        onChange={(e) =>
+          handleSectionChange(e, index, "noOfQuestions")
+        }
+      />
+    </td>
+    {QuestionLimitChecked && (
+      <td>
+        <input
+          type="number"
+          value={sectionsData[index]?.QuestionLimit || ""}
+          onChange={(e) =>
+            handleSectionChange(e, index, "QuestionLimit")
+          }
+        />
+      </td>
+    )}
+  </tr>
+))}
+
               </tbody>
             </table>
 
@@ -376,10 +463,18 @@ const Testcreation = () => {
           <br />
           <label>
             Instructions:
-            <select value={selectedInstruction} onChange={handleInstructionChange}>
-              <option value="" disabled>Select an instruction</option>
-              {instructionsData.map(instruction => (
-                <option key={instruction.instructionId} value={instruction.instructionId}>
+            <select
+              value={selectedInstruction}
+              onChange={handleInstructionChange}
+            >
+              <option value="" disabled>
+                Select an instruction
+              </option>
+              {instructionsData.map((instruction) => (
+                <option
+                  key={instruction.instructionId}
+                  value={instruction.instructionId}
+                >
                   {instruction.instructionHeading}
                 </option>
               ))}
@@ -403,7 +498,6 @@ const Testcreation = () => {
           </label>
           <br />
           <button type="submit">Submit</button>
-
         </form>
       )}
 
@@ -454,12 +548,8 @@ const Testcreation = () => {
           </tbody>
         </table>
       </div>
-
-
-
-
     </div>
-  )
-}
+  );
+};
 
-export default Testcreation
+export default Testcreation;
