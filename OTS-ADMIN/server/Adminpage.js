@@ -1268,6 +1268,24 @@ async function insertRecord(table, record) {
   }
 }
 
+
+const imagesDirectory = path.join(__dirname, 'uploads');
+
+app.use(express.json());
+app.use('/images', express.static(imagesDirectory));
+
+app.get('/image-list', async (req, res) => {
+  try {
+    const files = await fs.readdir(imagesDirectory);
+    console.log('Files in uploads directory:', files);
+    const imageNames = files.filter(file => file.endsWith('.png'));
+    res.json(imageNames);
+  } catch (error) {
+    console.error('Error fetching image list:', error);
+    res.status(500).send('Error fetching image list.');
+  }
+});
+
 //_________________________________________________Dashboard_____________________________________
 app.get('/courses/count', async (req, res) => {
   try {

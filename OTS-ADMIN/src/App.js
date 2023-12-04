@@ -13,6 +13,7 @@ import {UpdateInstruction} from './components/UpdateInstruction.jsx';
 import Testcreation from './components/Testcreation.jsx';
 import TestUpdate from './components/TestUpdate.jsx'
 import DocumentUpload from './components/DocumentUpload.jsx'
+import DisplayImages from './components/DisplayImages.jsx';
 function App() {
   return (
     <Router>
@@ -35,6 +36,8 @@ function App() {
             path="/InstructionPage/editIns/:instructionId/:id"
             element={<UpdateInstruction />}
           />
+
+          <Route path='/DisplayImages' element={<DisplayImages />}/>
       </Routes>
       </div>
       
