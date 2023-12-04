@@ -1240,6 +1240,43 @@ async function insertRecord(table, record) {
       throw err;
   }
 }
+app.get('/api/getAllImages', async (req, res) => {
+  try {
+    const questionImages = await getAllImagesByType('questions', 'question_img');
+    const optionImages = await getAllImagesByType('options', 'option_img');
+    const solutionImages = await getAllImagesByType('solution', 'solution_img');
+ 
+    res.json({
+      questionImages,
+      optionImages,
+      solutionImages,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).send('Error fetching images from the database.');
+  }
+});
+ 
+ 
+async function getAllImagesByType(table, column) {
+  try {
+    const [results] = await db.query(`SELECT ${column} FROM ${table} ORDER BY question_id`);
+ 
+    const imageUrls = results.map(result => {
+      const imageBuffer = result[column];
+      return `data:image/png;base64,${imageBuffer.toString('base64')}`;
+    });
+ 
+    return imageUrls;
+  } catch (err) {
+    console.error(`Error fetching images from ${table}: ${err}`);
+    throw err;
+  }
+}
+
+
+
+
 //_________________________________________________Dashboard_____________________________________
 app.get('/courses/count', async (req, res) => {
   try {
