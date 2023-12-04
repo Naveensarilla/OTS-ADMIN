@@ -20,7 +20,6 @@ const db = mysql.createPool({
   database: 'admin_project',
 });
 
-
 const storage = multer.diskStorage({
   destination: async (req, file, cb) => {
     const uploadDir = 'uploads/';
@@ -28,14 +27,33 @@ const storage = multer.diskStorage({
     cb(null, uploadDir);
   },
   filename: (req, file, cb) => {
-    // const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-    // cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname));
-    cb(null, Date.now() + path.extname(file.originalname));
-    // cb(null, file.originalname);
+    // Use the originalname for documents and generate unique names for images
+    if (file.fieldname === 'document') {
+      cb(null, Date.now() + path.extname(file.originalname));
+    } else {
+      cb(null, 'snapshot_' + Date.now() + path.extname(file.originalname));
+    }
   },
 });
 
 const upload = multer({ storage });
+
+
+// const storage = multer.diskStorage({
+//   destination: async (req, file, cb) => {
+//     const uploadDir = 'uploads/';
+//     await fs.mkdir(uploadDir, { recursive: true });
+//     cb(null, uploadDir);
+//   },
+//   filename: (req, file, cb) => {
+//     // const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+//     // cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname));
+//     cb(null, Date.now() + path.extname(file.originalname));
+//     // cb(null, file.originalname);
+//   },
+// });
+
+// const upload = multer({ storage });
 
 //______________________exam creation start__________________________
 
@@ -1176,70 +1194,80 @@ app.get('/sections/:testCreationTableId', async (req, res) => {
 app.post('/upload', upload.single('document'), async (req, res) => {
   const docxFilePath = `uploads/${req.file.filename}`;
   const outputDir = `uploads/${req.file.originalname}_images`;
+
   try {
     await fs.mkdir(outputDir, { recursive: true });
-      const result = await mammoth.convertToHtml({ path: docxFilePath });
-      const htmlContent = result.value;
-      const $ = cheerio.load(htmlContent);
-      const textResult = await mammoth.extractRawText({ path: docxFilePath });
-      const textContent = textResult.value;
-      const textSections = textContent.split('\n\n');
+    const result = await mammoth.convertToHtml({ path: docxFilePath });
+    const htmlContent = result.value;
+    const $ = cheerio.load(htmlContent);
+    
+    // Get all images in the order they appear in the HTML
+    const images = [];
+    $('img').each(function (i, element) {
+      const base64Data = $(this).attr('src').replace(/^data:image\/\w+;base64,/, '');
+      const imageBuffer = Buffer.from(base64Data, 'base64');
+      images.push(imageBuffer);
+    });
 
-      // Get all images in the order they appear in the HTML
-      const images = [];
-      $('img').each(function (i, element) {
-          const base64Data = $(this).attr('src').replace(/^data:image\/\w+;base64,/, '');
-          const imageBuffer = Buffer.from(base64Data, 'base64');
-          images.push(imageBuffer);
-      });
+    let Question_id;
+    for (let i = 0; i < images.length; i++) {
+      const j = i % 6; // Calculate the index within the 6-image cycle
 
-      let j = 0;
-      let Question_id;
-      for (let i = 0; i < images.length; i++) {
-          if (j == 0) {
-              const questionRecord = {
-                  "question_img": images[i],
-                  "testCreationTableId": req.body.testCreationTableId,
-                  "sectionId": req.body.sectionId
-              };
-              console.log(j);
-              Question_id = await insertRecord('questions', questionRecord);
-              j++;
-          } else if (j > 0 && j < 5) {
-              const optionRecord = {
-                  "option_img": images[i],
-                  "question_id": Question_id
-              };
-              console.log(j);
-              await insertRecord('options', optionRecord);
-              j++;
-          } else if (j == 5) {
-              const solutionRecord = {
-                  "solution_img": images[i],
-                  "question_id": Question_id
-              };
-              console.log(j);
-              await insertRecord('solution', solutionRecord);
-              j = 0;
-          }
+      if (j === 0) {
+        // Save the snapshot image as a PNG file
+        const imageName = `snapshot_${Math.floor(i / 6) + 1}.png`;
+        const imagePath = `${outputDir}/${imageName}`;
+        await fs.writeFile(imagePath, images[i]);
+
+        const questionRecord = {
+          "questioImgName": imageName,
+          "testCreationTableId": req.body.testCreationTableId,
+          "sectionId": req.body.sectionId
+        };
+        console.log(j);
+        Question_id = await insertRecord('questions', questionRecord);
+      } else {
+        // Save the snapshot image as a PNG file
+        const imageName = `snapshot_${Math.floor(i / 6) + 1}_${j}.png`;
+        const imagePath = `${outputDir}/${imageName}`;
+        await fs.writeFile(imagePath, images[i]);
+
+        if (j < 5) {
+          const optionRecord = {
+            "optionImgName": imageName,
+            "question_id": Question_id
+          };
+          console.log(j);
+          await insertRecord('options', optionRecord);
+        } else {
+          const solutionRecord = {
+            "solutionImgName": imageName,
+            "question_id": Question_id
+          };
+          console.log(j);
+          await insertRecord('solution', solutionRecord);
+        }
       }
-      res.send('Text content and images extracted and saved to the database with the selected topic ID successfully.');
+    }
+
+    res.send('Text content and images extracted and saved to the database with the selected topic ID successfully.');
   } catch (error) {
-      console.error(error);
-      res.status(500).send('Error extracting content and saving it to the database.');
+    console.error(error);
+    res.status(500).send('Error extracting content and saving it to the database.');
   }
 });
 
 async function insertRecord(table, record) {
   try {
-      const [result] = await db.query(`INSERT INTO ${table} SET ?`, record);
-      console.log(`${table} id: ${result.insertId}`);
-      return result.insertId;
+    const [result] = await db.query(`INSERT INTO ${table} SET ?`, record);
+    console.log(`${table} id: ${result.insertId}`);
+    return result.insertId;
   } catch (err) {
-      console.error(`Error inserting data into ${table}: ${err}`);
-      throw err;
+    console.error(`Error inserting data into ${table}: ${err}`);
+    throw err;
   }
 }
+
 //_________________________________________________Dashboard_____________________________________
 app.get('/courses/count', async (req, res) => {
   try {

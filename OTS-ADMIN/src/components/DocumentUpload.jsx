@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
 
-const DocumentUpload = ({testCreationTableId}) => {
+const DocumentUpload = ({ testCreationTableId }) => {
   const [tests, setTests] = useState([]);
   const [sections, setSections] = useState([]);
   const [selectedTest, setSelectedTest] = useState('');
   const [selectedSection, setSelectedSection] = useState('');
-  const [file, setFile] = useState(null);
+  const [documentFile, setDocumentFile] = useState(null);
 
   useEffect(() => {
     // Fetch tests data
@@ -30,7 +30,7 @@ const DocumentUpload = ({testCreationTableId}) => {
   };
 
   const handleFileChange = (e) => {
-    setFile(e.target.files[0]);
+    setDocumentFile(e.target.files[0]);
   };
 
   const handleSectionChange = (event) => {
@@ -39,7 +39,7 @@ const DocumentUpload = ({testCreationTableId}) => {
 
   const handleUpload = () => {
     const formData = new FormData();
-    formData.append('document', file);
+    formData.append('document', documentFile);
     formData.append('sectionId', selectedSection);
     formData.append('testCreationTableId', selectedTest);
 
