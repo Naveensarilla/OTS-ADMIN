@@ -48,7 +48,7 @@ function App() {
           <Route path="/feachingtest/:courseCreationId"  element={<TestPage />} />
           <Route path="/Instructions/:testCreationTableId"  element={<Instructions />} />
 <Route path="/fetchinstructions/:testCreationTableId" element={<GeneralInstructionsPage />} />
-<Route path="/fetchSections/:testCreationTableId" element={<QuizPage/>}/>
+<Route path="/quiz_all/:testCreationTableId" element={<QuizPage/>}/>
 
 
       </Routes>

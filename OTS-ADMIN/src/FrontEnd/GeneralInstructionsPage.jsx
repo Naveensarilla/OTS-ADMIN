@@ -36,7 +36,7 @@ const GeneralInstructionsPage = () => {
           </React.Fragment>
         ))}
       </ul>
-      <Link to={`/fetchSections/${testCreationTableId}`}>Start Test</Link>
+      <Link to={`/quiz_all/${testCreationTableId}`}>Start Test</Link>
     </div>
   );
 };
