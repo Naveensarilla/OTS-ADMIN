@@ -1199,14 +1199,33 @@ app.get('/tests', async (req, res) => {
   }
 });
 
-app.get('/sections/:testCreationTableId', async (req, res) => {
+app.get('/subjects/:testCreationTableId', async (req, res) => {
   const { testCreationTableId } = req.params;
+
   try {
-      const [rows] = await db.query('SELECT testCreationTableId, sectionId, sectionName FROM sections WHERE testCreationTableId = ?', [testCreationTableId]);
-      res.json(rows);
+    const [subjects] = await db.query(`
+      SELECT s.subjectName,s.subjectId
+      FROM test_creation_table tt
+      INNER JOIN course_subjects AS cs ON tt.courseCreationId = cs.courseCreationId
+      INNER JOIN subjects AS s ON cs.subjectId = s.subjectId
+      WHERE tt.testCreationTableId = ?
+    `, [testCreationTableId]);
+
+    res.json(subjects);
   } catch (error) {
-      console.error('Error fetching sections data:', error);
-      res.status(500).send('Internal Server Error');
+    console.error('Error fetching subjects:', error);
+    res.status(500).send('Error fetching subjects.');
+  }
+});
+
+app.get('/sections/:subjectId', async (req, res) => {
+  const { subjectId } = req.params;
+  try {
+    const [rows] = await db.query('SELECT s.sectionName,s.sectionId FROM test_creation_table tt INNER JOIN sections AS s ON tt.testCreationTableId = s.testCreationTableId WHERE s.subjectId=?', [subjectId]);
+    res.json(rows);
+  } catch (error) {
+    console.error('Error fetching sections data:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
   }
 });
 
@@ -1241,7 +1260,8 @@ app.post('/upload', upload.single('document'), async (req, res) => {
         const questionRecord = {
           "questioImgName": imageName,
           "testCreationTableId": req.body.testCreationTableId,
-          "sectionId": req.body.sectionId
+          "subjectId": req.body.subjectId,  // Add subjectId
+          "sectionId": req.body.sectionId   // Add sectionId
         };
         console.log(j);
         Question_id = await insertRecord('questions', questionRecord);

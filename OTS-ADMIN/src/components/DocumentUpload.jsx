@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from 'react';
-
-const DocumentUpload = ({ testCreationTableId }) => {
+// import { useParams } from 'react-router-dom';
+const DocumentUpload = () => {
   const [tests, setTests] = useState([]);
+  const [subjects, setSubjects] = useState([]);
   const [sections, setSections] = useState([]);
   const [selectedTest, setSelectedTest] = useState('');
+  const [selectedSubject, setSelectedSubject] = useState('');
   const [selectedSection, setSelectedSection] = useState('');
   const [documentFile, setDocumentFile] = useState(null);
-
+  // const { subjectId } = useParams();
   useEffect(() => {
     // Fetch tests data
     fetch('http://localhost:3081/tests')
@@ -18,10 +20,26 @@ const DocumentUpload = ({ testCreationTableId }) => {
   const handleTestChange = async (event) => {
     const testCreationTableId = event.target.value;
     setSelectedTest(testCreationTableId);
-
-    // Fetch sections data based on the selected test
+  
+    // Fetch subjects data based on the selected test
     try {
-      const response = await fetch(`http://localhost:3081/sections/${testCreationTableId}`);
+      const response = await fetch(`http://localhost:3081/subjects/${testCreationTableId}`);
+
+      const data = await response.json();
+      setSubjects(data);
+    } catch (error) {
+      console.error('Error fetching subjects data:', error);
+    }
+  };
+
+  const handleSubjectChange = async (event) => {
+    const subjectId = event.target.value;
+    setSelectedSubject(subjectId);
+
+    // Fetch sections data based on the selected subject
+    try {
+      const response = await fetch(`http://localhost:3081/sections/${subjectId}`);
+
       const data = await response.json();
       setSections(data);
     } catch (error) {
@@ -40,9 +58,10 @@ const DocumentUpload = ({ testCreationTableId }) => {
   const handleUpload = () => {
     const formData = new FormData();
     formData.append('document', documentFile);
+    formData.append('subjectId', selectedSubject);
     formData.append('sectionId', selectedSection);
     formData.append('testCreationTableId', selectedTest);
-
+  
     fetch('http://localhost:3081/upload', {
       method: 'POST',
       body: formData,
@@ -66,6 +85,17 @@ const DocumentUpload = ({ testCreationTableId }) => {
           {tests.map(test => (
             <option key={test.testCreationTableId} value={test.testCreationTableId}>
               {test.TestName}
+            </option>
+          ))}
+        </select>
+      </div>
+      <div>
+        <label htmlFor="subjectSelect">Select Subject:</label>
+        <select id="subjectSelect" onChange={handleSubjectChange} value={selectedSubject}>
+          <option value="">Select a Subject</option>
+          {subjects.map(subject => (
+            <option key={subject.subjectId} value={subject.subjectId}>
+              {subject.subjectName}
             </option>
           ))}
         </select>
