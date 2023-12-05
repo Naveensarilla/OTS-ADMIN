@@ -1,9 +1,6 @@
-import React, { useState, useEffect } from "react";
-import DocumentImages from "./DocumentImages";
-import { DocOtsImg } from "./DocOtsImg";
-import { UploadedDoc } from "./UploadedDoc";
+import React, { useState, useEffect } from 'react';
 
-const DocumentUpload = ({ testCreationTableId }) => {
+const DocumentUpload = () => {
   const [tests, setTests] = useState([]);
   const [subjects, setSubjects] = useState([]);
   const [sections, setSections] = useState([]);
@@ -78,10 +75,8 @@ const DocumentUpload = ({ testCreationTableId }) => {
       });
   };
 
-
   return (
     <div>
-       <div>
       <div>
         <label htmlFor="testSelect">Select Test:</label>
         <select id="testSelect" onChange={handleTestChange} value={selectedTest}>
@@ -119,15 +114,79 @@ const DocumentUpload = ({ testCreationTableId }) => {
       <input type="file" accept=".docx" onChange={handleFileChange} />
       <button onClick={handleUpload}>Upload</button>
     </div>
-      <div>
-
-        <UploadedDoc />
-        {/* <DocOtsImg /> */}
-
-        {/* <DocumentImages /> */}
-      </div>
-    </div>
   );
 };
 
 export default DocumentUpload;
+
+
+
+
+
+app.post('/upload', upload.single('document'), async (req, res) => {
+    const docxFilePath = `uploads/${req.file.filename}`;
+    const outputDir = `uploads/${req.file.originalname}_images`;
+    try {
+      await fs.mkdir(outputDir, { recursive: true });
+        const result = await mammoth.convertToHtml({ path: docxFilePath });
+        const htmlContent = result.value;
+        const $ = cheerio.load(htmlContent);
+        const textResult = await mammoth.extractRawText({ path: docxFilePath });
+        const textContent = textResult.value;
+        const textSections = textContent.split('\n\n');
+  
+        // Get all images in the order they appear in the HTML
+        const images = [];
+        $('img').each(function (i, element) {
+            const base64Data = $(this).attr('src').replace(/^data:image\/\w+;base64,/, '');
+            const imageBuffer = Buffer.from(base64Data, 'base64');
+            images.push(imageBuffer);
+        });
+  
+        let j = 0;
+        let Question_id;
+        for (let i = 0; i < images.length; i++) {
+            if (j == 0) {
+                const questionRecord = {
+                    "question_img": images[i],
+                    "testCreationTableId": req.body.testCreationTableId,
+                    "sectionId": req.body.sectionId
+                };
+                console.log(j);
+                Question_id = await insertRecord('questions', questionRecord);
+                j++;
+            } else if (j > 0 && j < 5) {
+                const optionRecord = {
+                    "option_img": images[i],
+                    "question_id": Question_id
+                };
+                console.log(j);
+                await insertRecord('options', optionRecord);
+                j++;
+            } else if (j == 5) {
+                const solutionRecord = {
+                    "solution_img": images[i],
+                    "question_id": Question_id
+                };
+                console.log(j);
+                await insertRecord('solution', solutionRecord);
+                j = 0;
+            }
+        }
+        res.send('Text content and images extracted and saved to the database with the selected topic ID successfully.');
+    } catch (error) {
+        console.error(error);
+        res.status(500).send('Error extracting content and saving it to the database.');
+    }
+  });
+  
+  async function insertRecord(table, record) {
+    try {
+        const [result] = await db.query(`INSERT INTO ${table} SET ?`, record);
+        console.log(`${table} id: ${result.insertId}`);
+        return result.insertId;
+    } catch (err) {
+        console.error(`Error inserting data into ${table}: ${err}`);
+        throw err;
+    }
+  }
