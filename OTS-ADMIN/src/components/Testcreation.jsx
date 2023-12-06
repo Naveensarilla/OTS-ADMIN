@@ -38,9 +38,6 @@
 //     fetchInstructions();
 //   }, []);
 
-
-  
-
 //   useEffect(() => {
 //     fetch('http://localhost:3081/testcourses')
 //       .then((response) => response.json())
@@ -63,7 +60,7 @@
 //   const handleCloseForm = () => {
 //     setIsFormVisible(false);
 //   };
-  
+
 //   const handleSelectChange = (e) => {
 //     setSelectedCourse(e.target.value);
 //   };
@@ -88,7 +85,6 @@
 //   const handleEndTimeChange = (e) => {
 //     setEndTime(e.target.value);
 //   };
-
 
 //   const handleDurationChange = (e) => {
 //     setDuration(e.target.value);
@@ -189,7 +185,6 @@
 //     feachTestData();
 //   }, []);
 
-
 //   function formatTime(dateTimeString) {
 //     const formattedTime = moment(dateTimeString, 'HH:mm:ss.SSSSSS').format('HH:mm');
 //     return formattedTime !== 'Invalid date' ? formattedTime : 'Invalid Time';
@@ -282,7 +277,6 @@
 //               </select>
 //             </label>
 //           </div>
-
 
 //           <label>
 //             Test  Start Date:
@@ -455,18 +449,11 @@
 //         </table>
 //       </div>
 
-
-
-
 //     </div>
 //   )
 // }
 
 // export default Testcreation
-
-
-
-
 
 import React, { useState, useEffect } from "react";
 import moment from "moment";
@@ -490,12 +477,19 @@ const Testcreation = () => {
   const [selectedSubjects, setSelectedSubjects] = useState("");
   const [numberOfSections, setNumberOfSections] = useState(1);
   const [QuestionLimitChecked, setQuestionLimitChecked] = useState(false);
-const [sectionsData, setSectionsData] = useState([{ selectedSubjects: "", sectionName: "", noOfQuestions: "", QuestionLimit: "" }]);
+  const [sectionsData, setSectionsData] = useState([
+    {
+      selectedSubjects: "",
+      sectionName: "",
+      noOfQuestions: "",
+      QuestionLimit: "",
+    },
+  ]);
   const [isFormVisible, setIsFormVisible] = useState(false);
   const [testData, setTestData] = useState([]);
   const [selectedInstruction, setSelectedInstruction] = useState("");
   const [instructionsData, setInstructionsData] = useState([]);
- 
+
   useEffect(() => {
     const fetchInstructions = async () => {
       try {
@@ -506,17 +500,17 @@ const [sectionsData, setSectionsData] = useState([{ selectedSubjects: "", sectio
         console.error("Error fetching instructions:", error);
       }
     };
- 
+
     fetchInstructions();
   }, []);
- 
+
   useEffect(() => {
     fetch("http://localhost:3081/testcourses")
       .then((response) => response.json())
       .then((data) => setCourses(data))
       .catch((error) => console.error("Error fetching courses:", error));
   }, []);
- 
+
   useEffect(() => {
     if (selectedCourse) {
       fetch(`http://localhost:3081/course-typeoftests/${selectedCourse}`)
@@ -527,7 +521,7 @@ const [sectionsData, setSectionsData] = useState([{ selectedSubjects: "", sectio
         );
     }
   }, [selectedCourse]);
- 
+
   useEffect(() => {
     if (selectedCourse) {
       fetch(`http://localhost:3081/course-subjects/${selectedCourse}`)
@@ -541,22 +535,22 @@ const [sectionsData, setSectionsData] = useState([{ selectedSubjects: "", sectio
         );
     }
   }, [selectedCourse]);
- 
+
   const handleOpenForm = () => {
     setIsFormVisible(true);
   };
- 
+
   const handleCloseForm = () => {
     setIsFormVisible(false);
   };
- 
+
   const handleSelectChange = (e) => {
     setSelectedCourse(e.target.value);
   };
   const handleSelectTypeOfTest = (e) => {
     setSelectedtypeOfTest(e.target.value);
   };
- 
+
   const handleSelectSubjects = (e) => {
     setSelectedSubjects(e.target.value);
   };
@@ -566,27 +560,27 @@ const [sectionsData, setSectionsData] = useState([{ selectedSubjects: "", sectio
   const handleStartDateChange = (e) => {
     setStartDate(e.target.value);
   };
- 
+
   const handleStartTimeChange = (e) => {
     setStartTime(e.target.value);
   };
- 
+
   const handleEndDateChange = (e) => {
     setEndDate(e.target.value);
   };
- 
+
   const handleEndTimeChange = (e) => {
     setEndTime(e.target.value);
   };
- 
+
   const handleDurationChange = (e) => {
     setDuration(e.target.value);
   };
- 
+
   const handleTotalQuestionsChange = (e) => {
     setTotalQuestions(e.target.value);
   };
- 
+
   const handleTotalMarksChange = (e) => {
     setTotalMarks(e.target.value);
   };
@@ -596,45 +590,44 @@ const [sectionsData, setSectionsData] = useState([{ selectedSubjects: "", sectio
   const handleCalculatorChange = (e) => {
     setCalculator(e.target.value);
   };
- 
+
   const handleStatusChange = (e) => {
     setStatus(e.target.value);
   };
- 
+
   const handleQuestionLimitChange = (e) => {
     setQuestionLimitChecked(e.target.checked);
   };
- 
+
   const handleSectionChange = (e, index, field) => {
     // Create a copy of the sectionsData array
     const updatedSectionsData = [...sectionsData];
- 
+
     // Ensure that the array at the given index is initialized
     if (!updatedSectionsData[index]) {
       updatedSectionsData[index] = {};
     }
- 
+
     // Update the specified field in the copied array
     updatedSectionsData[index][field] = e.target.value;
- 
+
     // Set the updated array to the state
     setSectionsData(updatedSectionsData);
   };
- 
- 
+
   const addSection = () => {
     setNumberOfSections((prevSections) => prevSections + 1);
   };
- 
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
       // Log the sectionsData before making the request
       console.log("Sections Data Before Request:", sectionsData);
- 
+
       // Assuming you have the testCreationTableId from the test creation
       // const testCreationTableId = getTestCreationTableId();
- 
+
       // Make a request to create test and sections
       const response = await fetch("http://localhost:3081/create-test", {
         method: "POST",
@@ -658,14 +651,14 @@ const [sectionsData, setSectionsData] = useState([{ selectedSubjects: "", sectio
           selectedInstruction,
         }),
       });
- 
+
       const data = await response.json();
       console.log(data);
     } catch (error) {
       console.error("Error submitting form:", error);
     }
   };
- 
+
   useEffect(() => {
     const feachTestData = async () => {
       try {
@@ -680,14 +673,14 @@ const [sectionsData, setSectionsData] = useState([{ selectedSubjects: "", sectio
     };
     feachTestData();
   }, []);
- 
+
   function formatTime(dateTimeString) {
     const formattedTime = moment(dateTimeString, "HH:mm:ss.SSSSSS").format(
       "HH:mm"
     );
     return formattedTime !== "Invalid date" ? formattedTime : "Invalid Time";
   }
- 
+
   // function formatDate(dateString) {
   //   const date = new Date(dateString);
   //   const day = date.getDate().toString().padStart(2, "0");
@@ -707,11 +700,11 @@ const [sectionsData, setSectionsData] = useState([{ selectedSubjects: "", sectio
             method: "DELETE",
           }
         );
- 
+
         if (!response.ok) {
           throw new Error(`HTTP error! Status: ${response.status}`);
         }
- 
+
         const result = await response.json();
         console.log(result.message);
         const updatedtestData = testData.filter(
@@ -728,7 +721,7 @@ const [sectionsData, setSectionsData] = useState([{ selectedSubjects: "", sectio
       console.log("Deletion canceled.");
     }
   };
- 
+
   return (
     <div>
       {!isFormVisible && (
@@ -736,7 +729,7 @@ const [sectionsData, setSectionsData] = useState([{ selectedSubjects: "", sectio
           Open Form
         </button>
       )}
- 
+
       {isFormVisible && (
         <form onSubmit={handleSubmit}>
           <button type="button" onClick={handleCloseForm}>
@@ -765,7 +758,7 @@ const [sectionsData, setSectionsData] = useState([{ selectedSubjects: "", sectio
             </select>
           </label>
           <br />
- 
+
           <div>
             <label>
               Type of Tests:
@@ -787,7 +780,7 @@ const [sectionsData, setSectionsData] = useState([{ selectedSubjects: "", sectio
               </select>
             </label>
           </div>
- 
+
           <label>
             Test Start Date:
             <input
@@ -866,66 +859,65 @@ const [sectionsData, setSectionsData] = useState([{ selectedSubjects: "", sectio
                 </tr>
               </thead>
               <tbody>
-              {Array.from({ length: numberOfSections }, (_, index) => (
-  <tr key={index}>
-    <td>{index + 1}</td>
-    <td>
-      <div>
-        <select
-          value={sectionsData[index]?.selectedSubjects || ""}
-          onChange={(e) =>
-            handleSectionChange(e, index, "selectedSubjects")
-          }
-        >
-          <option value="" disabled>
-            Select a Subject
-          </option>
-          {subjects.map((Subject) => (
-            <option
-              key={Subject.subjectId}
-              value={Subject.subjectId}
-            >
-              {Subject.subjectName}
-            </option>
-          ))}
-        </select>
-      </div>
-    </td>
-    <td>
-      <input
-        type="text"
-        value={sectionsData[index]?.sectionName || ""}
-        onChange={(e) =>
-          handleSectionChange(e, index, "sectionName")
-        }
-      />
-    </td>
-    <td>
-      <input
-        type="number"
-        value={sectionsData[index]?.noOfQuestions || ""}
-        onChange={(e) =>
-          handleSectionChange(e, index, "noOfQuestions")
-        }
-      />
-    </td>
-    {QuestionLimitChecked && (
-      <td>
-        <input
-          type="number"
-          value={sectionsData[index]?.QuestionLimit || ""}
-          onChange={(e) =>
-            handleSectionChange(e, index, "QuestionLimit")
-          }
-        />
-      </td>
-    )}
-  </tr>
-))}
- 
+                {Array.from({ length: numberOfSections }, (_, index) => (
+                  <tr key={index}>
+                    <td>{index + 1}</td>
+                    <td>
+                      <div>
+                        <select
+                          value={sectionsData[index]?.selectedSubjects || ""}
+                          onChange={(e) =>
+                            handleSectionChange(e, index, "selectedSubjects")
+                          }
+                        >
+                          <option value="" disabled>
+                            Select a Subject
+                          </option>
+                          {subjects.map((Subject) => (
+                            <option
+                              key={Subject.subjectId}
+                              value={Subject.subjectId}
+                            >
+                              {Subject.subjectName}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                    </td>
+                    <td>
+                      <input
+                        type="text"
+                        value={sectionsData[index]?.sectionName || ""}
+                        onChange={(e) =>
+                          handleSectionChange(e, index, "sectionName")
+                        }
+                      />
+                    </td>
+                    <td>
+                      <input
+                        type="number"
+                        value={sectionsData[index]?.noOfQuestions || ""}
+                        onChange={(e) =>
+                          handleSectionChange(e, index, "noOfQuestions")
+                        }
+                      />
+                    </td>
+                    {QuestionLimitChecked && (
+                      <td>
+                        <input
+                          type="number"
+                          value={sectionsData[index]?.QuestionLimit || ""}
+                          onChange={(e) =>
+                            handleSectionChange(e, index, "QuestionLimit")
+                          }
+                        />
+                      </td>
+                    )}
+                  </tr>
+                ))}
               </tbody>
             </table>
- 
+
             <button type="button" onClick={addSection}>
               +
             </button>
@@ -970,7 +962,7 @@ const [sectionsData, setSectionsData] = useState([{ selectedSubjects: "", sectio
           <button type="submit">Submit</button>
         </form>
       )}
- 
+
       <div>
         <table>
           <thead>
@@ -1021,5 +1013,5 @@ const [sectionsData, setSectionsData] = useState([{ selectedSubjects: "", sectio
     </div>
   );
 };
- 
+
 export default Testcreation;

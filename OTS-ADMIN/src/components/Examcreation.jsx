@@ -2,7 +2,11 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import './admin.css'
 // import SuccessPopup from './SuccessPopup';
-import { Link } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
+import GetSubjectData from '../Demo/GetSubjectData';
+import GetSubjectData2 from '../Demo/GetSubjectData2';
+import SubjectData from '../Demo/SubjectData ';
+import Imgsjhg from '../Demo/Imgsjhg';
 // import EditForm from './EditForm';
 function Examcreation() {
     const [examName, setExamName] = useState('');
@@ -14,8 +18,7 @@ function Examcreation() {
     const [formOpen, setFormOpen] = useState(false);
     // const [showSuccessPopup, setShowSuccessPopup] = useState(false);
     const [examsWithSubjects, setExamsWithSubjects] = useState([]);
-  
-
+  const {subjectId} = useParams();
     
     const resetForm = () => {
         setExamName('');
@@ -240,6 +243,13 @@ function Examcreation() {
           ))}
         </tbody>
         </table>
+
+
+        {/* <GetSubjectData2 /> */}
+        <Imgsjhg />
+
+
+        {/* <SubjectData  subjectId={4}/> */}
 {/* ....................................TABLE END...............................  */}
       </div>
     </div>
