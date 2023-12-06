@@ -26,7 +26,6 @@
   transition: 0.5s ease-in-out;
 }
 
-
 .rotate_right {
   display: block;
   width: 25px;
@@ -52,19 +51,14 @@
   margin-top: -0.65rem;
   transform: rotatez(50deg);
   transition: 0.5s ease-in-out;
-
-
-
 }
-
-
 
 /* -------------------------------------- header .js ---------------------- */
 
 .header {
   /* background-color: #000000; */
   /* background: #e2f7fb; */
-  background: #1A374D;
+  background: #1a374d;
   /* height: 4rem; */
 
   display: flex;
@@ -74,8 +68,6 @@
   /* padding: 5px 100px; */
   padding: 11px 16px;
   box-shadow: 3px 0px 10px 0px;
-
-
 }
 
 .img {
@@ -85,24 +77,18 @@
   width: 180px;
 }
 
-
-
 /* -------------------------------------- app.js ---------------------- */
 .common_grid_app {
   display: flex;
-
 }
 
 .left-nav-bar {
-  width: 200px;
+  width: 240px;
   height: 100vh;
   /* background-color: #000000; */
   /* background: #e2f7fb; */
-  background: #1A374D;
+  background: #1a374d;
   box-shadow: 3px 0px 10px 0px;
-
-
-
 }
 
 .left-nav-bar ul {
@@ -112,28 +98,35 @@
   display: flex;
   flex-direction: column;
   gap: 1rem;
+  justify-content: center;
+  align-items: center;
 }
 
-.left-nav-bar ul li {
-  color: #f7f2f2;
-  padding: 1rem 0;
+.left-nav-bar ul li a{
+  color: #000000;
+  padding: 1rem ;
   transition: 0.3s all;
-
+  background: #fff;
+  border-radius: 10px;
+  /* text-align: center; */
+  width: 220px;
 
   &:hover {
     background-color: #000000;
-
+    color: #ebe8e8;
   }
 }
-
-.left-nav-bar ul a {
+/* .left-nav-bar ul li:hover .left-nav-bar ul a {
   color: #ffffff;
-  font-size: 1.2rem;
+} */
+.left-nav-bar ul a {
+  color: #000000;
+  font-size: 16px;
   font-weight: 500;
   width: 100%;
-  margin-left: 1.2rem;
+  /* margin-left: 1.2rem; */
   &:hover {
-  color: #ffffff;
+    color: #ffffff;
   }
 }
 
@@ -147,7 +140,7 @@
 .create_exam_content {
   position: relative;
   /* width: 90%; */
-  margin: 3rem ;
+  margin: 3rem;
 }
 
 .create_exam_header {
@@ -170,18 +163,18 @@
   /* background: #000; */
 /* } */
 
-.Create_exam_page>h2 {
+.Create_exam_page > h2 {
   /* text-align: center; */
   margin: 1rem 0;
 }
 
-.Create_exam_page>table {
+.Create_exam_page > table {
   width: 100%;
 }
 
-.Create_exam_page>table,
-.Create_exam_page>table td,
-.Create_exam_page>table th {
+.Create_exam_page > table,
+.Create_exam_page > table td,
+.Create_exam_page > table th {
   /* background: #fffcde; */
   /* color: #fff; */
   /* width: 100%; */
@@ -189,10 +182,9 @@
   border-collapse: collapse;
   border-spacing: 10px;
   text-align: center;
-
 }
 
-.Create_exam_page>table td button {
+.Create_exam_page > table td button {
   /* padding: 0.52rem; */
   /* margin: 0.5rem; */
   padding: 5px;
@@ -202,20 +194,18 @@
   border-radius: 8px;
 }
 
-.Create_exam_page>table td button a {
+.Create_exam_page > table td button a {
   text-decoration: none;
   color: #fff;
-
 }
 
-.Create_exam_page>table tr,
-.Create_exam_page>table td,
-.Create_exam_page>table th {
+.Create_exam_page > table tr,
+.Create_exam_page > table td,
+.Create_exam_page > table th {
   /* padding: 0.5rem; */
 }
 
 .Create_Exam_from {
-
   position: absolute;
   background: #f7f5f5;
   box-shadow: 0px 0px 10px rgba(39, 158, 255, 0.822);
@@ -225,16 +215,14 @@
   /* height: 50vh; */
   border-radius: 18px;
   /* left: 16%; */
-
 }
 
-.Create_Exam_from h2{
+.Create_Exam_from h2 {
   text-align: center;
   margin: 1rem 0;
 }
 
-
-.Create_Exam_from>form {
+.Create_Exam_from > form {
   /* width: 300px; */
   margin: 0 auto;
   color: #000000;
@@ -245,47 +233,43 @@
   font-size: 1.2rem;
 }
 
-.Create_Exam_from>form .formdiv_contaniner {
+.Create_Exam_from > form .formdiv_contaniner {
   display: grid;
   grid-template-columns: 15% 50%;
   gap: 1rem;
   justify-content: center;
 }
 
-.Create_Exam_from>form .formdiv_contaniner input[type=text],
-.formdiv_contaniner input[type=date] {
+.Create_Exam_from > form .formdiv_contaniner input[type="text"],
+.formdiv_contaniner input[type="date"] {
   /* width: 100%; */
   height: 30px;
   border-radius: 8px;
   padding: 0.5rem;
   border: none;
-
-
 }
 
-.Create_Exam_from>form .formdiv_contaniner input:focus {
+.Create_Exam_from > form .formdiv_contaniner input:focus {
   outline: none;
-
 }
 
-.Create_Exam_from>form .formdiv_contaniner ul {
+.Create_Exam_from > form .formdiv_contaniner ul {
   display: flex;
   flex-direction: column;
 }
 
-.Create_Exam_from>form .formdiv_contaniner ul li label {
+.Create_Exam_from > form .formdiv_contaniner ul li label {
   display: flex;
   gap: 0.5rem;
 }
 
-.Create_Exam_from>form button {
+.Create_Exam_from > form button {
   /* width: 100px; */
   padding: 0.5rem 3rem;
   border-radius: 8px;
   margin: 0.5rem auto;
   font-weight: 700;
   font-size: 1.2rem;
-
 }
 
 /* body{
@@ -306,7 +290,7 @@
   /* align-items: center; */
   font-weight: 700;
   cursor: pointer;
-  font-family: 'Courier New', Courier, monospace;
+  font-family: "Courier New", Courier, monospace;
 }
 
 .mobile_menu_non_black .Line_one {
@@ -343,7 +327,6 @@
 /* -------------------- Examupdate.jsx------------------- */
 
 .update_Exam_from {
-
   background: #f7f5f5;
   box-shadow: 0px 0px 10px rgba(39, 158, 255, 0.822);
   width: 80%;
@@ -353,11 +336,9 @@
   text-align: center;
   padding: 1rem 0;
   /* left: 16%; */
-
 }
 
-
-.update_Exam_from>form {
+.update_Exam_from > form {
   /* width: 300px; */
   margin: 0 auto;
   color: #000000;
@@ -368,50 +349,43 @@
   font-size: 1.2rem;
 }
 
-
-.update_Exam_from>form .formdiv_contaniner {
+.update_Exam_from > form .formdiv_contaniner {
   display: grid;
   grid-template-columns: 15% 50%;
   gap: 1rem;
   justify-content: center;
 }
 
-.update_Exam_from>form .formdiv_contaniner input[type=text],
-.formdiv_contaniner input[type=date] {
+.update_Exam_from > form .formdiv_contaniner input[type="text"],
+.formdiv_contaniner input[type="date"] {
   /* width: 100%; */
   height: 30px;
   border-radius: 8px;
   padding: 0.5rem;
   border: none;
-
-
 }
 
-
-.update_Exam_from>form .formdiv_contaniner input:focus {
+.update_Exam_from > form .formdiv_contaniner input:focus {
   outline: none;
-
 }
 
-
-.update_Exam_from>form .formdiv_contaniner ul {
+.update_Exam_from > form .formdiv_contaniner ul {
   display: flex;
   flex-direction: column;
 }
 
-.update_Exam_from>form .formdiv_contaniner ul li label {
+.update_Exam_from > form .formdiv_contaniner ul li label {
   display: flex;
   gap: 0.5rem;
 }
 
-.update_Exam_from>form button {
+.update_Exam_from > form button {
   /* width: 100px; */
   padding: 0.5rem 3rem;
   border-radius: 8px;
   margin: 0.5rem auto;
   font-weight: 700;
   font-size: 1.2rem;
-
 }
 /* --------------------- Coursecreation.jsx ----------- */
 
@@ -419,7 +393,7 @@
   width: 80%;
   margin: 4rem auto;
 }
-.course_container_heder{
+.course_container_heder {
   display: flex;
   justify-content: space-between;
   width: 90%;
@@ -427,31 +401,29 @@
   margin: 1rem auto;
   /* flex-direction: column; */
 }
-.course_container .Add_Course_btn_container >button{
-
+.course_container .Add_Course_btn_container > button {
   /* display: inline; */
   background: #3673ce;
   border: 0;
-  padding:  0.5rem;
+  padding: 0.5rem;
   border-radius: 10px;
   color: #fff;
   font-weight: 700;
   margin: 0.5rem;
 }
-.course_exam_page  {
+.course_exam_page {
   width: 90%;
   margin: 0 auto;
   font-size: 0.9rem;
 }
 
-
-.course_exam_page>table {
+.course_exam_page > table {
   width: 100%;
 }
 
-.course_exam_page>table,
-.course_exam_page>table td,
-.course_exam_page>table th {
+.course_exam_page > table,
+.course_exam_page > table td,
+.course_exam_page > table th {
   /* background: #fffcde; */
   /* color: #fff; */
   /* width: 100%; */
@@ -460,36 +432,35 @@
   border-spacing: 10px;
   text-align: center;
   padding: 0.5rem;
-
 }
-.courseupdate_btn_container{
+.courseupdate_btn_container {
   display: flex;
-  
 }
-.courseupdate_btn ,.coursedelte_btn{
+.courseupdate_btn,
+.coursedelte_btn {
   display: inline;
   background: #3673ce;
   border: 0;
-  padding:  0.5rem;
+  padding: 0.5rem;
   border-radius: 10px;
   color: #fff;
   font-weight: 700;
   margin: 0.5rem;
 }
-.course_container form{
-
+.course_container form {
   position: absolute;
   background: #f7f5f5;
   box-shadow: 0px 0px 10px rgba(39, 158, 255, 0.822);
   top: 15%;
-  left: 25%;width: 68%;
+  left: 25%;
+  width: 68%;
 
   /* height: 50vh; */
   border-radius: 18px;
   padding: 2rem;
 }
 
-.course_frominput_container{
+.course_frominput_container {
   /* display: grid;
   grid-template-columns: repeat(2,1fr);
   gap: 1rem; */
@@ -501,127 +472,126 @@
   align-items: center;
 }
 
-.course_frominput_container>div{
-      /* display: flex; */
-      display: grid;
-      grid-template-columns: 1fr 1fr 1fr;
-      gap: 1rem;
-      align-items: center;
+.course_frominput_container > div {
+  /* display: flex; */
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 1rem;
+  align-items: center;
 }
-.course_frominput_container input, .course_frominput_container select,.course_frominput_containe_discunt input{
+.course_frominput_container input,
+.course_frominput_container select,
+.course_frominput_containe_discunt input {
   height: 40px;
   border-radius: 8px;
   padding: 0.5rem;
   border: none;
 }
-.course_checkbox_continer_content{
+.course_checkbox_continer_content {
   display: grid;
-  grid-template-columns: repeat(3,1fr) ;
+  grid-template-columns: repeat(3, 1fr);
 }
-.course_checkbox_continer{
+.course_checkbox_continer {
   display: flex;
   gap: 0.5rem;
   align-items: center;
 }
-fieldset{
+fieldset {
   padding: 0.8rem;
 }
-fieldset >legend{
+fieldset > legend {
   margin-left: 10px;
 }
 
-.course_container form button{
+.course_container form button {
   /* display: inline; */
   background: #3673ce;
   border: 0;
-  padding:  0.5rem;
+  padding: 0.5rem;
   border-radius: 10px;
   color: #fff;
   font-weight: 700;
   margin: 0.5rem;
 }
 
-
-
 .course_frominput_container_discount {
-   display: grid;
-   grid-template-columns: 1fr 1fr;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
 }
 
-.course_frominput_container_parent{
+.course_frominput_container_parent {
   display: grid;
   /* grid-template-columns: repeat(auto-fill, minmax(100px, 600px));  */
 
-  grid-template-columns: 1fr 1fr ;
-   gap: 1rem;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
 }
-.course_frominput_containe_discunt{
+.course_frominput_containe_discunt {
   display: grid;
   grid-template-columns: 25% 35%;
 }
 
-#courses_close_btn{
+#courses_close_btn {
   position: absolute;
   z-index: 10001;
   top: 0;
   right: 0;
   background: none;
-
 }
-#courses_close_btn i{
+#courses_close_btn i {
   color: #000;
   font-size: 20px;
 }
 
-
 /* --------------------------- couseupdatepage----------------- */
 
-.couseupdatepage{
- min-width: 30%;
- height: 80vh;
+.couseupdatepage {
+  min-width: 30%;
+  height: 80vh;
   margin: 3rem auto;
   background: #ebe8e8;
-  padding: 2rem; 
+  padding: 2rem;
   border-radius: 18px;
   box-shadow: 0px 0px 10px rgba(39, 158, 255, 0.822);
 }
 
-.couseupdatepage form{
+.couseupdatepage form {
   display: flex;
   flex-direction: column;
   gap: 0.9rem;
 }
-.courseupdate_frominput_container{
-display: grid;
-grid-template-columns: 40% 1fr;
-align-items: center;
+.courseupdate_frominput_container {
+  display: grid;
+  grid-template-columns: 40% 1fr;
+  align-items: center;
   /* flex-direction: column; */
   /* text-align: center; */
-  
 }
-.courseupdate_frominput_container_checkbox{
+.courseupdate_frominput_container_checkbox {
   display: grid;
-  grid-template-columns: repeat(2,1fr);
+  grid-template-columns: repeat(2, 1fr);
   align-items: center;
 }
-.courseupdate_frominput_container_checkbox div{
+.courseupdate_frominput_container_checkbox div {
   display: flex;
   align-items: center;
   gap: 0.5rem;
   margin-left: 0.5rem;
 }
 
-.courseupdate_frominput_container input, .courseupdate_frominput_container select,.courseupdate_frominput_container input{
-height: 40px;
-border-radius: 8px;
-padding: 0.5rem;
-border: none;
-/* width: 200px; */
+.courseupdate_frominput_container input,
+.courseupdate_frominput_container select,
+.courseupdate_frominput_container input {
+  height: 40px;
+  border-radius: 8px;
+  padding: 0.5rem;
+  border: none;
+  /* width: 200px; */
 }
-.couseupdatepage form button{
+.couseupdatepage form button {
   background: #3673ce;
   border: 0;
-  padding:  0.5rem;
+  padding: 0.5rem;
   border-radius: 10px;
   color: #fff;
   font-weight: 700;
@@ -629,44 +599,39 @@ border: none;
   width: 150px;
 }
 
-
-
-
-@media  (max-width:1350px) {
-  .course_container{
+@media (max-width: 1350px) {
+  .course_container {
     margin: 0;
   }
-  .course_exam_page>table {
+  .course_exam_page > table {
     width: 100%;
     /* transform: rotate(90deg); */
   }
-  .course_exam_page>table,
-  .course_exam_page>table td,
-  .course_exam_page>table th {
+  .course_exam_page > table,
+  .course_exam_page > table td,
+  .course_exam_page > table th {
     padding: 0.2rem;
     font-size: 0.6rem;
     /* transform: rotate(90deg); */
   }
 
+  .courseupdate_btn,
+  .coursedelte_btn {
+    font-size: 0.7rem;
+  }
+  .course_container form {
+    top: 15%;
+  }
 
-    
-      .courseupdate_btn, .coursedelte_btn {
-font-size: 0.7rem;
-      }
-      .course_container form{
-        top: 15%;
-      }
-
-      .course_container form{
-        position: absolute;
-        top: 5%;
-        left: 20%;
-        font-size: 0.8rem;
-        transform: scale(0.8);
-          }
+  .course_container form {
+    position: absolute;
+    top: 5%;
+    left: 20%;
+    font-size: 0.8rem;
+    transform: scale(0.8);
+  }
 }
-@media (max-width:1000px) {
-
+@media (max-width: 1000px) {
   .mobile_menu {
     position: fixed;
     top: 28%;
@@ -686,7 +651,7 @@ font-size: 0.7rem;
     z-index: 1001;
     transform: scale(0.6);
     /* display: none; */
-}
+  }
 
   .left-nav-bar {
     /* transform: translatex(-300px); */
@@ -715,7 +680,7 @@ font-size: 0.7rem;
     transition: 0.5s;
     border-radius: 50%;
     background: #000;
-   
+
     transform: scale(0.5);
     z-index: 1001000;
 
@@ -724,11 +689,9 @@ font-size: 0.7rem;
       border-radius: 50%;
     }
 
-   
     /* .mobile_menu {
     display: block;
   } */
-
   }
 
   .mobile_menu_non_black .Line_one {
@@ -749,10 +712,9 @@ font-size: 0.7rem;
     border-radius: 10px;
     background: #ffffff;
     transform: rotate(141deg);
-
   }
 
-  .Create_exam_page>table {
+  .Create_exam_page > table {
     width: 80%;
     margin: 0 auto;
     font-size: 0.9rem;
@@ -763,113 +725,108 @@ font-size: 0.7rem;
     padding: 0;
     top: 10%;
     left: 1%;
-
   }
 
-  .Create_Exam_from>form {
+  .Create_Exam_from > form {
     padding: 3rem 0rem;
   }
 
-
-  .Create_Exam_from>form .formdiv_contaniner {
+  .Create_Exam_from > form .formdiv_contaniner {
     grid-template-columns: 25% 50%;
     gap: 1rem;
   }
 
-
-  .update_Exam_from>form {
+  .update_Exam_from > form {
     padding: 3rem 0rem;
   }
 
-  .update_Exam_from>form .formdiv_contaniner {
+  .update_Exam_from > form .formdiv_contaniner {
     grid-template-columns: 25% 50%;
     gap: 1rem;
   }
-.course_container{
-  margin: 0;
-}
-.course_exam_page>table {
-  width: 100%;
-  /* transform: rotate(90deg); */
-}
-.course_exam_page>table,
-.course_exam_page>table td,
-.course_exam_page>table th {
-  padding: 0.1rem;
-  font-size: 0.4rem;
-  /* transform: rotate(90deg); */
-}
+  .course_container {
+    margin: 0;
+  }
+  .course_exam_page > table {
+    width: 100%;
+    /* transform: rotate(90deg); */
+  }
+  .course_exam_page > table,
+  .course_exam_page > table td,
+  .course_exam_page > table th {
+    padding: 0.1rem;
+    font-size: 0.4rem;
+    /* transform: rotate(90deg); */
+  }
 
+  .course_container form {
+    position: absolute;
+    top: 0;
+    left: 0%;
+    font-size: 0.6rem;
+    transform: scale(0.8);
+  }
 
-.course_container form{
-  position: absolute;
-  top: 0;
-  left: 0%;
-  font-size: 0.6rem;
-  transform: scale(0.8);
-    }
+  .courseupdate_btn,
+  .coursedelte_btn {
+    font-size: 0.5rem;
+  }
+  .course_container form {
+    /* top: 15%; */
+    width: 100%;
+  }
 
-    .courseupdate_btn, .coursedelte_btn {
-      font-size: 0.5rem;
-            }
-            .course_container form{
-        /* top: 15%; */
-        width: 100%;
-      }
-      
-
-.course_frominput_container {
-
-  /* flex-direction: column; */
-  align-items: baseline;
-}.course_frominput_container_parent {
-  display: grid;
-  grid-template-columns:  1fr;
-  gap: 1rem;
-}
-
-#course_frominput_container_media{
-  display: flex;align-items: center;
-  gap: 0.1rem;
-}
-.course_frominput_container>div {
-  /* display: flex; */
-  
-  grid-template-columns: 1fr 1fr ;
- 
-}
-.couseupdatepage{
-width: 100%;
-   /* margin: 3rem auto; */
-   margin: 0;
-   background: #ebe8e8;
-   padding: 2rem; 
-   height: 100vh;
-   /* border-radius: 18px; */
-   box-shadow: 0px 0px 10px rgba(39, 158, 255, 0.822);
- }
-}
-
-@media (max-width:500px){
   .course_frominput_container {
-  display: grid;
-  gap: 0.5rem;
+    /* flex-direction: column; */
+    align-items: baseline;
+  }
+  .course_frominput_container_parent {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  #course_frominput_container_media {
+    display: flex;
+    align-items: center;
+    gap: 0.1rem;
+  }
+  .course_frominput_container > div {
+    /* display: flex; */
+
+    grid-template-columns: 1fr 1fr;
+  }
+  .couseupdatepage {
+    width: 100%;
+    /* margin: 3rem auto; */
+    margin: 0;
+    background: #ebe8e8;
+    padding: 2rem;
+    height: 100vh;
+    /* border-radius: 18px; */
+    box-shadow: 0px 0px 10px rgba(39, 158, 255, 0.822);
+  }
+}
+
+@media (max-width: 500px) {
+  .course_frominput_container {
+    display: grid;
+    gap: 0.5rem;
     /* align-items: baseline; */
   }
 
-.course_exam_page table td,.course_exam_page table th{
-  font-size: 0.2rem;
-}
+  .course_exam_page table td,
+  .course_exam_page table th {
+    font-size: 0.2rem;
+  }
 
-
-.courseupdate_frominput_container {
-  font-size: 0.6rem;
-}
-.courseupdate_frominput_container  input{
-  height: 30px;
-  font-size: 0.6rem;
-}
-
+  .courseupdate_frominput_container {
+    font-size: 0.6rem;
+  }
+  .courseupdate_frominput_container input {
+    height: 30px;
+    font-size: 0.6rem;
+  }
 }
 
 .Instruction_container {

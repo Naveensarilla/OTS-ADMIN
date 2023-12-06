@@ -18,9 +18,10 @@ import { YourComponent } from "./Demo/YourComponent .jsx";
 import QuestionDetails from "./Demo/QuestionDetails .jsx";
 import ImageComponent from "./Demo/ImageComponent .jsx";
 import ImageDisplay from "./Demo/ImageDisplay .jsx";
-import { DocumentData } from "./components/DocumentData.jsx";
 import UpdatingInst from "./Demo/UpdatingInst.jsx";
 import DocgetImages from "./Demo/DocgetImages.jsx";
+import Imgsjhg from "./Demo/Imgsjhg.jsx";
+import Document_ImageInfo from "./components/Document_ImageInfo.jsx";
 function App() {
   return (
     <Router>
@@ -57,8 +58,8 @@ function App() {
 
           {/* document list */}
           <Route
-            path="/api/getDocumentData/:document_Id"
-            element={<DocgetImages />}
+            path="/getSubjectData/:subjectId/:testCreationTableId"
+            element={<Document_ImageInfo />}
           />
         </Routes>
       </div>
@@ -66,7 +67,7 @@ function App() {
       {/* demo */}
 
       {/* below code working */}
-      <YourComponent />
+      {/* <YourComponent /> */}
       {/* <QuestionDetails /> */}
       {/* <DocgetImages /> */}
       {/* <ImageComponent /> */}

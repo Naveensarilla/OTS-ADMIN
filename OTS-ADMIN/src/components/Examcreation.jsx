@@ -246,7 +246,7 @@ function Examcreation() {
 
 
         {/* <GetSubjectData2 /> */}
-        <Imgsjhg />
+        {/* <Imgsjhg /> */}
 
 
         {/* <SubjectData  subjectId={4}/> */}

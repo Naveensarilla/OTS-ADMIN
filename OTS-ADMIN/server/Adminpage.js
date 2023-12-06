@@ -1680,17 +1680,19 @@ app.get('/subjects/:testCreationTableId', async (req, res) => {
   }
 });
  
-app.get('/sections/:subjectId', async (req, res) => {
-  const { subjectId } = req.params;
+app.get('/sections/:subjectId/:testCreationTableId', async (req, res) => {
+  const { subjectId, testCreationTableId } = req.params;
   try {
-    const [rows] = await db.query('SELECT s.sectionName,s.sectionId FROM test_creation_table tt INNER JOIN sections AS s ON tt.testCreationTableId = s.testCreationTableId WHERE s.subjectId=?', [subjectId]);
+    const [rows] = await db.query(
+      'SELECT s.sectionName, s.sectionId, s.testCreationTableId, s.subjectId FROM sections s JOIN test_creation_table tt ON s.testCreationTableId = tt.testCreationTableId WHERE s.subjectId = ? AND s.testCreationTableId = ?',
+      [subjectId, testCreationTableId]
+    );
     res.json(rows);
   } catch (error) {
     console.error('Error fetching sections data:', error);
     res.status(500).json({ error: 'Internal Server Error' });
   }
 });
-
 app.post("/upload", upload.single("document"), async (req, res) => {
   const docxFilePath = `uploads/${req.file.filename}`;
   const outputDir = `uploads/${req.file.originalname}_images`;
@@ -1933,12 +1935,47 @@ async function insertRecord(table, record) {
 //   return combinedImages;
 // }
 
-app.get("/getSubjectData/:subjectId", async (req, res) => {
+
+// app.get("/getSubjectData/:subjectId", async (req, res) => {
+//   try {
+//     const subjectId = req.params.subjectId;
+
+//     // Fetch document data based on subjectId
+//     const documentData = await getDocumentBySubjectId(subjectId);
+
+//     if (!documentData) {
+//       return res.status(404).send("Document not found");
+//     }
+
+//     const document_Id = documentData.document_Id;
+
+//     // Fetch question data based on subjectId and document_Id
+//     const questions = await getQuestionsBySubjectAndDocumentId(subjectId, document_Id);
+
+//     // Fetch option data based on questions
+//     const options = await getOptionsByQuestionsAndDocumentId(questions, document_Id);
+
+//     // Fetch solution data based on questions
+//     const solutions = await getSolutionsByQuestionsAndDocumentId(questions, document_Id);
+
+//     res.json({
+//       document: documentData,
+//       questions,
+//       options,
+//       solutions,
+//     });
+//   } catch (error) {
+//     console.error(error);
+//     res.status(500).send('Error fetching data from the database.');
+//   }
+// });
+app.get("/getSubjectData/:subjectId/:testCreationTableId", async (req, res) => {
   try {
     const subjectId = req.params.subjectId;
+    const testCreationTableId = req.params.testCreationTableId;
 
-    // Fetch document data based on subjectId
-    const documentData = await getDocumentBySubjectId(subjectId);
+    // Fetch document data based on subjectId and testCreationTableId
+    const documentData = await getDocumentBySubjectAndTestCreationId(subjectId, testCreationTableId);
 
     if (!documentData) {
       return res.status(404).send("Document not found");
@@ -1949,10 +1986,10 @@ app.get("/getSubjectData/:subjectId", async (req, res) => {
     // Fetch question data based on subjectId and document_Id
     const questions = await getQuestionsBySubjectAndDocumentId(subjectId, document_Id);
 
-    // Fetch option data based on questions
+    // Fetch option data based on questions and document_Id
     const options = await getOptionsByQuestionsAndDocumentId(questions, document_Id);
 
-    // Fetch solution data based on questions
+    // Fetch solution data based on questions and document_Id
     const solutions = await getSolutionsByQuestionsAndDocumentId(questions, document_Id);
 
     res.json({
@@ -1968,20 +2005,36 @@ app.get("/getSubjectData/:subjectId", async (req, res) => {
 });
 
 // Reusable function to get document data based on subjectId
-async function getDocumentBySubjectId(subjectId) {
+// async function getDocumentBySubjectId(subjectId) {
+//   try {
+//     const query = `
+//       SELECT document_Id, testCreationTableId, documen_name
+//       FROM ots_document
+//       WHERE subjectId = ?
+//     `;
+//     const [result] = await db.query(query, [subjectId]);
+//     return result[0];
+//   } catch (err) {
+//     console.error(`Error fetching document details: ${err}`);
+//     throw err;
+//   }
+// }
+// Reusable function to get document data based on subjectId and testCreationTableId
+async function getDocumentBySubjectAndTestCreationId(subjectId, testCreationTableId) {
   try {
     const query = `
       SELECT document_Id, testCreationTableId, documen_name
       FROM ots_document
-      WHERE subjectId = ?
+      WHERE subjectId = ? AND testCreationTableId = ?
     `;
-    const [result] = await db.query(query, [subjectId]);
+    const [result] = await db.query(query, [subjectId, testCreationTableId]);
     return result[0];
   } catch (err) {
     console.error(`Error fetching document details: ${err}`);
     throw err;
   }
 }
+
 
 // Reusable function to get questions data based on subjectId and document_Id
 async function getQuestionsBySubjectAndDocumentId(subjectId, document_Id) {
@@ -2302,7 +2355,7 @@ async function getImagesByType(table, column, document_Id) {
 app.get("/documentName", async (req, res) => {
   try {
     const query =
-      "SELECT document_Id, testCreationTableId, documen_name FROM ots_document";
+      "SELECT document_Id, testCreationTableId, documen_name, subjectId FROM ots_document";
     const [rows] = await db.query(query);
     res.json(rows);
   } catch (error) {
@@ -2518,6 +2571,18 @@ app.get('/courses/count', async (req, res) => {
     res.status(500).json({ error: 'Internal Server Error' });
   }
 });
+
+app.get('/exam/count', async (req, res) => {
+  try {
+    const [results, fields] = await db.execute(
+      'SELECT COUNT(examId) AS count FROM exams'
+    );
+    res.json(results);
+  } catch (error) {
+    console.error('Error fetching course count:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
 app.get('/test/count', async (req, res) => {
   try {
     const [results, fields] = await db.execute(
@@ -2532,7 +2597,7 @@ app.get('/test/count', async (req, res) => {
 app.get('/question/count', async (req, res) => {
   try {
     const [results, fields] = await db.execute(
-      'SELECT COUNT(qustion_id) AS count FROM questions'
+      'SELECT COUNT(question_id) AS count FROM questions'
     );
     res.json(results);
   } catch (error) {

@@ -86,7 +86,7 @@ const InstructionsDisplay = () => {
         </thead>
         <tbody>
           {instruction.map((ite, inde) => (
-            <tr key={inde}>
+            <tr key={inde} className={ite.examId % 2 === 0 ? "color1" : 'color2'}>
               <td>{ite.instructionId}</td>
               <td>{ite.examId}</td>
               <td>{ite.instructionHeading}</td>
@@ -129,31 +129,7 @@ const InstructionsDisplay = () => {
       </table>
 
       <div className="Instruction_Dis">
-        {/* {points.map((item, index) => (
-          <ul key={index}>
-            <li>{item.points}</li>
-            <div className="Instruction_btn">
-              <Link
-                to={`/InstructionPage/editIns/${item.instructionId}/${item.id}`}
-              >
-                edit
-              </Link>
-            </div>
-
-            <div className="InstructionDelete ">
-              <button className="InstDelete InstDelete1"
-                onClick={() => handleDeletePoint(item.instructionId, item.id)}
-              >
-             <i class="fa-solid fa-delete-left"></i>
-              </button>
-            </div>
-            <div className="Instruction_Point InstructionDelete">
-              <button className="InstDelete InstDelete2" onClick={() => handleDelete(item.instructionId)}>
-              <i class="fa-solid fa-trash"></i>
-              </button>
-            </div>
-          </ul>
-        ))} */}
+       
       </div>
     </div>
   );

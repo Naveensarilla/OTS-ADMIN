@@ -57,12 +57,6 @@ const GettinggInstructions = () => {
         <ul key={index} >
           <li>{item.instructionHeading}</li>
           <li>{item.points}</li>
-          {/* <Link
-            to={`/InstructionPage/editIns/${item.instructionId}/${item.id}`}
-          >
-          <i className="fa-solid fa-pencil"></i>
-          </Link> */}
-          
           <Link
             to={`/InstructionPage/editIns/${item.instructionId}/${item.id}`}
             title="Edit this point"

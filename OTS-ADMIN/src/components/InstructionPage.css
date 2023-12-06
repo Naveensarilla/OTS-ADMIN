@@ -1,6 +1,13 @@
-
-
-
+.color1{
+  background:  #ffffff;
+}
+.color2{
+  background:   #d1dde7;
+}
+.Instruction_containerTable {
+  background: #c9d4dd;
+  padding: 10px;
+}
 .instruction_container {
     margin: 2rem;
   }
@@ -37,7 +44,7 @@
     gap: 10px;
     justify-content: center;
     align-items: center;
-    background: #d5d5d5;
+    background: #c9d4dd;
   }
   .inst {
     display: flex;
@@ -52,7 +59,7 @@
     color: white;
     border-radius: 4px;
 }
-  .inst input,
+  .inst input,   .inst
   select {
     width: 350px;
     padding: 6px;
@@ -82,7 +89,7 @@
   }
   .Instruction_containerTable table tr th,
   tr td {
-    border: 2px solid #54808a;
+    /* border: 2px solid #54808a; */
     padding: 3px;
   }
   .Instruction_containerTable table tr th {
