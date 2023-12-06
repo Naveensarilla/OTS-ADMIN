@@ -14,9 +14,21 @@ function Examcreation() {
     const [formOpen, setFormOpen] = useState(false);
     // const [showSuccessPopup, setShowSuccessPopup] = useState(false);
     const [examsWithSubjects, setExamsWithSubjects] = useState([]);
-  
-
+    const [refreshTable, setRefreshTable] = useState(false);
     
+
+
+
+    useEffect(() => {
+      // If refreshTable state changes, reload the window
+      if (refreshTable) {
+        window.location.reload();
+        // Reset the refreshTable state to avoid continuous reloads
+        setRefreshTable(false);
+      }
+    }, [refreshTable]);
+
+
     const resetForm = () => {
         setExamName('');
         setStartDate('');
@@ -81,6 +93,7 @@ function Examcreation() {
                 // Reset form fields and state as needed
                 setSubmitting(false);
                 resetForm();
+                setRefreshTable(true);
                 // window.location.reload();
                 // setShowSuccessPopup(true);
             })
@@ -96,7 +109,7 @@ function Examcreation() {
     //     setShowSuccessPopup(false);
     // };
 
-
+   
 
     useEffect(() => {
         axios.get('http://localhost:3081/exams-with-subjects')
@@ -127,7 +140,14 @@ function Examcreation() {
         }
     };
 //....................................END...............................//
-    
+// useEffect(() => {
+//   if (refresh) {
+//       // Reload the window
+//       window.location.reload();
+//       // Reset the refresh state to avoid continuous reloads
+//       setRefresh(false);
+//   }
+// }, [refresh]);
 
 
   return (
@@ -188,7 +208,7 @@ function Examcreation() {
           </div>
   
   
-  <button type="submit" disabled={submitting}>Create Exam</button>
+          <button onClick={() => setFormOpen(true)}><i className="fa-solid fa-plus"></i> Exam</button>
   
           
             

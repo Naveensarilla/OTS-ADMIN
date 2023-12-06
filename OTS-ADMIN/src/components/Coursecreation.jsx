@@ -14,7 +14,7 @@ const Coursecreation = () => {
   const [subjectsData, setSubjectsData] = useState([]);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [courseData, setCourseData] = useState([]);
-
+  // const [refreshTable, setRefreshTable] = useState(false);
   const resetFormFields = () => {
     setFormData({
       courseName: "",
@@ -308,6 +308,7 @@ const Coursecreation = () => {
         } else {
           console.log("Failed to create course:", result.error);
         }
+        
       } else {
         console.log("Failed to create course. Unexpected response:", result);
       }
@@ -316,6 +317,7 @@ const Coursecreation = () => {
       // Handle error or show an error message to the user
     }
   };
+ 
 
   // function formatDate(dateString) {
   //   const date = new Date(dateString);
@@ -374,6 +376,16 @@ const Coursecreation = () => {
       resetFormFields();
     }
   };
+
+  // useEffect(() => {
+  //   // If refreshTable state changes, reload the window
+  //   if (refreshTable) {
+  //     window.location.reload();
+  //     // Reset the refreshTable state to avoid continuous reloads
+  //     setRefreshTable(false);
+  //   }
+  // }, [refreshTable]);
+
   return (
     <div className="course_container">
       <div className="course_container_heder">
