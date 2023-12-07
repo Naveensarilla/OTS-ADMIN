@@ -1454,6 +1454,142 @@ app.get('/examData', async (req, res) => {
 
 
 
+
+    app.get('/subjects/:testCreationTableId', async (req, res) => {
+      const { testCreationTableId } = req.params;
+      try {
+        // Fetch instructions from the database based on testCreationTableId
+        const [subjects] = await db.query(
+          'SELECT subjects.subjectName FROM test_creation_table JOIN course_creation_table ON test_creation_table.courseCreationId = course_creation_table.courseCreationId JOIN course_subjects ON course_creation_table.courseCreationId = course_subjects.courseCreationId JOIN Subjects ON course_subjects.subjectId = Subjects.subjectId WHERE test_creation_table.testCreationTableId = ?',
+          [testCreationTableId]
+        );
+        res.json(subjects);
+      } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Internal Server Error' });
+      }
+    });
+
+
+
+
+
+
+
+    app.get("/getPaperData/:testCreationTableId/:subjectId", async (req, res) => {
+      try {
+        const subjectId = req.params.subjectId;
+        const testCreationTableId = req.params.testCreationTableId;
+     
+       
+        const questions = await getQuestionsBySubjectAndDocumentId(subjectId, testCreationTableId);
+     
+        // Fetch option data based on questions and document_Id
+        const options = await getOptionsByQuestionsAndDocumentId(questions, testCreationTableId);
+     
+        // Fetch solution data based on questions and document_Id
+        const solutions = await getSolutionsByQuestionsAndDocumentId(questions, testCreationTableId);
+     
+        res.json({
+          // document: documentData,
+          questions,
+          options,
+          solutions,
+        });
+      } catch (error) {
+        console.error(error);
+        res.status(500).send('Error fetching data from the database.');
+      }
+    });
+     
+     
+     
+    // Reusable function to get questions data based on subjectId and document_Id
+    async function getQuestionsBySubjectAndDocumentId(subjectId, testCreationTableId) {
+      try {
+        const query = ` SELECT question_id, question_img FROM questions WHERE subjectId = ? AND testCreationTableId = ?  `;
+        const [results] = await db.query(query, [subjectId, testCreationTableId]);
+        const optionsWithBase64 = results.map(option => ({
+          question_id: option.question_id,
+          question_img: option.question_img.toString('base64'),
+        }));
+        return optionsWithBase64;
+      } catch (err) {
+        console.error(`Error fetching questions: ${err}`);
+        throw err;
+      }
+    }
+     
+    // Reusable function to get options data based on questions and document_Id
+    async function getOptionsByQuestionsAndDocumentId(questions, testCreationTableId) {
+      try {
+        const questionIds = questions.map(question => question.question_id);
+    
+        // Check if questionIds is not empty before constructing the query
+        if (questionIds.length === 0) {
+          return []; // Return an empty array or handle the case appropriately
+        }
+    
+        const query = `SELECT question_id, option_img FROM options WHERE question_id IN (?)`;
+        const [results] = await db.query(query, [questionIds, testCreationTableId]);
+    
+        // Convert BLOB data to base64 for sending in the response
+        const optionsWithBase64 = results.map(option => ({
+          question_id: option.question_id,
+          option_img: option.option_img.toString('base64'),
+        }));
+    
+        return optionsWithBase64;
+      } catch (err) {
+        console.error(`Error fetching options: ${err.message}`);
+        throw err;
+      }
+    }
+     
+    // Reusable function to get solutions data based on questions and document_Id
+    async function getSolutionsByQuestionsAndDocumentId(questions, testCreationTableId) {
+      try {
+        const questionIds = questions.map(question => question.question_id);
+        const query = `SELECT question_id, solution_img FROM solution WHERE question_id IN (?) `;
+        const [results] = await db.query(query, [questionIds, testCreationTableId]);
+     
+        // Convert BLOB data to base64 for sending in the response
+        const solutionsWithBase64 = results.map(solution => ({
+          question_id: solution.question_id,
+          solution_img: solution.solution_img.toString('base64'),
+        }));
+     
+        return solutionsWithBase64;
+      } catch (err) {
+        console.error(`Error fetching solutions: ${err}`);
+        throw err;
+      }
+    }
+     
+    function combineImage(questions, options, solutions) {
+      const combinedImages = [];
+     
+      for (let i = 0; i < questions.length; i++) {
+        const questionImage = questions[i].question_img;
+        const optionImages = options
+          .filter((opt) => opt.question_id === questions[i].question_id)
+          .map((opt) => opt.option_img);
+        const solutionImage = solutions.find(
+          (sol) => sol.question_id === questions[i].question_id
+        )?.solution_img;
+     
+        combinedImages.push({
+          questionImage,
+          optionImages,
+          solutionImage,
+        });
+      }
+     
+      return combinedImages;
+    }
+     
+
+
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
 });

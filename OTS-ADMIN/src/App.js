@@ -17,7 +17,8 @@ import CoursePage from "./FrontEnd/CoursePage.jsx";
 import TestPage from "./FrontEnd/TestPage.jsx";
 import Instructions from "./FrontEnd/Instructions";
 import GeneralInstructionsPage from "./FrontEnd/GeneralInstructionsPage.jsx";
-import QuizPage from "./FrontEnd/QuizPage.jsx";
+import Paper2 from "./FrontEnd/paper2.jsx";
+// import QuizPage from "./FrontEnd/QuizPage.jsx";
 function App() {
   return (
     <Router>
@@ -61,7 +62,8 @@ function App() {
             path="/fetchinstructions/:testCreationTableId"
             element={<GeneralInstructionsPage />}
           />
-          <Route path="/quiz_all/:testCreationTableId" element={<QuizPage />} />
+          {/* <Route path="/quiz_all/:testCreationTableId" element={<QuizPage />} /> */}
+          <Route path="/subjects/:testCreationTableId" element={<Paper2/>}/>
         </Routes>
       </div>
     </Router>
