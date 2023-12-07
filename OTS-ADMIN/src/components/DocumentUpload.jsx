@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from 'react';
+import { useParams } from 'react-router-dom';
+
 
 const DocumentUpload = () => {
   const [tests, setTests] = useState([]);
@@ -8,7 +10,7 @@ const DocumentUpload = () => {
   const [selectedSubject, setSelectedSubject] = useState('');
   const [selectedSection, setSelectedSection] = useState('');
   const [file, setFile] = useState(null);
-
+  const { testCreationTableId } = useParams();
   useEffect(() => {
     // Fetch tests data
     fetch('http://localhost:3081/tests')
@@ -32,13 +34,12 @@ const DocumentUpload = () => {
     }
   };
   const handleSubjectChange = async (event) => {
-    const subjectId = event.target.value;
-    setSelectedSubject(subjectId);
- 
+    const selectedSubject = event.target.value;
+    setSelectedSubject(selectedSubject);
+
     // Fetch sections data based on the selected subject
     try {
-      const response = await fetch(`http://localhost:3081/sections/${subjectId}`);
- 
+      const response = await fetch(`http://localhost:3081/sections/${selectedSubject}/${selectedTest}`);
       const data = await response.json();
       setSections(data);
     } catch (error) {

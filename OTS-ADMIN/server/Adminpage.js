@@ -1198,16 +1198,20 @@ app.get('/subjects/:testCreationTableId', async (req, res) => {
   }
 });
  
-app.get('/sections/:subjectId', async (req, res) => {
-  const { subjectId } = req.params;
+app.get('/sections/:subjectId/:testCreationTableId', async (req, res) => {
+  const { subjectId, testCreationTableId } = req.params;
   try {
-    const [rows] = await db.query('SELECT s.sectionName,s.sectionId FROM test_creation_table tt INNER JOIN sections AS s ON tt.testCreationTableId = s.testCreationTableId WHERE s.subjectId=?', [subjectId]);
+    const [rows] = await db.query(
+      'SELECT s.sectionName, s.sectionId, s.testCreationTableId, s.subjectId FROM sections s JOIN test_creation_table tt ON s.testCreationTableId = tt.testCreationTableId WHERE s.subjectId = ? AND s.testCreationTableId = ?',
+      [subjectId, testCreationTableId]
+    );
     res.json(rows);
   } catch (error) {
     console.error('Error fetching sections data:', error);
     res.status(500).json({ error: 'Internal Server Error' });
   }
 });
+
 
 app.post('/upload', upload.single('document'), async (req, res) => {
   const docxFilePath = `uploads/${req.file.filename}`;
