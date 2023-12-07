@@ -1340,7 +1340,7 @@ app.get('/test/count', async (req, res) => {
 app.get('/question/count', async (req, res) => {
   try {
     const [results, fields] = await db.execute(
-      'SELECT COUNT(qustion_id) AS count FROM questions'
+      'SELECT COUNT(question_id) AS count FROM questions'
     );
     res.json(results);
   } catch (error) {
@@ -1453,9 +1453,9 @@ app.get('/examData', async (req, res) => {
       const testCreationTableId = req.params.testCreationTableId;
     
       const sql = `
-        SELECT tt.testCreationTableId, s.sectionId, q.qustion_id, q.question_img, o.option_id, o.option_img, o.option_index
+        SELECT tt.testCreationTableId, s.sectionId, q.question_id, q.question_img, o.option_id, o.option_img, o.option_index
         FROM test_creation_table tt, sections s, questions q, options o
-        WHERE tt.testCreationTableId=q.testCreationTableId AND s.testCreationTableId=tt.testCreationTableId AND q.qustion_id=o.question_id AND tt.testCreationTableId=?
+        WHERE tt.testCreationTableId=q.testCreationTableId AND s.testCreationTableId=tt.testCreationTableId AND q.question_id=o.question_id AND tt.testCreationTableId=?
       `;
    
       try {
@@ -1464,7 +1464,7 @@ app.get('/examData', async (req, res) => {
         const sections = {};
     
         results.forEach((row) => {
-          const { sectionId, sectionName, qustion_id, question_img, Option_Index, option_img } = row;
+          const { sectionId, sectionName, question_id, question_img, Option_Index, option_img } = row;
 
           if (!sections[sectionName]) {
             sections[sectionName] = {
@@ -1474,10 +1474,10 @@ app.get('/examData', async (req, res) => {
             };
           }
     
-          const question = sections[sectionName].questions.find(q => q.qustion_id === qustion_id);
+          const question = sections[sectionName].questions.find(q => q.question_id === question_id);
           if (!question) {
             sections[sectionName].questions.push({
-              qustion_id,
+              question_id,
               userAnswers: "",
               isvisited: 0,
               question_img: question_img.toString('base64'),
@@ -1491,7 +1491,7 @@ app.get('/examData', async (req, res) => {
             optiontype
           };
     
-          sections[sectionName].questions.find(q => q.qustion_id === qustion_id).option_img.push(option);
+          sections[sectionName].questions.find(q => q.question_id === question_id).option_img.push(option);
         });
     
         res.json(sections);
