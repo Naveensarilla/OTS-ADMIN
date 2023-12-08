@@ -1229,6 +1229,7 @@ app.get('/sections/:subjectId', async (req, res) => {
   }
 });
 
+
 app.post('/upload', upload.single('document'), async (req, res) => {
   const docxFilePath = `uploads/${req.file.filename}`;
   const outputDir = `uploads/${req.file.originalname}_images`;
@@ -1238,7 +1239,7 @@ app.post('/upload', upload.single('document'), async (req, res) => {
     const result = await mammoth.convertToHtml({ path: docxFilePath });
     const htmlContent = result.value;
     const $ = cheerio.load(htmlContent);
-    
+
     // Get all images in the order they appear in the HTML
     const images = [];
     $('img').each(function (i, element) {
@@ -1248,40 +1249,38 @@ app.post('/upload', upload.single('document'), async (req, res) => {
     });
 
     let Question_id;
+
     for (let i = 0; i < images.length; i++) {
       const j = i % 6; // Calculate the index within the 6-image cycle
 
-      if (j === 0) {
-        // Save the snapshot image as a PNG file
-        const imageName = `snapshot_${Math.floor(i / 6) + 1}.png`;
-        const imagePath = `${outputDir}/${imageName}`;
-        await fs.writeFile(imagePath, images[i]);
+      // Save the snapshot image as a PNG file
+      const imageName = `snapshot_${Math.floor(i / 6) + 1}_${j}.png`;
+      const imagePath = `${outputDir}/${imageName}`;
+      await fs.writeFile(imagePath, images[i]);
 
+      if (j === 0) {
+        // For the first image, save it as a question
         const questionRecord = {
-          "questioImgName": imageName,
-          "testCreationTableId": req.body.testCreationTableId,
-          "subjectId": req.body.subjectId,  // Add subjectId
-          "sectionId": req.body.sectionId   // Add sectionId
+          questionImgName: imageName,
+          testCreationTableId: req.body.testCreationTableId,
+          subjectId: req.body.subjectId,
+          sectionId: req.body.sectionId
         };
         console.log(j);
         Question_id = await insertRecord('questions', questionRecord);
       } else {
-        // Save the snapshot image as a PNG file
-        const imageName = `snapshot_${Math.floor(i / 6) + 1}_${j}.png`;
-        const imagePath = `${outputDir}/${imageName}`;
-        await fs.writeFile(imagePath, images[i]);
-
+        // For subsequent images, save as options or solution
         if (j < 5) {
           const optionRecord = {
-            "optionImgName": imageName,
-            "question_id": Question_id
+            optionImgName: imageName,
+            question_id: Question_id
           };
           console.log(j);
           await insertRecord('options', optionRecord);
         } else {
           const solutionRecord = {
-            "solutionImgName": imageName,
-            "question_id": Question_id
+            solutionImgName: imageName,
+            question_id: Question_id
           };
           console.log(j);
           await insertRecord('solution', solutionRecord);
@@ -1306,7 +1305,6 @@ async function insertRecord(table, record) {
     throw err;
   }
 }
-
 
 const imagesDirectory = path.join(__dirname, 'uploads');
 
