@@ -19,7 +19,7 @@ const Paper2 = () => {
 
         // Fetch paper data
         const paperResponse = await fetch(
-          `http://localhost:3081/getPaperData/${testCreationTableId}/${subjectId}`
+          `http://localhost:3081/quiz_all/${testCreationTableId}/${subjectId}`
         );
         const paperData = await paperResponse.json();
         setQuestionsData(paperData);
@@ -34,7 +34,7 @@ const Paper2 = () => {
   const handlepaperClick = async (typeOfTestId) => {
     try {
       // Fetch tests based on typeOfTestId
-      const response = await fetch(`http://localhost:3081/getPaperData/${testCreationTableId}/${subjectId}`);
+      const response = await fetch(`http://localhost:3081/quiz_all/${testCreationTableId}/${subjectId}`);
       const paperData = await response.json();
       setQuestionsData(paperData);
     } catch (error) {
