@@ -1239,6 +1239,9 @@ app.post('/upload', upload.single('document'), async (req, res) => {
     const result = await mammoth.convertToHtml({ path: docxFilePath });
     const htmlContent = result.value;
     const $ = cheerio.load(htmlContent);
+    const textResult = await mammoth.extractRawText({ path: docxFilePath });
+    const textContent = textResult.value;
+    const textSections = textContent.split('\n\n');
 
     // Get all images in the order they appear in the HTML
     const images = [];
@@ -1285,6 +1288,30 @@ app.post('/upload', upload.single('document'), async (req, res) => {
           console.log(j);
           await insertRecord('solution', solutionRecord);
         }
+      }
+    }
+    for (let i = 0; i < textSections.length; i++) {
+      if (textSections[i].startsWith('[qtype]')) {
+        // Save in the qtype table
+        const qtypeRecord = {
+          qtype_text: textSections[i].replace('[qtype]', ''),
+          question_id: Question_id
+        };
+        await insertRecord('qtype', qtypeRecord);
+      } else if (textSections[i].startsWith('[ans]')) {
+        // Save in the answer table
+        const answerRecord = {
+          answer_text: textSections[i].replace('[ans]', ''),
+          question_id: Question_id
+        };
+        await insertRecord('answer', answerRecord);
+      } else if (textSections[i].startsWith('[Marks]')) {
+        // Save in the marks table
+        const marksRecord = {
+          marks_text: textSections[i].replace('[Marks]', ''),
+          question_id: Question_id
+        };
+        await insertRecord('marks', marksRecord);
       }
     }
 
