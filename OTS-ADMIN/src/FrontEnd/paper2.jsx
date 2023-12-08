@@ -1,86 +1,45 @@
-import React, { useEffect, useState } from 'react';
-import { Link,useParams } from 'react-router-dom';
-
-const Paper2 = () => {
-  const [subjects, setSubjects] = useState([]);
-  const [questionsData, setQuestionsData] = useState([]);
-  const { testCreationTableId, subjectId } = useParams();
-
+import React, { useState, useEffect } from 'react';
+ 
+function PaperData() {
+  const [data, setData] = useState(null);
+ 
   useEffect(() => {
-    // Fetch subjects and paper data when the component mounts
-    const fetchData = async () => {
+    const fetchPaperData = async () => {
       try {
-        // Fetch subjects
-        const subjectsResponse = await fetch(
-          `http://localhost:3081/subjects/${testCreationTableId}`
-        );
-        const subjectsData = await subjectsResponse.json();
-        setSubjects(subjectsData);
-  
-        // You can add more fetch calls or any other logic here
+        // Assuming you have testCreationTableId and subjectId values
+        // const testCreationTableId = 1; // replace with your actual value
+        // const subjectId = 2; // replace with your actual value
+ 
+        const response = await fetch(`http://localhost:4009/getPaperDataa/1/1`);
+        const result = await response.json();
+        setData(result);
       } catch (error) {
         console.error('Error fetching data:', error);
-        // Handle errors appropriately
       }
     };
-  
-    fetchData();
-  }, [testCreationTableId]);
-  
-
-  const handlepaperClick = async (typeOfTestId) => {
-    try {
-      // Fetch tests based on typeOfTestId
-      const response = await fetch(`http://localhost:3081/getPaperDataa/${testCreationTableId}/${subjectId}`);
-      const paperData = await response.json();
-      setQuestionsData(paperData);
-    } catch (error) {
-      console.error(error);
-    }
-  };
-
-
-
+ 
+    fetchPaperData();
+  }, []); // The empty dependency array ensures that this effect runs once when the component mounts.
+ 
+  if (!data) {
+    return <div>Loading...</div>;
+  }
+ 
+  // Render your component using the fetched data
   return (
     <div>
-      <h2>Subjects</h2>
-      <ul>
-        {subjects.map(subject => (
-          <li key={subject.subjectId}>
-            <Link to="#" onClick={() => handlepaperClick(subject.subjectId) }>
-              {subject.subjectName}
-            </Link>
-          </li>
-        ))}
-      </ul>
-
-      <h2>Paper Data for Subject: {subjectId}</h2>
-      <ul>
-        {questionsData.map((questionData, index) => (
-          <li key={index}>
-            <div>
-              <h3>Question {index + 1}</h3>
-              <img src={`data:image/png;base64,${questionData.questionImage}`} alt={`Question ${index + 1}`} />
-            </div>
-            <div>
-              <h4>Options:</h4>
-              <ul>
-                {questionData.optionImages.map((optionImage, optionIndex) => (
-                  <li key={optionIndex}>
-                    <img src={`data:image/png;base64,${optionImage}`} alt={`Option ${optionIndex + 1}`} />
-                  </li>
-                ))}
-              </ul>
-            </div>
-            <div>
-              <h4>Solution:</h4>
-              <img src={`data:image/png;base64,${questionData.solutionImage}`} alt={`Solution ${index + 1}`} />
-            </div>
-          </li>
-        ))}
-      </ul>
+      {/* Access data as needed, for example: */}
+      <h1>Test Creation Table ID: {data.testData.testCreationTableId}</h1>
+      {/* Render questions, options, and solutions similarly */}
+      {data.questions.map(question => (
+        <div key={question.question_id}>
+          <img src={`data:image/png;base64,${question.question_img}`} alt="Question" />
+          {/* Render options and solutions similarly */}
+          <img src={`data:image/png;base64,${question.option_img}`} alt="Option" />
+        </div>
+      ))}
     </div>
   );
-};
-
-export default Paper2;
+}
+ 
+export default PaperData;
