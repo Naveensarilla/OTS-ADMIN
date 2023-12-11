@@ -14,7 +14,29 @@ const Coursecreation = () => {
   const [subjectsData, setSubjectsData] = useState([]);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [courseData, setCourseData] = useState([]);
+  const [formErrors, setFormErrors] = useState({});
 
+  const validateForm = () => {
+    const errors = {};
+
+    if (!formData.courseName.trim()) {
+      errors.courseName = "Course Name is required";
+    }
+
+    if (!selectedexams) {
+      errors.selectedexams = "Please select an exam";
+    }
+
+    if (selectedSubjects.length === 0) {
+      errors.selectedSubjects = "Please select at least one subject";
+    }
+
+    // Add more validation checks as needed
+
+    setFormErrors(errors);
+
+    return Object.keys(errors).length === 0;
+  };
   const resetFormFields = () => {
     setFormData({
       courseName: "",
@@ -262,8 +284,10 @@ const Coursecreation = () => {
       alert("Please fill in all required fields.");
       return;
     }
+    if (validateForm()) {
     // window.location.reload();
     resetFormFields();
+ 
     const data = {
       ...formData,
       typeOfTest: selectedtypeOfTest,
@@ -303,6 +327,7 @@ const Coursecreation = () => {
         const subjectsResult = await subjectsResponse.json();
         console.log("Subjects Result:", subjectsResult);
         console.log(result);
+       
         if (result.success) {
           console.log("Course created successfully");
         } else {
@@ -311,12 +336,13 @@ const Coursecreation = () => {
       } else {
         console.log("Failed to create course. Unexpected response:", result);
       }
+    
     } catch (error) {
       console.error("Error submitting course data:", error);
       // Handle error or show an error message to the user
     }
   };
-
+  }
   // function formatDate(dateString) {
   //   const date = new Date(dateString);
   //   const day = date.getDate().toString().padStart(2, "0");

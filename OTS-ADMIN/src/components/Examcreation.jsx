@@ -14,8 +14,33 @@ function Examcreation() {
     const [formOpen, setFormOpen] = useState(false);
     // const [showSuccessPopup, setShowSuccessPopup] = useState(false);
     const [examsWithSubjects, setExamsWithSubjects] = useState([]);
-  
+    const [formErrors, setFormErrors] = useState({});
 
+    const validateForm = () => {
+      const errors = {};
+  
+      if (!examName.trim()) {
+        errors.examName = 'Exam Name is required';
+      }
+  
+      if (!startDate) {
+        errors.startDate = 'Start Date is required';
+      }
+  
+      if (!endDate) {
+        errors.endDate = 'End Date is required';
+      } else if (new Date(endDate) < new Date(startDate)) {
+        errors.endDate = 'End Date must be after Start Date';
+      }
+  
+      if (selectedSubjects.length === 0) {
+        errors.subjects = 'At least one subject must be selected';
+      }
+  
+      setFormErrors(errors);
+  
+      return Object.keys(errors).length === 0;
+    };
     
     const resetForm = () => {
         setExamName('');
@@ -63,18 +88,19 @@ function Examcreation() {
 //................................... handler for submit button .............................//
     const handleSubmit = (e) => {
         e.preventDefault();
-        setSubmitting(true);
-        if (!examName || !startDate || !endDate || selectedSubjects.length === 0) {
-          alert('Please fill in all required fields.');
-          return;
-        }
+        // setSubmitting(true);
+        // if (!examName || !startDate || !endDate || selectedSubjects.length === 0) {
+        //   alert('Please fill in all required fields.');
+        //   return;
+        // }
         const examData = {
             examName,
             startDate,
             endDate,
             selectedSubjects,
         };
-
+        if (validateForm()) {
+          setSubmitting(true);
         axios.post('http://localhost:3081/exams', examData)
             .then(response => {
                 console.log('Exam created:', response.data);
@@ -88,6 +114,15 @@ function Examcreation() {
                 console.error('Error creating exam:', error);
                 setSubmitting(false);
             });
+
+            setExamName('');
+            setStartDate('');
+            setEndDate('');
+            setSelectedSubjects([]);
+            setFormErrors({});
+            setFormOpen(false);
+            setSubmitting(false);
+          }
     };
 
 
@@ -146,31 +181,28 @@ function Examcreation() {
             <div className='formdiv_contaniner'>
             <label>
               Exam Name:
+              {formErrors.examName && <p>{formErrors.examName}</p>}
             </label>
             <input type="text" value={examName} onChange={(e) => setExamName(e.target.value)} />
-
             </div>
             <div className='formdiv_contaniner'>
             <label>
-              Start Date:
-              
+              Start Date:  
+              {formErrors.startDate && <p>{formErrors.startDate}</p>}
             </label>
             <input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} min={new Date().toISOString().split('T')[0]}/>
              </div>
-            
-  
            <div className='formdiv_contaniner'>
            <label>
               End Date:
+              {formErrors.endDate && <p>{formErrors.endDate}</p>}
             </label>
             <input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} min={new Date().toISOString().split('T')[0]}/>
-
            </div>
-  
-           
-  
           <div className='formdiv_contaniner'>
-          <label>Subjects:</label>
+          <label>Subjects:
+          {formErrors.subjects && <p>{formErrors.subjects}</p>}
+          </label>
             <ul className="subject-list">
               {subjects.map(subject => (
                 <li key={subject.subjectId}>
