@@ -1251,7 +1251,7 @@ app.post('/upload', upload.single('document'), async (req, res) => {
       images.push(imageBuffer);
     });
 
-    let Question_id;
+    let Question_id=[];
 
     for (let i = 0; i < images.length; i++) {
       const j = i % 6; // Calculate the index within the 6-image cycle
@@ -1376,7 +1376,7 @@ app.get('/test/count', async (req, res) => {
 app.get('/question/count', async (req, res) => {
   try {
     const [results, fields] = await db.execute(
-      'SELECT COUNT(qustion_id) AS count FROM questions'
+      'SELECT COUNT(question_id) AS count FROM questions'
     );
     res.json(results);
   } catch (error) {
