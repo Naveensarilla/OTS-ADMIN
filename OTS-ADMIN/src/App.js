@@ -14,6 +14,7 @@ import Testcreation from './components/Testcreation.jsx';
 import TestUpdate from './components/TestUpdate.jsx'
 import DocumentUpload from './components/DocumentUpload.jsx'
 import DisplayImages from './components/DisplayImages.jsx';
+import QuizComponent from './components/QuizComponent.jsx';
 function App() {
   return (
     <Router>
@@ -38,7 +39,11 @@ function App() {
           />
 
           <Route path='/DisplayImages' element={<DisplayImages />}/>
+
+          <Route path='/quiz_all/2' element={<QuizComponent/>} />
       </Routes>
+
+      
       </div>
       
     </Router>

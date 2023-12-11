@@ -1339,6 +1339,7 @@ async function insertRecord(table, record) {
 }
 
 const imagesDirectory = path.join(__dirname, 'uploads');
+app.use('/uploads', express.static(imagesDirectory));
 
 app.use(express.json());
 app.use('/images', express.static(imagesDirectory));
@@ -1391,6 +1392,90 @@ app.get('/question/count', async (req, res) => {
 });
 
 //_____________________________________________________END________________________________
+
+
+
+app.get("/quiz_all/:testCreationTableId", async (req, res) => {
+  try {
+    const testCreationTableId = req.params.testCreationTableId;
+    const sql =
+      "SELECT q.question_id, option_id, questionImgName, optionImgName, q.subjectId, subjectName, se.sectionId, sectionName FROM questions q, options o, subjects s, sections se WHERE q.question_id=o.question_id AND s.subjectId=q.subjectId AND se.sectionId=q.sectionId AND q.testCreationTableId=2 AND questionImgName !='' ORDER BY q.question_id ASC ";
+
+    const results = await queryDatabase(sql);
+
+    const subjects = {};
+
+    results.forEach((row) => {
+      const {
+        subjectId,
+        subjectName,
+        questionImgName,
+        question_id,
+        option_id,
+        optionImgName,
+        sectionId,
+        sectionName,
+      } = row;
+
+      if (!subjects[subjectName]) {
+        subjects[subjectName] = {
+          subjectId,
+          subjectName,
+          sections: {},
+        };
+      }
+
+      if (!subjects[subjectName].sections[sectionName]) {
+        subjects[subjectName].sections[sectionName] = {
+          questions: [],
+        };
+      }
+
+      const question = subjects[subjectName].sections[sectionName].questions.find(
+        (q) => q.question_id === question_id
+      );
+
+      if (!question) {
+        subjects[subjectName].sections[sectionName].questions.push({
+          question_id,
+          userAnswers: "",
+          isvisited: 0,
+          questionImgName,
+          options: [],
+        });
+      }
+
+      const option = {
+        option_id,
+        optionImgName,
+      };
+
+      subjects[subjectName].sections[sectionName].questions.find(
+        (q) => q.question_id === question_id
+      ).options.push(option);
+    });
+
+    res.json(subjects);
+  } catch (error) {
+    console.error('Error processing request: ' + error.message);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
+// Helper function to promisify the database query
+async function queryDatabase(sql) {
+  try {
+    const [results] = await db.query(sql);
+    return results;
+  } catch (error) {
+    throw error;
+  }
+}
+
+
+
+
+
 
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
