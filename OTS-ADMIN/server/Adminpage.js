@@ -1235,6 +1235,7 @@ app.post('/upload', upload.single('document'), async (req, res) => {
 
       let j = 0;
       let Question_id;
+      let question_id=[];
       for (let i = 0; i < images.length; i++) {
           if (j == 0) {
               const questionRecord = {
@@ -1245,6 +1246,7 @@ app.post('/upload', upload.single('document'), async (req, res) => {
               };
               console.log(j);
               Question_id = await insertRecord('questions', questionRecord);
+              question_id.push(Question_id)
               j++;
           } else if (j > 0 && j < 5) {
               const optionRecord = {
@@ -1264,6 +1266,34 @@ app.post('/upload', upload.single('document'), async (req, res) => {
               j = 0;
           }
       }
+      // let j=0;
+    let que_id;
+    for (let i = 0; i < textSections.length; i++) {
+      if (textSections[i].startsWith('[qtype]')) {
+        que_id=question_id[j];
+        j++;
+        // Save in the qtype table
+        const qtypeRecord = {
+          qtype_text: textSections[i].replace('[qtype]', ''),
+          question_id: que_id
+        };
+        await insertRecord('qtype', qtypeRecord);
+      } else if (textSections[i].startsWith('[ans]')) {
+        // Save in the answer table
+        const answerRecord = {
+          answer_text: textSections[i].replace('[ans]', ''),
+          question_id: que_id
+        };
+        await insertRecord('answer', answerRecord);
+      } else if (textSections[i].startsWith('[Marks]')) {
+        // Save in the marks table
+        const marksRecord = {
+          marks_text: textSections[i].replace('[Marks]', ''),
+          question_id: que_id
+        };
+        await insertRecord('marks', marksRecord);
+      }
+    }
       res.send('Text content and images extracted and saved to the database with the selected topic ID successfully.');
   } catch (error) {
       console.error(error);
