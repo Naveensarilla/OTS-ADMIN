@@ -40,7 +40,7 @@ function App() {
 
           <Route path='/DisplayImages' element={<DisplayImages />}/>
 
-          <Route path='/quiz_all/2' element={<QuizComponent/>} />
+          <Route path='/quiz_all/4' element={<QuizComponent/>} />
       </Routes>
 
       

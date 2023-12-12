@@ -1233,7 +1233,7 @@ app.get('/sections/:subjectId', async (req, res) => {
 app.post('/upload', upload.single('document'), async (req, res) => {
   const docxFilePath = `uploads/${req.file.filename}`;
   const outputDir = `uploads/${req.file.originalname}_images`;
- 
+  const docName = `${req.file.originalname}`;
   try {
     await fs.mkdir(outputDir, { recursive: true });
     const result = await mammoth.convertToHtml({ path: docxFilePath });
@@ -1243,6 +1243,14 @@ app.post('/upload', upload.single('document'), async (req, res) => {
     const textContent = textResult.value;
     const textSections = textContent.split('\n\n');
  
+    const [documentResult] = await db.query("INSERT INTO ots_document SET ?", {
+      documen_name: docName,
+            testCreationTableId: req.body.testCreationTableId,
+            subjectId: req.body.subjectId,
+          });
+          const document_Id = documentResult.insertId;
+
+
     // Get all images in the order they appear in the HTML
     const images = [];
     $('img').each(function (i, element) {
@@ -1268,6 +1276,7 @@ app.post('/upload', upload.single('document'), async (req, res) => {
           questionImgName: imageName,
           testCreationTableId: req.body.testCreationTableId,
           subjectId: req.body.subjectId,
+          document_Id: document_Id,
           sectionId: req.body.sectionId
         };
         console.log(j);
@@ -1399,7 +1408,7 @@ app.get("/quiz_all/:testCreationTableId", async (req, res) => {
   try {
     const testCreationTableId = req.params.testCreationTableId;
     const sql =
-      "SELECT q.question_id, option_id, questionImgName, optionImgName, q.subjectId, subjectName, se.sectionId, sectionName FROM questions q, options o, subjects s, sections se WHERE q.question_id=o.question_id AND s.subjectId=q.subjectId AND se.sectionId=q.sectionId AND q.testCreationTableId=2 AND questionImgName !='' ORDER BY q.question_id ASC ";
+      "SELECT d.documen_name, q.question_id, o.option_id, q.questionImgName, o.optionImgName, q.subjectId, s.subjectName,se.sectionId,se.sectionName  FROM ots_document d,questions q, options o, subjects s,sections se WHERE d.testCreationTableId=q.testCreationTableId AND q.question_id=o.question_id AND s.subjectId=q.subjectId AND se.sectionId=q.sectionId AND q.testCreationTableId=4 AND questionImgName !='' ORDER BY q.question_id ASC ";
 
     const results = await queryDatabase(sql);
 
@@ -1407,6 +1416,7 @@ app.get("/quiz_all/:testCreationTableId", async (req, res) => {
 
     results.forEach((row) => {
       const {
+        documen_name,
         subjectId,
         subjectName,
         questionImgName,
@@ -1419,6 +1429,7 @@ app.get("/quiz_all/:testCreationTableId", async (req, res) => {
 
       if (!subjects[subjectName]) {
         subjects[subjectName] = {
+          documen_name,
           subjectId,
           subjectName,
           sections: {},
@@ -1472,7 +1483,23 @@ async function queryDatabase(sql) {
   }
 }
 
+// app.get("/document_name/:testCreationTableId", async (req, res) => {
+//   try {
+//     const testCreationTableId = req.params.testCreationTableId;
+//     const sql = "SELECT documen_name,testCreationTableId,document_Id FROM ots_document WHERE testCreationTableId = ?";
+//     const [result] = await db.query(sql, [testCreationTableId]);
 
+//     if (result.length > 0) {
+//       const documentName = result[0].documen_name;
+//       res.json({ documentName });
+//     } else {
+//       res.status(404).json({ error: 'Document not found' });
+//     }
+//   } catch (error) {
+//     console.error('Error fetching document name:', error);
+//     res.status(500).json({ error: 'Internal Server Error' });
+//   }
+// });
 
 
 
