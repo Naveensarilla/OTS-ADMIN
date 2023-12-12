@@ -22,7 +22,7 @@ const QuizComponent = () => {
     return options.map((option) => (
       <div key={option.option_id}>
         {/* Render other option details */}
-        <img src={`http://localhost:3081/uploads/${option.optionImgName}`}  alt={`Option ${option.option_id}`} />
+        <img src={`http://localhost:3081/uploads/VITEEE_PYQ_MATHS_2008_Rev1_UPLOAD_FORMAT 1.docx_images/${option.optionImgName}`}  alt={`Option ${option.option_id}`} />
       </div>
     ));
   };
@@ -43,7 +43,7 @@ const QuizComponent = () => {
                 {console.log(`/uploads/${question.questionImgName}`)}
   
                 {/* Render other question details */}
-                <img src={`http://localhost:3081/uploads/${question.questionImgName}`}  alt={`Question ${question.question_id}`} />
+                <img src={`http://localhost:3081/uploads/VITEEE_PYQ_MATHS_2008_Rev1_UPLOAD_FORMAT 1.docx_images/${question.questionImgName}`}  alt={`Question ${question.question_id}`} />
                 {renderOptions(question.options)}
               </div>
             ))}
